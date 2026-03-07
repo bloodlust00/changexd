@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChangeX - Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Check if user is logged in
+        if (!localStorage.getItem('user')) {
+            window.location.href = 'login.html';
+        }
+    </script>
+</head>
+<body class="dashboard-page">
+    <header class="header">
+        <div class="logo-container" style="flex-direction: row; align-items: center;">
+            <img src="assets/logo.jpg" alt="Company Logo" class="company-logo">
+            <div>
+                <p class="welcome-text">Welcome to !</p>
+                <h1 class="logo"><span class="purple">Change</span><span class="red">X</span></h1>
+            </div>
+        </div>
+        <div class="header-right">
+            <span class="user-email" id="userEmail">ydvpallavi34@gmail.com</span>
+            <button class="btn btn-logout" onclick="logout()">
+                <span>→</span> Logout
+            </button>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <nav class="sidebar">
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-item active"><span class="nav-icon">🏠</span> Home</a></li>
+                <li><a href="running-line.html" class="nav-item"><span class="nav-icon">📉</span> Running Line Changeover</a></li>
+                <li><a href="upcoming.html" class="nav-item"><span class="nav-icon">📅</span> Upcoming Changeover</a></li>
+                <li><a href="live-tracking.html" class="nav-item"><span class="nav-icon">📈</span> Live CO Tracking</a></li>
+                <li><a href="alerts.html" class="nav-item"><span class="nav-icon">🔔</span> Alerts</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="whats-new.html" class="nav-item"><span class="nav-icon">🆕</span> What's New?</a>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="dashboard-layout">
+                <div class="left-column">
+                    <!-- Production Status Card -->
+                    <div class="content-card">
+                        <h2 class="card-title">Production Status</h2>
+                        <div class="charts-row">
+                            <div class="chart-container">
+                                <h3>On-Time Production <span>Factory-Wise</span></h3>
+                                <div style="height: 180px; position: relative;">
+                                    <canvas id="onTimeChart"></canvas>
+                                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                                        <div style="font-size: 14px; font-weight: 700;">Factory</div>
+                                        <div style="font-size: 14px; font-weight: 700;">1</div>
+                                    </div>
+                                </div>
+                                <div class="chart-legend" id="onTimeLegend"></div>
+                            </div>
+                            <div class="chart-container">
+                                <h3>Late Production <span>Factory-Wise</span></h3>
+                                <div style="height: 180px; position: relative;">
+                                    <canvas id="lateChart"></canvas>
+                                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                                        <div style="font-size: 14px; font-weight: 700;">Factory</div>
+                                    </div>
+                                </div>
+                                <div class="chart-legend" id="lateLegend"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Line-Wise Efficiency Card -->
+                    <div class="content-card">
+                        <h2 class="card-title">Line-Wise Efficiency</h2>
+                        <div class="gauges-grid">
+                            <div class="gauge-item">
+                                <div class="gauge-wrapper" style="--gauge-percent: 79; --gauge-color: #e74c3c;">
+                                    <svg viewBox="0 0 100 50" class="gauge-svg">
+                                        <path d="M 10 45 A 40 40 0 0 1 90 45" fill="none" stroke="#f0f0f0" stroke-width="8" stroke-linecap="round" />
+                                        <path d="M 10 45 A 40 40 0 0 1 90 45" fill="none" stroke="#e74c3c" stroke-width="8" stroke-linecap="round" 
+                                              stroke-dasharray="125.66" stroke-dashoffset="calc(125.66 * (1 - 79 / 100))" />
+                                    </svg>
+                                    <span class="gauge-value">79%</span>
+                                </div>
+                                <span class="gauge-label">Sewing Line 1</span>
+                            </div>
+                            <div class="gauge-item">
+                                <div class="gauge-wrapper" style="--gauge-percent: 85; --gauge-color: #2ecc71;">
+                                    <svg viewBox="0 0 100 50" class="gauge-svg">
+                                        <path d="M 10 45 A 40 40 0 0 1 90 45" fill="none" stroke="#f0f0f0" stroke-width="8" stroke-linecap="round" />
+                                        <path d="M 10 45 A 40 40 0 0 1 90 45" fill="none" stroke="#2ecc71" stroke-width="8" stroke-linecap="round" 
+                                              stroke-dasharray="125.66" stroke-dashoffset="calc(125.66 * (1 - 85 / 100))" />
+                                    </svg>
+                                    <span class="gauge-value">85%</span>
+                                </div>
+                                <span class="gauge-label">Sewing Line 2</span>
+                            </div>
+                            <div class="gauge-item">
+                                <div class="gauge-wrapper" style="--gauge-percent: 72; --gauge-color: #f1c40f;">
+                                    <svg viewBox="0 0 100 50" class="gauge-svg">
+                                        <path d="M 10 45 A 40 40 0 0 1 90 45" fill="none" stroke="#f0f0f0" stroke-width="8" stroke-linecap="round" />
+                                        <path d="M 10 45 A 40 40 0 0 1 90 45" fill="none" stroke="#f1c40f" stroke-width="8" stroke-linecap="round" 
+                                              stroke-dasharray="125.66" stroke-dashoffset="calc(125.66 * (1 - 72 / 100))" />
+                                    </svg>
+                                    <span class="gauge-value">72%</span>
+                                </div>
+                                <span class="gauge-label">Sewing Line 3</span>
+                            </div>
+                            <div class="gauge-item">
+                                <div class="gauge-wrapper" style="--gauge-percent: 68; --gauge-color: #e67e22;">
+                                    <svg viewBox="0 0 100 50" class="gauge-svg">
+                                        <path d="M 10 45 A 40 40 0 0 1 90 45" fill="none" stroke="#f0f0f0" stroke-width="8" stroke-linecap="round" />
+                                        <path d="M 10 45 A 40 40 0 0 1 90 45" fill="none" stroke="#e67e22" stroke-width="8" stroke-linecap="round" 
+                                              stroke-dasharray="125.66" stroke-dashoffset="calc(125.66 * (1 - 68 / 100))" />
+                                    </svg>
+                                    <span class="gauge-value">68%</span>
+                                </div>
+                                <span class="gauge-label">Sewing Line 4</span>
+                            </div>
+                            <div class="gauge-item">
+                                <div class="gauge-wrapper" style="--gauge-percent: 88; --gauge-color: #2ecc71;">
+                                    <svg viewBox="0 0 100 50" class="gauge-svg">
+                                        <path d="M 10 45 A 40 40 0 0 1 90 45" fill="none" stroke="#f0f0f0" stroke-width="8" stroke-linecap="round" />
+                                        <path d="M 10 45 A 40 40 0 0 1 90 45" fill="none" stroke="#2ecc71" stroke-width="8" stroke-linecap="round" 
+                                              stroke-dasharray="125.66" stroke-dashoffset="calc(125.66 * (1 - 88 / 100))" />
+                                    </svg>
+                                    <span class="gauge-value">88%</span>
+                                </div>
+                                <span class="gauge-label">Sewing Line 5</span>
+                            </div>
+                            <div class="gauge-item">
+                                <div class="gauge-wrapper" style="--gauge-percent: 76; --gauge-color: #f1c40f;">
+                                    <svg viewBox="0 0 100 50" class="gauge-svg">
+                                        <path d="M 10 45 A 40 40 0 0 1 90 45" fill="none" stroke="#f0f0f0" stroke-width="8" stroke-linecap="round" />
+                                        <path d="M 10 45 A 40 40 0 0 1 90 45" fill="none" stroke="#f1c40f" stroke-width="8" stroke-linecap="round" 
+                                              stroke-dasharray="125.66" stroke-dashoffset="calc(125.66 * (1 - 76 / 100))" />
+                                    </svg>
+                                    <span class="gauge-value">76%</span>
+                                </div>
+                                <span class="gauge-label">Sewing Line 6</span>
+                            </div>
+                            <div class="gauge-item">
+                                <div class="gauge-wrapper" style="--gauge-percent: 81; --gauge-color: #2ecc71;">
+                                    <svg viewBox="0 0 100 50" class="gauge-svg">
+                                        <path d="M 10 45 A 40 40 0 0 1 90 45" fill="none" stroke="#f0f0f0" stroke-width="8" stroke-linecap="round" />
+                                        <path d="M 10 45 A 40 40 0 0 1 90 45" fill="none" stroke="#2ecc71" stroke-width="8" stroke-linecap="round" 
+                                              stroke-dasharray="125.66" stroke-dashoffset="calc(125.66 * (1 - 81 / 100))" />
+                                    </svg>
+                                    <span class="gauge-value">81%</span>
+                                </div>
+                                <span class="gauge-label">Sewing Line 7</span>
+                            </div>
+                            <div class="gauge-item">
+                                <div class="gauge-wrapper" style="--gauge-percent: 73; --gauge-color: #f1c40f;">
+                                    <svg viewBox="0 0 100 50" class="gauge-svg">
+                                        <path d="M 10 45 A 40 40 0 0 1 90 45" fill="none" stroke="#f0f0f0" stroke-width="8" stroke-linecap="round" />
+                                        <path d="M 10 45 A 40 40 0 0 1 90 45" fill="none" stroke="#f1c40f" stroke-width="8" stroke-linecap="round" 
+                                              stroke-dasharray="125.66" stroke-dashoffset="calc(125.66 * (1 - 73 / 100))" />
+                                    </svg>
+                                    <span class="gauge-value">73%</span>
+                                </div>
+                                <span class="gauge-label">Sewing Line 8</span>
+                            </div>
+                            <div class="gauge-item">
+                                <div class="gauge-wrapper" style="--gauge-percent: 86; --gauge-color: #2ecc71;">
+                                    <svg viewBox="0 0 100 50" class="gauge-svg">
+                                        <path d="M 10 45 A 40 40 0 0 1 90 45" fill="none" stroke="#f0f0f0" stroke-width="8" stroke-linecap="round" />
+                                        <path d="M 10 45 A 40 40 0 0 1 90 45" fill="none" stroke="#2ecc71" stroke-width="8" stroke-linecap="round" 
+                                              stroke-dasharray="125.66" stroke-dashoffset="calc(125.66 * (1 - 86 / 100))" />
+                                    </svg>
+                                    <span class="gauge-value">86%</span>
+                                </div>
+                                <span class="gauge-label">Sewing Line 9</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Defects Card -->
+                    <div class="content-card">
+                        <h2 class="card-title">Total Defects in Production Line-Wise</h2>
+                        <div style="height: 250px;">
+                            <canvas id="defectsChart"></canvas>
+                        </div>
+                        <div style="text-align: center; font-size: 11px; color: #888; margin-top: 10px;">Sewing Lines</div>
+                    </div>
+                </div>
+
+                <div class="right-column">
+                    <!-- Machine Utilization Card -->
+                    <div class="content-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 class="card-title" style="margin-bottom: 0;">Machine Utilization</h2>
+                            <span style="font-size: 10px; color: #999;">(Click Factory to Drill-Down) ></span>
+                        </div>
+                        
+                        <div class="factory-util-header">
+                            <span>Factory 1</span>
+                            <span class="util-val">75% ⌵</span>
+                        </div>
+                        <div class="machine-list">
+                            <div class="machine-item">
+                                <span class="check-icon">✓</span>
+                                <span class="machine-name">Cutting Mahnes</span>
+                                <div class="progress-wrap">
+                                    <div class="progress-bg"><div class="progress-fill" style="width: 80%;"></div></div>
+                                    <span class="progress-percent">80%</span>
+                                </div>
+                            </div>
+                            <div class="machine-item">
+                                <span class="check-icon">✓</span>
+                                <span class="machine-name">Sewing Mahnes</span>
+                                <div class="progress-wrap">
+                                    <div class="progress-bg"><div class="progress-fill" style="width: 70%;"></div></div>
+                                    <span class="progress-percent">70%</span>
+                                </div>
+                            </div>
+                            <div class="machine-item">
+                                <span class="check-icon">✓</span>
+                                <span class="machine-name">Embroidery Mahmes</span>
+                                <div class="progress-wrap">
+                                    <div class="progress-bg"><div class="progress-fill" style="width: 75%;"></div></div>
+                                    <span class="progress-percent">75%</span>
+                                </div>
+                            </div>
+                            <div class="machine-item">
+                                <span class="check-icon">✓</span>
+                                <span class="machine-name">Finishing Mahnes</span>
+                                <div class="progress-wrap">
+                                    <div class="progress-bg"><div class="progress-fill" style="width: 60%;"></div></div>
+                                    <span class="progress-percent">60%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="factory-util-header" style="color: var(--primary-blue); margin-top: 25px;">
+                            <span>⌵ Factory 1</span>
+                            <span class="util-val" style="color: var(--primary-blue);">75% ⌵</span>
+                        </div>
+                        <div class="machine-list">
+                            <div class="machine-item">
+                                <div style="width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--primary-blue); display: flex; align-items: center; justify-content: center; color: var(--primary-blue); font-size: 8px;">✓</div>
+                                <span class="machine-name">Cutting Machines</span>
+                                <div class="progress-wrap">
+                                    <div class="progress-bg"><div class="progress-fill" style="width: 80%;"></div></div>
+                                    <span class="progress-percent">80%</span>
+                                </div>
+                            </div>
+                            <div class="machine-item">
+                                <div style="width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--primary-blue); display: flex; align-items: center; justify-content: center; color: var(--primary-blue); font-size: 8px;">✓</div>
+                                <span class="machine-name">Sewing Machines</span>
+                                <div class="progress-wrap">
+                                    <div class="progress-bg"><div class="progress-fill" style="width: 70%;"></div></div>
+                                    <span class="progress-percent">70%</span>
+                                </div>
+                            </div>
+                            <div class="machine-item">
+                                <div style="width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--primary-blue); display: flex; align-items: center; justify-content: center; color: var(--primary-blue); font-size: 8px;">✓</div>
+                                <span class="machine-name">Embroidery Machines</span>
+                                <div class="progress-wrap">
+                                    <div class="progress-bg"><div class="progress-fill" style="width: 75%;"></div></div>
+                                    <span class="progress-percent">75%</span>
+                                </div>
+                            </div>
+                            <div class="machine-item">
+                                <div style="width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--primary-blue); display: flex; align-items: center; justify-content: center; color: var(--primary-blue); font-size: 8px;">✓</div>
+                                <span class="machine-name">Finishing Machines</span>
+                                <div class="progress-wrap">
+                                    <div class="progress-bg"><div class="progress-fill" style="width: 60%;"></div></div>
+                                    <span class="progress-percent">60%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column Defects Card -->
+                    <div class="content-card">
+                        <h2 class="card-title">Total Defects in Production Line-Wise</h2>
+                        <div style="height: 250px; position: relative; padding-left: 30px;">
+                            <div style="position: absolute; left: 0; top: 50%; transform: rotate(-90deg) translateX(-50%); font-size: 11px; color: #888; width: 100px; transform-origin: left center;">Defect (%)</div>
+                            <canvas id="sideDefectsChart"></canvas>
+                        </div>
+                        <div style="text-align: center; font-size: 11px; color: #888; margin-top: 10px;">Sewing Lines</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

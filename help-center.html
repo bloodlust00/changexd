@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChangeX - Help Center</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .help-center-body .header {
+            padding: 10px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .help-center-logo-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+        }
+        .help-center-logo-box h1 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #003366;
+            margin: 0;
+        }
+        .help-center-logo-box .sep {
+            color: #ddd;
+            font-size: 20px;
+        }
+        .help-center-logo-box .sub {
+            font-size: 14px;
+            color: #444;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="dashboard-page help-center-body">
+    <header class="header">
+        <a href="index.html" class="help-center-logo-box">
+            <div style="font-size: 20px;">⛵</div>
+            <h1>LAGUNA HAI</h1>
+            <span class="sep">|</span>
+            <span class="sub">Help Center</span>
+        </a>
+        <div class="header-right" style="gap: 15px;">
+            <a href="index.html" style="text-decoration: none; font-size: 12px; font-weight: 600; color: #3498db;">← Back to Dashboard</a>
+            <div style="position: relative;">
+                <span style="font-size: 18px;">🔔</span>
+                <span style="position: absolute; top: -5px; right: -5px; background: #e74c3c; color: white; border-radius: 50%; width: 14px; height: 14px; font-size: 9px; display: flex; align-items: center; justify-content: center; font-weight: 700;">9</span>
+            </div>
+            <span style="font-size: 18px;">❓</span>
+            <div style="width: 28px; height: 28px; border-radius: 4px; overflow: hidden;"><img src="https://i.pravatar.cc/30?u=1" alt="user" style="width: 100%; height: 100%;"></div>
+            <button class="btn" id="openChatBtn" style="background: #3498db; color: white; border: none; border-radius: 6px; padding: 8px 15px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                <span>💬</span> Chat With Us
+            </button>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <nav class="sidebar">
+            <div style="padding: 20px; display: flex; justify-content: center;">
+                <div style="position: relative; width: 100px; height: 100px;">
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #e3f2fd; border-radius: 50%; opacity: 0.5;"></div>
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px;">😊</div>
+                </div>
+            </div>
+
+            <div style="padding: 0 20px 10px 20px; font-size: 13px; font-weight: 700; color: #333;">Help Topics</div>
+            <ul class="nav-menu">
+                <li><a href="#" class="nav-item active" style="color: #3498db; background: #f1f7fe; border-left: 3px solid #3498db; border-radius: 0 20px 20px 0;"><span class="nav-icon">🚀</span> Getting Started</a></li>
+                <li><a href="#" class="nav-item"><span class="nav-icon">👤</span> Account Management</a></li>
+                <li><a href="#" class="nav-item"><span class="nav-icon">⭐</span> Features & Usage</a></li>
+                <li><a href="#" class="nav-item"><span class="nav-icon">💰</span> Billing & Pricing</a></li>
+                <li><a href="#" class="nav-item"><span class="nav-icon">🔌</span> Integrations</a></li>
+                <li><a href="#" class="nav-item"><span class="nav-icon">🔧</span> Troubleshooting</a></li>
+                <li><a href="#" class="nav-item" style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 20px;"><span class="nav-icon">📄</span> Browse All Articles</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content" style="padding: 30px 40px;">
+            <h2 style="font-size: 22px; font-weight: 600; color: #333; margin-bottom: 25px;">Help Center</h2>
+            
+            <div style="position: relative; margin-bottom: 30px;">
+                <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #3498db; font-size: 18px;">🔍</span>
+                <input type="text" placeholder="Ask us anything..." style="width: 100%; padding: 15px 15px 15px 50px; border: 1px solid #eee; border-radius: 8px; font-size: 15px; background: #fff;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 40px;">
+                <div style="background: #f1f7fe; padding: 15px 20px; border-radius: 8px; display: flex; align-items: center; gap: 15px; cursor: pointer;">
+                    <span style="font-size: 20px;">💡</span>
+                    <span style="font-weight: 500; color: #333; font-size: 14px;">Setting Started</span>
+                </div>
+                <div style="background: #f1f7fe; padding: 15px 20px; border-radius: 8px; display: flex; align-items: center; gap: 15px; cursor: pointer;">
+                    <span style="font-size: 20px;">📖</span>
+                    <span style="font-weight: 500; color: #333; font-size: 14px;">Laguna Hai Guide</span>
+                </div>
+                <div style="background: #f1f7fe; padding: 15px 20px; border-radius: 8px; display: flex; align-items: center; gap: 15px; cursor: pointer;">
+                    <span style="font-size: 20px;">💰</span>
+                    <span style="font-weight: 500; color: #333; font-size: 14px;">Billing & Pricing</span>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="font-size: 18px; font-weight: 600; color: #333;">Recent Articles <span style="color: #cbd5e0; margin-left: 5px;">•</span></h3>
+                <a href="#" style="color: #3498db; font-size: 14px; font-weight: 600; text-decoration: none;">See all</a>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <!-- Articles... -->
+                <div style="background: #fff; border: 1px solid #f0f0f0; border-radius: 12px; padding: 25px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                        <span style="color: #3498db; font-size: 16px;">🚀</span>
+                        <span style="font-size: 11px; color: #999; font-weight: 600;">Getting Started</span>
+                    </div>
+                    <h4 style="font-size: 16px; font-weight: 700; color: #333; margin-bottom: 8px;">Setting Up Your Store</h4>
+                    <p style="font-size: 12px; color: #888; margin-bottom: 15px;">Get tutorated repais to get sarted.</p>
+                </div>
+                <div style="background: #fff; border: 1px solid #f0f0f0; border-radius: 12px; padding: 25px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                        <span style="color: #f1c40f; font-size: 16px;">⭐</span>
+                        <span style="font-size: 11px; color: #999; font-weight: 600;">Features & Usage</span>
+                    </div>
+                    <h4 style="font-size: 16px; font-weight: 700; color: #333; margin-bottom: 8px;">Laguna Hai Best Practices</h4>
+                    <p style="font-size: 12px; color: #888; margin-bottom: 15px;">Learn expectiyis from new users.</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Chat Widget (Simplified toggle) -->
+        <div id="chatWidget" style="position: fixed; bottom: 30px; right: 30px; width: 320px; background: #fff; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); overflow: hidden; z-index: 1000; border: 1px solid #eee; display: none;">
+            <div style="padding: 15px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f0f0f0;">
+                <div style="color: #3498db; font-size: 18px;">⛵</div>
+                <div style="font-size: 12px; font-weight: 700; color: #003366;">LAGUNA HAI</div>
+                <div id="closeChatBtn" style="margin-left: auto; cursor: pointer; color: #999; font-size: 14px; font-weight: 700;">✕</div>
+            </div>
+            <div style="padding: 20px;">
+                <h4 style="font-size: 16px; font-weight: 700; margin-bottom: 10px;">Chat With Us</h4>
+                <div style="background: #f1f7fe; padding: 12px; border-radius: 10px; font-size: 13px; margin-bottom: 20px;">Hi! How can I assist you today?</div>
+                <div style="display: flex; align-items: center; border-top: 1px solid #eee; padding-top: 15px;">
+                    <input type="text" placeholder="Ask your question..." style="flex: 1; border: none; font-size: 13px; outline: none;">
+                    <div style="background: #3498db; color: white; width: 30px; height: 30px; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer;">➤</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const chatWidget = document.getElementById('chatWidget');
+        const closeChatBtn = document.getElementById('closeChatBtn');
+        const openChatBtn = document.getElementById('openChatBtn');
+        if (closeChatBtn) closeChatBtn.onclick = () => chatWidget.style.display = 'none';
+        if (openChatBtn) openChatBtn.onclick = () => chatWidget.style.display = 'block';
+    </script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChangeX - Contact Us</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="dashboard-page">
+    <header class="header">
+        <div class="logo-container" style="flex-direction: row; align-items: center;"><img src="assets/logo.jpg" alt="Company Logo" class="company-logo">
+            <p class="welcome-text">Welcome to !</p>
+            <h1 class="logo"><span class="purple">Change</span><span class="red">X</span></h1>
+        </div>
+        <div class="header-right">
+            <span class="user-email" id="userEmail">ydvpallavi34@gmail.com</span>
+            <a href="contact.html" class="btn btn-contact active">Contact Us</a>
+            <button class="btn btn-logout" onclick="logout()">
+                <span>→</span> Logout
+            </button>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <nav class="sidebar">
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-item"><span class="nav-icon">🏠</span> Home</a></li>
+                <li><a href="running-line.html" class="nav-item"><span class="nav-icon">📉</span> Running Line Changeover</a></li>
+                <li><a href="upcoming.html" class="nav-item"><span class="nav-icon">📅</span> Upcoming Changeover</a></li>
+                <li><a href="live-tracking.html" class="nav-item"><span class="nav-icon">📈</span> Live CO Tracking</a></li>
+                <li><a href="alerts.html" class="nav-item"><span class="nav-icon">🔔</span> Alerts</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="whats-new.html" class="nav-item"><span class="nav-icon">🆕</span> What's New?</a>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="contact-container">
+                <h1 class="contact-header-title">CONTACT US</h1>
+                <div class="contact-underline"></div>
+                <p class="contact-subtitle">
+                    We align leaders around a shared purpose and strategic story that catalyzes their<br>
+                    business and brand to take action.
+                </p>
+
+                <div class="contact-grid-6">
+                    <div class="grid-item grid-img" style="background-image: url('https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60')"></div>
+                    <div class="grid-item">
+                        <div class="item-icon-circle">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        </div>
+                        <h3 class="item-title">Email:</h3>
+                        <p class="item-text underline">hello@company.com</p>
+                        <p class="item-text underline">support@company.com</p>
+                    </div>
+                    <div class="grid-item grid-img" style="background-image: url('https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60')"></div>
+                    
+                    <div class="grid-item">
+                        <div class="item-icon-circle">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        </div>
+                        <h3 class="item-title">Address:</h3>
+                        <p class="item-text">121 Rock Sreet, 21 Avenue,</p>
+                        <p class="item-text">New York, NY 92103-9000</p>
+                    </div>
+                    <div class="grid-item grid-img" style="background-image: url('https://images.unsplash.com/photo-1524758631624-e2822e304c36?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60')"></div>
+                    <div class="grid-item">
+                        <div class="item-icon-circle">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        </div>
+                        <h3 class="item-title">Call us:</h3>
+                        <p class="item-text">1 (234) 567-891</p>
+                        <p class="item-text">1 (234) 987-654</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
+

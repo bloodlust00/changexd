@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChangeX - Sign Up</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="dashboard-page login-page">
+    <header class="header">
+        <div class="logo-section" style="display: flex; align-items: center; gap: 15px;">
+            <img src="assets/imagesss.jpeg" alt="Company Logo" class="company-logo" style="margin-top: 10px;">
+            <div class="logo-content">
+                <p class="welcome-text">Welcome to ChangeX!</p>
+                <h1 class="logo">Change<span>X</span> Sign Up</h1>
+            </div>
+        </div>
+        <div class="header-right">
+        </div>
+    </header>
+
+    <main class="login-container">
+        <div class="login-card">
+            <h2>Create Account</h2>
+            <form id="signupForm">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="you@company.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Create a password" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required>
+                </div>
+                <button type="submit" class="btn-login">SIGN UP</button>
+            </form>
+            <p class="signup-link">Already have an account? <a href="login.html">Sign In</a></p>
+            <p id="errorMessage" class="error-message"></p>
+            <p id="successMessage" class="success-message"></p>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            
+            errorMessage.textContent = '';
+            successMessage.textContent = '';
+            
+            if (password !== confirmPassword) {
+                errorMessage.textContent = 'Passwords do not match';
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    successMessage.textContent = 'Account created successfully! Redirecting...';
+                    setTimeout(() => window.location.href = 'login.html', 2000);
+                } else {
+                    errorMessage.textContent = data.message || 'Signup failed';
+                }
+            } catch (error) {
+                errorMessage.textContent = 'Server not available. Please start the backend server.';
+            }
+        });
+    </script>
+</body>
+</html>

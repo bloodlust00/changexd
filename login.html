@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChangeX - Login</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="dashboard-page login-page">
+    <header class="header">
+        <div class="logo-section" style="display: flex; align-items: center; gap: 15px;">
+            <img src="assets/imagesss.jpeg" alt="Company Logo" class="company-logo" style="margin-top: 10px;">
+            <div class="logo-content">
+                <p class="welcome-text">Welcome to ChangeX!</p>
+                <h1 class="logo">Change<span>X</span> Login</h1>
+            </div>
+        </div>
+        <div class="header-right">
+        </div>
+    </header>
+
+    <main class="login-container">
+        <div class="login-card">
+            <h2>Sign In</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="you@company.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn-login">LOGIN</button>
+            </form>
+            <p class="signup-link">Don't have an account? <a href="signup.html">Sign Up</a></p>
+            <p id="errorMessage" class="error-message"></p>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = 'index.html';
+                } else {
+                    errorMessage.textContent = data.message || 'Login failed';
+                }
+            } catch (error) {
+                errorMessage.textContent = 'Server not available. Demo mode: redirecting...';
+                localStorage.setItem('user', JSON.stringify({ email }));
+                setTimeout(() => window.location.href = 'index.html', 1500);
+            }
+        });
+    </script>
+</body>
+</html>
