@@ -204,25 +204,33 @@ body {
 
 .chart-container {
     text-align: center;
+    position: relative;
+    padding-top: 10px;
+    padding-left: 20px; /* Shift chart to the right */
 }
 
 .chart-container h3 {
     font-size: 13px;
     margin-bottom: 15px;
     font-weight: 500;
-}
-
-.chart-container h3 span {
-    color: #999;
-    font-weight: 400;
+    text-align: left;
+    padding-left: 0;
 }
 
 .chart-legend {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 15px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 8px;
+    border-radius: 6px;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
 }
 
 .legend-item {
@@ -946,6 +954,11 @@ body {
 .year-badge.orange { background-color: #fb8c00; color: white; }
 
 /* Auth Pages (Login/Signup) */
+body.login-page {
+    overflow-y: auto;
+    height: auto;
+}
+
 .login-page {
     background: linear-gradient(135deg, #e1e9f5 0%, #c9d6ff 100%);
     min-height: 100vh;

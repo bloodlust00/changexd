@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChangeX - Upload Data</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        // Check if user is logged in
+        if (!localStorage.getItem('user')) {
+            window.location.href = 'login.html';
+        }
+    </script>
+    <style>
+        .upload-section {
+            max-width: 600px;
+            margin: 40px auto;
+            text-align: center;
+        }
+        .upload-box {
+            border: 2px dashed #ddd;
+            padding: 40px;
+            border-radius: 12px;
+            background: #fff;
+            margin-bottom: 20px;
+        }
+        .file-input-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        .file-input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .file-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 6px;
+        }
+        .btn-upload {
+            background: linear-gradient(to right, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        .upload-status {
+            margin-top: 15px;
+            font-weight: 600;
+            color: #2ecc71;
+            display: none;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body class="dashboard-page">
+    <header class="header">
+        <div class="logo-container" style="flex-direction: row; align-items: center;">
+            <img src="assets/logo.jpg" alt="Company Logo" class="company-logo">
+            <div>
+                <p class="welcome-text">Welcome to !</p>
+                <h1 class="logo"><span class="purple">Change</span><span class="red">X</span></h1>
+            </div>
+        </div>
+        <div class="header-right">
+            <span class="user-email" id="userEmployeeID">ID: 12345</span>
+            <button class="btn btn-logout" onclick="logout()">
+                <span>→</span> Logout
+            </button>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <nav class="sidebar">
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-item"><span class="nav-icon">🏠</span> Home</a></li>
+                <li><a href="running-line.html" class="nav-item"><span class="nav-icon">📉</span> Running Line Changeover</a></li>
+                <li><a href="upcoming.html" class="nav-item"><span class="nav-icon">📅</span> Upcoming Changeover</a></li>
+                <li><a href="live-tracking.html" class="nav-item"><span class="nav-icon">📈</span> Live CO Tracking</a></li>
+                <li><a href="alerts.html" class="nav-item"><span class="nav-icon">🔔</span> Alerts</a></li>
+                <li><a href="upload.html" class="nav-item active"><span class="nav-icon">📤</span> Upload Data</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="whats-new.html" class="nav-item"><span class="nav-icon">🆕</span> What's New?</a>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="upload-section">
+                <h2 style="margin-bottom: 30px;">Upload Excel Sheets</h2>
+                <div class="upload-box">
+                    <form id="uploadForm">
+                        <div class="file-input-group">
+                            <label for="excel1">Production Schedule (Excel)</label>
+                            <input type="file" id="excel1" class="file-input" accept=".xlsx, .xls" required>
+                        </div>
+                        <div class="file-input-group">
+                            <label for="excel2">Line Efficiency Report (Excel)</label>
+                            <input type="file" id="excel2" class="file-input" accept=".xlsx, .xls" required>
+                        </div>
+                        <button type="submit" class="btn-upload" id="uploadBtn">UPLOAD FILES</button>
+                        <div id="uploadStatus" class="upload-status">✓ Data uploaded successfully! Redirecting...</div>
+                    </form>
+                </div>
+                <p style="color: #888; font-size: 13px;">Please upload files in .xlsx or .xls format only.</p>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('uploadBtn');
+            const status = document.getElementById('uploadStatus');
+            
+            btn.textContent = 'UPLOADING...';
+            btn.disabled = true;
+            
+            // Simulate upload process
+            setTimeout(() => {
+                btn.style.display = 'none';
+                status.style.display = 'block';
+                
+                // Redirect to home page after showing message
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

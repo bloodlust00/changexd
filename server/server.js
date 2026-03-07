@@ -30,12 +30,10 @@ const userSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    email: {
-        type: String,
+    employeeID: {
+        type: Number,
         required: true,
-        unique: true,
-        lowercase: true,
-        trim: true
+        unique: true
     },
     password: {
         type: String,
@@ -67,21 +65,21 @@ const User = mongoose.model('User', userSchema);
 // Signup
 app.post('/api/signup', async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, employeeID, password } = req.body;
 
         // Check if user already exists
-        const existingUser = await User.findOne({ email });
+        const existingUser = await User.findOne({ employeeID });
         if (existingUser) {
-            return res.status(400).json({ message: 'User with this email already exists' });
+            return res.status(400).json({ message: 'User with this Employee ID already exists' });
         }
 
         // Create new user
-        const user = new User({ name, email, password });
+        const user = new User({ name, employeeID, password });
         await user.save();
 
         res.status(201).json({ 
             message: 'User created successfully',
-            user: { id: user._id, name: user.name, email: user.email }
+            user: { id: user._id, name: user.name, employeeID: user.employeeID }
         });
     } catch (error) {
         console.error('Signup error:', error);
@@ -92,23 +90,23 @@ app.post('/api/signup', async (req, res) => {
 // Login
 app.post('/api/login', async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { employeeID, password } = req.body;
 
         // Find user
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ employeeID });
         if (!user) {
-            return res.status(401).json({ message: 'Invalid email or password' });
+            return res.status(401).json({ message: 'Invalid Employee ID or password' });
         }
 
         // Check password
         const isMatch = await user.comparePassword(password);
         if (!isMatch) {
-            return res.status(401).json({ message: 'Invalid email or password' });
+            return res.status(401).json({ message: 'Invalid Employee ID or password' });
         }
 
         // Generate JWT token
         const token = jwt.sign(
-            { userId: user._id, email: user.email },
+            { userId: user._id, employeeID: user.employeeID },
             JWT_SECRET,
             { expiresIn: '24h' }
         );
@@ -116,7 +114,7 @@ app.post('/api/login', async (req, res) => {
         res.json({
             message: 'Login successful',
             token,
-            user: { id: user._id, name: user.name, email: user.email }
+            user: { id: user._id, name: user.name, employeeID: user.employeeID }
         });
     } catch (error) {
         console.error('Login error:', error);

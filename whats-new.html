@@ -15,12 +15,15 @@
             </h1>
         </div>
         <div class="header-right" style="gap: 15px;">
-            <span style="font-size: 11px; color: #999;">Last Updated: Apr 2024</span>
-            <span class="nav-icon" style="font-size: 16px;">🔔</span>
-            <span class="nav-icon" style="font-size: 16px;">👤</span>
-            <div style="border: 1px solid #ddd; padding: 5px 10px; border-radius: 4px; display: flex; align-items: center; gap: 10px; font-size: 12px;">
-                <span style="color: #3498db;">✈</span> Factory A <span>⌵</span>
-            </div>
+            <span style="font-size: 11px; color: #999;">Last Updated: Mar 2026</span>
+            <span class="nav-icon" id="userEmployeeID" style="font-size: 13px; color: #666;">ID: 12345</span>
+            <select id="factorySelector" style="border: 1px solid #ddd; padding: 5px 10px; border-radius: 4px; font-size: 12px; outline: none; cursor: pointer;">
+                <option value="1">Factory 1</option>
+                <option value="2">Factory 2</option>
+                <option value="3">Factory 3</option>
+                <option value="4">Factory 4</option>
+                <option value="5">Factory 5</option>
+            </select>
             <span style="font-size: 11px; color: #999;">v2.4</span>
         </div>
     </header>
@@ -42,27 +45,27 @@
         <main class="main-content">
             <div class="whats-new-container">
                 <div class="content-card roadmap-main-card">
-                    <h2 class="roadmap-title">Future of Changeover Optimization</h2>
+                    <h2 class="roadmap-title">Future of Changeover Optimization — <span id="currentFactoryTitle">Factory 1</span></h2>
                     
                     <div class="metrics-grid">
                         <div class="metric-item">
-                            <p class="metric-text">Avg Changeover Time: <span class="metric-value">42 min → 18 min</span></p>
-                            <p class="metric-text">Prediction Accuracy: <span class="metric-value">0% → 90%</span></p>
+                            <p class="metric-text">Avg Changeover Time: <span class="metric-value" id="avgCOTime">42 min → 18 min</span></p>
+                            <p class="metric-text">Prediction Accuracy: <span class="metric-value" id="predAccuracy">90%</span></p>
                         </div>
                         <div class="metric-item">
-                            <p class="metric-text">Line Idle Time: <span class="metric-value danger">12% → <span class="success">5%</span></span></p>
-                            <p class="metric-text">Digital Adoption: <span class="metric-value success">35% → 100%</span></p>
+                            <p class="metric-text">Line Idle Time: <span class="metric-value danger" id="idleTime">12% → 5%</span></p>
+                            <p class="metric-text">Digital Adoption: <span class="metric-value success" id="digitalAdoption">100%</span></p>
                         </div>
                         <div class="metric-item">
-                            <p class="metric-text">Prediction Accuracy: <span class="metric-value">0% → 90%</span></p>
+                            <p class="metric-text">Setup Efficiency: <span class="metric-value" id="setupEfficiency">85%</span></p>
                             <div style="background-color: #3498db; color: white; padding: 4px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600;">
-                                <span style="font-size: 10px;">✓</span> Tatclesso Perseit
+                                <span style="font-size: 10px;">✓</span> Active Performance
                             </div>
                         </div>
                     </div>
 
-                    <div class="roadmap-banner">
-                        AI-driven SMED system will reduce changeover time by 50% across 5 factories by 2028.
+                    <div class="roadmap-banner" id="roadmapBanner">
+                        AI-driven SMED system will reduce changeover time by 50% for Factory 1 by 2028.
                     </div>
 
                     <div class="roadmap-years-grid">
@@ -133,17 +136,19 @@
                 <div class="whats-new-bottom-grid">
                     <div class="content-card feature-card">
                         <h3 style="font-size: 13px; font-weight: 600; margin-bottom: 15px; color: #666;">Factory Impact Tracker</h3>
-                        <div class="impact-tracker-item">
-                            <p class="impact-tracker-label">Factory 1 <span style="font-weight: 700;">48 min → 25 min</span></p>
-                            <div class="impact-tracker-progress"><div class="impact-tracker-fill" style="width: 55%; background: #2ecc71;"></div></div>
-                        </div>
-                        <div class="impact-tracker-item">
-                            <p class="impact-tracker-label">Factory 2 <span style="font-weight: 700;">52 min → 28 min</span></p>
-                            <div class="impact-tracker-progress"><div class="impact-tracker-fill" style="width: 50%; background: #3498db;"></div></div>
-                        </div>
-                        <div class="impact-tracker-item">
-                            <p class="impact-tracker-label">Factory 3 <span style="font-weight: 700;">39 min → 20 min</span></p>
-                            <div class="impact-tracker-progress"><div class="impact-tracker-fill" style="width: 60%; background: #f1c40f;"></div></div>
+                        <div id="impactTrackerContent">
+                            <div class="impact-tracker-item">
+                                <p class="impact-tracker-label">Sewing Line 1 <span style="font-weight: 700;">48 min → 25 min</span></p>
+                                <div class="impact-tracker-progress"><div class="impact-tracker-fill" style="width: 55%; background: #3498db;"></div></div>
+                            </div>
+                            <div class="impact-tracker-item">
+                                <p class="impact-tracker-label">Sewing Line 2 <span style="font-weight: 700;">52 min → 28 min</span></p>
+                                <div class="impact-tracker-progress"><div class="impact-tracker-fill" style="width: 50%; background: #9b59b6;"></div></div>
+                            </div>
+                            <div class="impact-tracker-item">
+                                <p class="impact-tracker-label">Sewing Line 3 <span style="font-weight: 700;">39 min → 20 min</span></p>
+                                <div class="impact-tracker-progress"><div class="impact-tracker-fill" style="width: 60%; background: #00bcd4;"></div></div>
+                            </div>
                         </div>
                     </div>
 
@@ -204,7 +209,98 @@
             </div>
         </main>
     </div>
+    
     <script src="script.js"></script>
+    <script>
+        const factoryData = {
+            '1': {
+                title: 'Factory 1',
+                avgCO: '42 min → 18 min',
+                accuracy: '90%',
+                idle: '12% → 5%',
+                adoption: '100%',
+                setup: '85%',
+                impact: [
+                    { label: 'Sewing Line 1', val: '48 min → 25 min', percent: 55, color: '#3498db' },
+                    { label: 'Sewing Line 2', val: '52 min → 28 min', percent: 50, color: '#9b59b6' },
+                    { label: 'Sewing Line 3', val: '39 min → 20 min', percent: 60, color: '#00bcd4' }
+                ]
+            },
+            '2': {
+                title: 'Factory 2',
+                avgCO: '45 min → 22 min',
+                accuracy: '88%',
+                idle: '15% → 7%',
+                adoption: '95%',
+                setup: '82%',
+                impact: [
+                    { label: 'Sewing Line 1', val: '50 min → 30 min', percent: 40, color: '#3498db' },
+                    { label: 'Sewing Line 2', val: '48 min → 25 min', percent: 48, color: '#9b59b6' },
+                    { label: 'Sewing Line 3', val: '45 min → 22 min', percent: 51, color: '#00bcd4' }
+                ]
+            },
+            '3': {
+                title: 'Factory 3',
+                avgCO: '38 min → 15 min',
+                accuracy: '92%',
+                idle: '10% → 4%',
+                adoption: '100%',
+                setup: '90%',
+                impact: [
+                    { label: 'Sewing Line 1', val: '35 min → 12 min', percent: 65, color: '#3498db' },
+                    { label: 'Sewing Line 2', val: '40 min → 18 min', percent: 55, color: '#9b59b6' },
+                    { label: 'Sewing Line 3', val: '38 min → 15 min', percent: 60, color: '#00bcd4' }
+                ]
+            },
+            '4': {
+                title: 'Factory 4',
+                avgCO: '50 min → 25 min',
+                accuracy: '85%',
+                idle: '18% → 9%',
+                adoption: '90%',
+                setup: '78%',
+                impact: [
+                    { label: 'Sewing Line 1', val: '55 min → 32 min', percent: 42, color: '#3498db' },
+                    { label: 'Sewing Line 2', val: '58 min → 35 min', percent: 40, color: '#9b59b6' },
+                    { label: 'Sewing Line 3', val: '52 min → 28 min', percent: 46, color: '#00bcd4' }
+                ]
+            },
+            '5': {
+                title: 'Factory 5',
+                avgCO: '40 min → 20 min',
+                accuracy: '87%',
+                idle: '14% → 6%',
+                adoption: '98%',
+                setup: '80%',
+                impact: [
+                    { label: 'Sewing Line 1', val: '42 min → 22 min', percent: 48, color: '#3498db' },
+                    { label: 'Sewing Line 2', val: '45 min → 25 min', percent: 44, color: '#9b59b6' },
+                    { label: 'Sewing Line 3', val: '40 min → 20 min', percent: 50, color: '#00bcd4' }
+                ]
+            }
+        };
+
+        document.getElementById('factorySelector').addEventListener('change', function(e) {
+            const data = factoryData[e.target.value];
+            document.getElementById('currentFactoryTitle').textContent = data.title;
+            document.getElementById('avgCOTime').textContent = data.avgCO;
+            document.getElementById('predAccuracy').textContent = data.accuracy;
+            document.getElementById('idleTime').textContent = data.idle;
+            document.getElementById('digitalAdoption').textContent = data.adoption;
+            document.getElementById('setupEfficiency').textContent = data.setup;
+            document.getElementById('roadmapBanner').textContent = `AI-driven SMED system will reduce changeover time by 50% for ${data.title} by 2028.`;
+            
+            const tracker = document.getElementById('impactTrackerContent');
+            tracker.innerHTML = '';
+            data.impact.forEach(item => {
+                tracker.innerHTML += `
+                    <div class="impact-tracker-item">
+                        <p class="impact-tracker-label">${item.label} <span style="font-weight: 700;">${item.val}</span></p>
+                        <div class="impact-tracker-progress"><div class="impact-tracker-fill" style="width: ${item.percent}%; background: ${item.color};"></div></div>
+                    </div>
+                `;
+            });
+        });
+    </script>
 </body>
 </html>
-

@@ -7,12 +7,12 @@ function logout() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Populate user email
+    // Populate user Employee ID
     const user = JSON.parse(localStorage.getItem('user'));
-    if (user && user.email) {
-        const userEmailElement = document.getElementById('userEmail');
-        if (userEmailElement) {
-            userEmailElement.textContent = user.email;
+    if (user && user.employeeID) {
+        const userEmployeeIDElement = document.getElementById('userEmployeeID');
+        if (userEmployeeIDElement) {
+            userEmployeeIDElement.textContent = 'ID: ' + user.employeeID;
         }
     }
 
@@ -54,10 +54,10 @@ document.addEventListener('DOMContentLoaded', function() {
         new Chart(onTimeCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Factory 1', 'Factory 2', '2arx:', 'Factory 4', 'Other'],
+                labels: ['Factory 1', 'Factory 3', 'Factory 5'],
                 datasets: [{
-                    data: [30, 20, 15, 10, 25],
-                    backgroundColor: [colors.blue, colors.green, colors.yellow, colors.red, '#eee'],
+                    data: [40, 35, 25],
+                    backgroundColor: ['#3498db', '#9b59b6', '#00bcd4'],
                     borderWidth: 0
                 }]
             },
@@ -77,10 +77,10 @@ document.addEventListener('DOMContentLoaded', function() {
         new Chart(lateCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Factory 1', 'Factory 3', 'Factory 4', 'Factory 5', 'Other'],
+                labels: ['Factory 2', 'Factory 4'],
                 datasets: [{
-                    data: [20, 25, 25, 15, 15],
-                    backgroundColor: [colors.blue, colors.green, colors.yellow, colors.red, '#eee'],
+                    data: [60, 40],
+                    backgroundColor: ['#e67e22', '#8e44ad'],
                     borderWidth: 0
                 }]
             },
@@ -109,8 +109,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
 
-    createLegend('onTimeLegend', ['Factory 1', 'Factory 2', '2arx:', 'Factory 4'], [colors.blue, colors.green, colors.yellow, colors.red]);
-    createLegend('lateLegend', ['Factory 1', 'Factory 3', 'Factory 4', 'Factory 5'], [colors.blue, colors.green, colors.yellow, colors.red]);
+    createLegend('onTimeLegend', ['Factory 1', 'Factory 3', 'Factory 5'], ['#3498db', '#9b59b6', '#00bcd4']);
+    createLegend('lateLegend', ['Factory 2', 'Factory 4'], ['#e67e22', '#8e44ad']);
 
     // Total Defects Chart (Main)
     const defectsCanvas = document.getElementById('defectsChart');
