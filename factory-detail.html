@@ -46,157 +46,190 @@
 
     <script src="script.js"></script>
     <script>
-        // Factory data
-        const factoryData = {
-            1: {
-                name: "Factory 1",
-                lines: [
-                    {
-                        name: "Line 1",
-                        runningStyle: "Style A-204",
-                        runningSMV: "12.5",
-                        upcomingStyle: "Style B-108",
-                        upcomingSMV: "14.2",
-                        requirements: "New needle plate, folder attachment",
-                        estimatedTime: "45 min",
-                        delayReasons: "Waiting for mechanic"
-                    },
-                    {
-                        name: "Line 2",
-                        runningStyle: "Style C-301",
-                        runningSMV: "9.8",
-                        upcomingStyle: "Style D-112",
-                        upcomingSMV: "11.0",
-                        requirements: "Bobbin change, thread color swap",
-                        estimatedTime: "30 min",
-                        delayReasons: "None"
-                    }
-                ]
-            },
-            2: {
-                name: "Factory 2",
-                lines: [
-                    {
-                        name: "Line 1",
-                        runningStyle: "Style E-505",
-                        runningSMV: "15.2",
-                        upcomingStyle: "Style F-220",
-                        upcomingSMV: "13.8",
-                        requirements: "Presser foot change",
-                        estimatedTime: "35 min",
-                        delayReasons: "None"
-                    },
-                    {
-                        name: "Line 2",
-                        runningStyle: "Style G-118",
-                        runningSMV: "10.5",
-                        upcomingStyle: "Style H-330",
-                        upcomingSMV: "12.0",
-                        requirements: "Thread tension adjustment",
-                        estimatedTime: "25 min",
-                        delayReasons: "Material shortage"
-                    }
-                ]
-            },
-            3: {
-                name: "Factory 3",
-                lines: [
-                    {
-                        name: "Line 1",
-                        runningStyle: "Style I-401",
-                        runningSMV: "11.3",
-                        upcomingStyle: "Style J-550",
-                        upcomingSMV: "14.5",
-                        requirements: "Complete machine setup",
-                        estimatedTime: "55 min",
-                        delayReasons: "Waiting for approval"
-                    },
-                    {
-                        name: "Line 2",
-                        runningStyle: "Style K-222",
-                        runningSMV: "8.9",
-                        upcomingStyle: "Style L-180",
-                        upcomingSMV: "9.5",
-                        requirements: "Minor adjustments",
-                        estimatedTime: "20 min",
-                        delayReasons: "None"
-                    }
-                ]
-            },
-            4: {
-                name: "Factory 4",
-                lines: [
-                    {
-                        name: "Line 1",
-                        runningStyle: "Style M-600",
-                        runningSMV: "13.7",
-                        upcomingStyle: "Style N-450",
-                        upcomingSMV: "12.2",
-                        requirements: "Needle change, guide adjustment",
-                        estimatedTime: "40 min",
-                        delayReasons: "None"
-                    }
-                ]
-            },
-            5: {
-                name: "Factory 5",
-                lines: [
-                    {
-                        name: "Line 1",
-                        runningStyle: "Style O-310",
-                        runningSMV: "10.1",
-                        upcomingStyle: "Style P-280",
-                        upcomingSMV: "11.5",
-                        requirements: "Feed dog adjustment",
-                        estimatedTime: "30 min",
-                        delayReasons: "None"
-                    },
-                    {
-                        name: "Line 2",
-                        runningStyle: "Style Q-125",
-                        runningSMV: "9.2",
-                        upcomingStyle: "Style R-440",
-                        upcomingSMV: "13.0",
-                        requirements: "Full setup change",
-                        estimatedTime: "50 min",
-                        delayReasons: "Parts on order"
-                    }
-                ]
-            }
-        };
+    // Factory data
+    const factoryData = {
+        1: {
+            name: "Factory 1",
+            lines: [
+                {
+                    name: "Line 1",
+                    runningStyle: "H-LIAM-BD-E-C1-263-50566988",
+                    runningSMV: "23.5",
+                    upcomingStyle: "KASON-A-25-50293691",
+                    upcomingSMV: "28.2",
+                    requirements: "New needle plate, folder attachment",
+                    estimatedTime: "45 min",
+                    delayReasons: "Waiting for mechanic"
+                },
+                {
+                    name: "Line 2",
+                    runningStyle: "HUGOBOSS BASIC SHIRT",
+                    runningSMV: "24.5",
+                    upcomingStyle: "CKML-BN-5D",
+                    upcomingSMV: "27.0",
+                    requirements: "Bobbin change, thread color swap, Cuff template change",
+                    estimatedTime: "60 min",
+                    delayReasons: "None"
+                }
+            ]
+        },
 
-        // Get factory ID from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const factoryId = urlParams.get('id') || 1;
-        const factory = factoryData[factoryId];
+        2: {
+            name: "Factory 2",
+            lines: [
+                {
+                    name: "Line 3",
+                    runningStyle: "Tommy",
+                    runningSMV: "23.5",
+                    upcomingStyle: "Style F-220",
+                    upcomingSMV: "25.2",
+                    requirements: "Presser foot change",
+                    estimatedTime: "35 min",
+                    delayReasons: "None"
+                },
+                {
+                    name: "Line 4",
+                    runningStyle: "Style G-118",
+                    runningSMV: "26.0",
+                    upcomingStyle: "Style H-330",
+                    upcomingSMV: "23.5",
+                    requirements: "Thread tension adjustment",
+                    estimatedTime: "25 min",
+                    delayReasons: "Material shortage"
+                }
+            ]
+        },
 
-        // Render factory details
-        const detailContainer = document.getElementById('factoryDetail');
-        if (factory) {
-            let html = `<h2 class="factory-title">${factory.name}</h2>`;
-            factory.lines.forEach((line, index) => {
-                html += `
-                    <div class="line-section ${index > 0 ? 'line-border' : ''}">
-                        <h3 class="line-title">${line.name}</h3>
-                        <div class="line-details">
-                            <div class="detail-column">
-                                <p><strong>Running style</strong> : ${line.runningStyle}</p>
-                                <p><strong>Upcoming style</strong> : ${line.upcomingStyle}</p>
-                                <p><strong>Upcoming Style Requirements</strong> : ${line.requirements}</p>
-                                <p><strong>Estimated Changeover time</strong> : ${line.estimatedTime}</p>
-                            </div>
-                            <div class="detail-column">
-                                <p><strong>Running style SMV</strong> : ${line.runningSMV}</p>
-                                <p><strong>Upcoming style SMV</strong> : ${line.upcomingSMV}</p>
-                                <p><strong>Delay Reasons</strong> : ${line.delayReasons}</p>
-                            </div>
+        3: {
+            name: "Factory 3",
+            lines: [
+                {
+                    name: "Line 5",
+                    runningStyle: "Style I-401",
+                    runningSMV: "27.3",
+                    upcomingStyle: "Style J-550",
+                    upcomingSMV: "23.5",
+                    requirements: "Complete machine setup",
+                    estimatedTime: "55 min",
+                    delayReasons: "Waiting for approval"
+                },
+                {
+                    name: "Line 6",
+                    runningStyle: "Style K-222",
+                    runningSMV: "28.3",
+                    upcomingStyle: "Style L-180",
+                    upcomingSMV: "25.4",
+                    requirements: "Minor adjustments",
+                    estimatedTime: "20 min",
+                    delayReasons: "None"
+                }
+            ]
+        },
+
+        4: {
+            name: "Factory 4",
+            lines: [
+                {
+                    name: "Line 7",
+                    runningStyle: "Style M-600",
+                    runningSMV: "24.0",
+                    upcomingStyle: "Style N-450",
+                    upcomingSMV: "23.5",
+                    requirements: "Needle change, guide adjustment",
+                    estimatedTime: "40 min",
+                    delayReasons: "None"
+                },
+                {
+                    name: "Line 8",
+                    runningStyle: "Style M-600",
+                    runningSMV: "23.5",
+                    upcomingStyle: "Style N-450",
+                    upcomingSMV: "26.2",
+                    requirements: "Needle change, guide adjustment",
+                    estimatedTime: "40 min",
+                    delayReasons: "None"
+                }
+            ]
+        },
+
+        5: {
+            name: "Factory 5",
+            lines: [
+                {
+                    name: "Line 9",
+                    runningStyle: "Style O-310",
+                    runningSMV: "10.1",
+                    upcomingStyle: "Style P-280",
+                    upcomingSMV: "11.5",
+                    requirements: "Feed dog adjustment",
+                    estimatedTime: "30 min",
+                    delayReasons: "None"
+                },
+                {
+                    name: "Line 10",
+                    runningStyle: "Style Q-125",
+                    runningSMV: "9.2",
+                    upcomingStyle: "Style R-440",
+                    upcomingSMV: "13.0",
+                    requirements: "Full setup change",
+                    estimatedTime: "50 min",
+                    delayReasons: "Parts on order"
+                },
+                {
+                    name: "Line 11",
+                    runningStyle: "Style Q-125",
+                    runningSMV: "27.3",
+                    upcomingStyle: "Style R-440",
+                    upcomingSMV: "25.2",
+                    requirements: "Full setup change",
+                    estimatedTime: "50 min",
+                    delayReasons: "Parts on order"
+                }
+            ]
+        }
+    };
+
+    // Get factory ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const factoryId = parseInt(urlParams.get('id')) || 1;
+
+    const factory = factoryData[factoryId];
+
+    // Render factory details
+    const detailContainer = document.getElementById('factoryDetail');
+
+    if (factory) {
+        let html = `<h2 class="factory-title">${factory.name}</h2>`;
+
+        factory.lines.forEach((line, index) => {
+            html += `
+                <div class="line-section ${index > 0 ? 'line-border' : ''}">
+                    <h3 class="line-title">${line.name}</h3>
+
+                    <div class="line-details">
+                        <div class="detail-column">
+                            <p><strong>Running style</strong> : ${line.runningStyle}</p>
+                            <p><strong>Upcoming style</strong> : ${line.upcomingStyle}</p>
+                            <p><strong>Upcoming Style Requirements</strong> : ${line.requirements}</p>
+                            <p><strong>Estimated Changeover time</strong> : ${line.estimatedTime}</p>
+                        </div>
+
+                        <div class="detail-column">
+                            <p><strong>Running style SMV</strong> : ${line.runningSMV}</p>
+                            <p><strong>Upcoming style SMV</strong> : ${line.upcomingSMV}</p>
+                            <p><strong>Delay Reasons</strong> : ${line.delayReasons}</p>
                         </div>
                     </div>
-                `;
-            });
-            detailContainer.innerHTML = html;
-        }
-    </script>
+                </div>
+            `;
+        });
+
+        detailContainer.innerHTML = html;
+
+    } else {
+        detailContainer.innerHTML = "<h2>Factory not found</h2>";
+    }
+</script>
 </body>
 </html>
 
