@@ -82,6 +82,7 @@
                                               stroke-dasharray="125.66" stroke-dashoffset="calc(125.66 * (1 - 79 / 100))" />
                                     </svg>
                                     <span class="gauge-value">79%</span>
+                                    <div class="gauge-tooltip">Reason: Due to machine breakdown</div>
                                 </div>
                                 <span class="gauge-label">Sewing Line 1</span>
                             </div>
@@ -104,6 +105,7 @@
                                               stroke-dasharray="125.66" stroke-dashoffset="calc(125.66 * (1 - 72 / 100))" />
                                     </svg>
                                     <span class="gauge-value">72%</span>
+                                    <div class="gauge-tooltip">Reason: Mechanic delay</div>
                                 </div>
                                 <span class="gauge-label">Sewing Line 3</span>
                             </div>
@@ -115,6 +117,7 @@
                                               stroke-dasharray="125.66" stroke-dashoffset="calc(125.66 * (1 - 68 / 100))" />
                                     </svg>
                                     <span class="gauge-value">68%</span>
+                                    <div class="gauge-tooltip">Reason: Needle breakdown</div>
                                 </div>
                                 <span class="gauge-label">Sewing Line 4</span>
                             </div>
@@ -137,6 +140,7 @@
                                               stroke-dasharray="125.66" stroke-dashoffset="calc(125.66 * (1 - 76 / 100))" />
                                     </svg>
                                     <span class="gauge-value">76%</span>
+                                    <div class="gauge-tooltip">Reason: Absenteeism</div>
                                 </div>
                                 <span class="gauge-label">Sewing Line 6</span>
                             </div>
@@ -159,6 +163,7 @@
                                               stroke-dasharray="125.66" stroke-dashoffset="calc(125.66 * (1 - 73 / 100))" />
                                     </svg>
                                     <span class="gauge-value">73%</span>
+                                    <div class="gauge-tooltip">Reason: Machine breakdown</div>
                                 </div>
                                 <span class="gauge-label">Sewing Line 8</span>
                             </div>
@@ -173,13 +178,36 @@
                                 </div>
                                 <span class="gauge-label">Sewing Line 9</span>
                             </div>
+                            <div class="gauge-item">
+                                <div class="gauge-wrapper" style="--gauge-percent: 82; --gauge-color: #2ecc71;">
+                                    <svg viewBox="0 0 100 50" class="gauge-svg">
+                                        <path d="M 10 45 A 40 40 0 0 1 90 45" fill="none" stroke="#f0f0f0" stroke-width="8" stroke-linecap="round" />
+                                        <path d="M 10 45 A 40 40 0 0 1 90 45" fill="none" stroke="#2ecc71" stroke-width="8" stroke-linecap="round" 
+                                              stroke-dasharray="125.66" stroke-dashoffset="calc(125.66 * (1 - 82 / 100))" />
+                                    </svg>
+                                    <span class="gauge-value">82%</span>
+                                </div>
+                                <span class="gauge-label">Sewing Line 10</span>
+                            </div>
+                            <div class="gauge-item">
+                                <div class="gauge-wrapper" style="--gauge-percent: 75; --gauge-color: #e74c3c;">
+                                    <svg viewBox="0 0 100 50" class="gauge-svg">
+                                        <path d="M 10 45 A 40 40 0 0 1 90 45" fill="none" stroke="#f0f0f0" stroke-width="8" stroke-linecap="round" />
+                                        <path d="M 10 45 A 40 40 0 0 1 90 45" fill="none" stroke="#e74c3c" stroke-width="8" stroke-linecap="round" 
+                                              stroke-dasharray="125.66" stroke-dashoffset="calc(125.66 * (1 - 75 / 100))" />
+                                    </svg>
+                                    <span class="gauge-value">75%</span>
+                                    <div class="gauge-tooltip">Reason: Absenteeism</div>
+                                </div>
+                                <span class="gauge-label">Sewing Line 11</span>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Total Defects Card -->
                     <div class="content-card">
                         <h2 class="card-title">Total Defects in Production Line-Wise</h2>
-                        <div style="height: 250px;">
+                        <div style="height: 220px;">
                             <canvas id="defectsChart"></canvas>
                         </div>
                         <div style="text-align: center; font-size: 11px; color: #888; margin-top: 10px;">Sewing Lines</div>
@@ -275,11 +303,9 @@
                     <!-- Right Column Defects Card -->
                     <div class="content-card">
                         <h2 class="card-title">Reasons for changeover delays</h2>
-                        <div style="height: 250px; position: relative; padding-left: 30px;">
-                            <div style="position: absolute; left: 0; top: 50%; transform: rotate(-90deg) translateX(-50%); font-size: 11px; color: #888; width: 100px; transform-origin: left center;">Delay (%)</div>
+                        <div style="height: 460px; position: relative;">
                             <canvas id="sideDefectsChart"></canvas>
                         </div>
-                        <div style="text-align: center; font-size: 11px; color: #888; margin-top: 10px;">Sewing Lines</div>
                     </div>
                 </div>
             </div>

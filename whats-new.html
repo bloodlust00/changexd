@@ -18,19 +18,19 @@ body{
 
 /* HEADER */
 
-.header{
+.whats-new-header{
     text-align:center;
     padding:60px 20px;
 }
 
-.header h1{
+.whats-new-header h1{
     font-size:42px;
     background:linear-gradient(90deg,#00d9ff,#4ade80);
     -webkit-background-clip:text;
     color:transparent;
 }
 
-.header p{
+.whats-new-header p{
     color:#cbd5f5;
     max-width:700px;
     margin:auto;
@@ -131,19 +131,44 @@ body{
 </style>
 </head>
 
-<body>
+<body class="dashboard-page">
+    <header class="header">
+        <div class="logo-container" style="flex-direction: row; align-items: center;"><img src="assets/logo.jpg" alt="Company Logo" class="company-logo">
+            <p class="welcome-text">Welcome to !</p>
+            <h1 class="logo"><span class="purple">Change</span><span class="red">X</span></h1>
+        </div>
+        <div class="header-right">
+            <span class="user-email" id="userEmployeeID">ID: 12345</span>
+            <button class="btn btn-logout" onclick="logout()">
+                <span>→</span> Logout
+            </button>
+        </div>
+    </header>
 
-<!-- HEADER -->
+    <div class="app-container">
+        <nav class="sidebar">
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-item"><span class="nav-icon">🏠</span> Home</a></li>
+                <li><a href="running-line.html" class="nav-item"><span class="nav-icon">📉</span> Running Line Changeover</a></li>
+                <li><a href="upcoming.html" class="nav-item"><span class="nav-icon">📅</span> Upcoming Changeover</a></li>
+                <li><a href="live-tracking.html" class="nav-item"><span class="nav-icon">📈</span> Live CO Tracking</a></li>
+                <li><a href="alerts.html" class="nav-item"><span class="nav-icon">🔔</span> Alerts</a></li>
+                <li><a href="upload.html" class="nav-item"><span class="nav-icon">📤</span> Upload Data</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="whats-new.html" class="nav-item active"><span class="nav-icon">🆕</span> What's New?</a>
+            </div>
+        </nav>
 
-<section class="header">
+        <main class="main-content" style="background:#0f172a; color:white; padding: 0;">
+            <!-- HEADER -->
+            <section class="whats-new-header">
+                <h1>Future of SMED Line Changeover</h1>
+                <p>
+                    Transforming garment factories into fully digital Industry 4.0 smart manufacturing systems through AI, automation and real-time production intelligence.
+                </p>
+            </section>
 
-<h1>Future of SMED Line Changeover</h1>
-
-<p>
-Transforming garment factories into fully digital Industry 4.0 smart manufacturing systems through AI, automation and real-time production intelligence.
-</p>
-
-</section>
 
 <!-- KPI DASHBOARD -->
 
@@ -256,7 +281,10 @@ Factories will simulate production lines virtually to test line balancing and pr
 SMED Line Changeover System • Digital Manufacturing Platform
 
 </div>
+</main>
+</div>
 
+<script src="script.js"></script>
 <script>
 
 /* Animated KPI numbers */

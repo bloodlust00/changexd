@@ -115,30 +115,43 @@ body {
 }
 
 .sidebar {
-    width: 240px;
+    width: 70px; /* Collapsed width showing only icons */
     background-color: #fff;
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     padding: 20px 0;
     flex-shrink: 0;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition-delay: 0.1s; /* Slight delay to prevent accidental collapses */
+    overflow-x: hidden;
+    z-index: 1000;
+}
+
+.sidebar:hover,
+.sidebar.persistent-hover {
+    width: 260px; /* Expanded width */
+    transition-delay: 0s; /* Expand immediately on hover */
 }
 
 .nav-menu {
     list-style: none;
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .nav-item {
     display: flex;
     align-items: center;
-    padding: 12px 25px;
+    padding: 15px 20px;
     color: #444;
     text-decoration: none;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
-    gap: 12px;
+    gap: 20px;
+    white-space: nowrap;
+    transition: background-color 0.2s;
 }
 
 .nav-item:hover {
@@ -149,20 +162,23 @@ body {
 .nav-item.active {
     color: var(--primary-blue);
     background: linear-gradient(to right, rgba(52, 152, 219, 0.1), transparent);
-    border-left: 3px solid var(--primary-blue);
+    border-left: 4px solid var(--primary-blue);
 }
 
 .nav-icon {
-    width: 20px;
-    height: 20px;
+    width: 30px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+    font-size: 22px; /* Larger icons/emojis */
 }
 
 .sidebar-footer {
     padding-top: 20px;
     border-top: 1px solid var(--border-color);
+    overflow: hidden;
 }
 
 /* Main Content */
@@ -194,6 +210,26 @@ body {
     display: grid;
     grid-template-columns: 1fr 340px;
     gap: 20px;
+    align-items: stretch; /* Make columns equal height */
+}
+
+.left-column, .right-column {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.left-column > .content-card:last-child,
+.right-column > .content-card:last-child {
+    flex: 1; /* Stretch last card to fill column */
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.left-column > .content-card:last-child > div:nth-child(2),
+.right-column > .content-card:last-child > div:nth-child(2) {
+    flex: 1; /* Stretch chart container inside the last card */
 }
 
 .charts-row {
@@ -249,19 +285,70 @@ body {
 
 /* Gauges */
 .gauges-grid {
-    display: grid;
-    grid-template-columns: repeat(9, 1fr);
+    display: flex;
     gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    scrollbar-width: none; /* Hide scrollbar for cleaner look */
+    -ms-overflow-style: none;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+.gauges-grid::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Chrome/Safari */
 }
 
 .gauge-item {
     text-align: center;
+    /* Exactly 9 items visible: (100% - total gap width) / 9 */
+    flex: 0 0 calc((100% - 80px) / 9);
+    min-width: 0;
 }
 
 .gauge-wrapper {
     position: relative;
     width: 100%;
     margin-bottom: 5px;
+    cursor: help;
+}
+
+.gauge-tooltip {
+    visibility: hidden;
+    width: 100px; /* Smaller width */
+    background-color: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    text-align: center;
+    border-radius: 4px;
+    padding: 5px 8px;
+    position: absolute;
+    z-index: 100;
+    top: 50%;
+    left: 105%; /* Position to the right */
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.2s;
+    font-size: 9px;
+    pointer-events: none;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+    line-height: 1.2;
+    white-space: normal;
+}
+
+.gauge-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 100%; /* Arrow on the left of tooltip */
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent rgba(0, 0, 0, 0.85) transparent transparent;
+}
+
+.gauge-wrapper:hover .gauge-tooltip {
+    visibility: visible;
+    opacity: 1;
 }
 
 .gauge-svg {
