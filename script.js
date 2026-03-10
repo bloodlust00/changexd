@@ -14,6 +14,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check if sidebar should be expanded on load (persistence from previous page)
     if (sessionStorage.getItem('sidebar_persistent_hover') === 'true') {
         sidebar.classList.add('persistent-hover');
+        
+        // Remove the temporary class from html element now that sidebar has its class
+        document.documentElement.classList.remove('sidebar-pushed');
     }
 
     // Set persistence when a link is clicked while sidebar is expanded
@@ -29,10 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Remove persistence as soon as mouse moves within the page but outside the sidebar
     document.addEventListener('mousemove', function(e) {
         if (sidebar.classList.contains('persistent-hover')) {
-            const sidebarRect = sidebar.getBoundingClientRect();
-            // Expanded width is 260px
             const expandedWidth = 260;
-            
             if (e.clientX > expandedWidth) {
                 sidebar.classList.remove('persistent-hover');
                 sessionStorage.removeItem('sidebar_persistent_hover');

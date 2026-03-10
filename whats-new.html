@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        if (sessionStorage.getItem('sidebar_persistent_hover') === 'true') {
+            document.documentElement.classList.add('sidebar-pushed');
+        }
+    </script>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SMED Digital Factory - What's New</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -133,33 +137,14 @@ body{
 
 <body class="dashboard-page">
     <header class="header">
-        <div class="logo-container" style="flex-direction: row; align-items: center;"><img src="assets/logo.jpg" alt="Company Logo" class="company-logo">
-            <p class="welcome-text">Welcome to !</p>
-            <h1 class="logo"><span class="purple">Change</span><span class="red">X</span></h1>
-        </div>
-        <div class="header-right">
-            <span class="user-email" id="userEmployeeID">ID: 12345</span>
-            <button class="btn btn-logout" onclick="logout()">
-                <span>→</span> Logout
-            </button>
+        <div class="header-left">
+            <a href="index.html" class="btn btn-back" style="background: #1e293b; color: white; border: 1px solid #334155; display: flex; align-items: center; gap: 8px; border-radius: 8px; padding: 10px 20px; text-decoration: none;">
+                <span>←</span> Back to Dashboard
+            </a>
         </div>
     </header>
 
     <div class="app-container">
-        <nav class="sidebar">
-            <ul class="nav-menu">
-                <li><a href="index.html" class="nav-item"><span class="nav-icon">🏠</span> Home</a></li>
-                <li><a href="running-line.html" class="nav-item"><span class="nav-icon">📉</span> Running Line Changeover</a></li>
-                <li><a href="upcoming.html" class="nav-item"><span class="nav-icon">📅</span> Upcoming Changeover</a></li>
-                <li><a href="live-tracking.html" class="nav-item"><span class="nav-icon">📈</span> Live CO Tracking</a></li>
-                <li><a href="alerts.html" class="nav-item"><span class="nav-icon">🔔</span> Alerts</a></li>
-                <li><a href="upload.html" class="nav-item"><span class="nav-icon">📤</span> Upload Data</a></li>
-            </ul>
-            <div class="sidebar-footer">
-                <a href="whats-new.html" class="nav-item active"><span class="nav-icon">🆕</span> What's New?</a>
-            </div>
-        </nav>
-
         <main class="main-content" style="background:#0f172a; color:white; padding: 0;">
             <!-- HEADER -->
             <section class="whats-new-header">

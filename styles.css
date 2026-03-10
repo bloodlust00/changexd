@@ -128,6 +128,15 @@ body {
     z-index: 1000;
 }
 
+html.sidebar-pushed .sidebar { 
+    width: 260px !important; 
+    transition: none !important; 
+}
+
+.sidebar.no-transition {
+    transition: none !important;
+}
+
 .sidebar:hover,
 .sidebar.persistent-hover {
     width: 260px; /* Expanded width */

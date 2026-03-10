@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+        if (sessionStorage.getItem('sidebar_persistent_hover') === 'true') {
+            document.documentElement.classList.add('sidebar-pushed');
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChangeX - Upcoming Changeover</title>
