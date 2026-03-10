@@ -216,85 +216,55 @@
 
                 <div class="right-column">
                     <!-- Machine Utilization Card -->
-                    <div class="content-card">
+                    <div class="content-card machine-utilization-card">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                             <h2 class="card-title" style="margin-bottom: 0;">Machine Utilization</h2>
+                            <select id="factorySelect" style="padding: 5px 10px; border-radius: 4px; border: 1px solid #ddd; font-size: 12px; outline: none; cursor: pointer;">
+                                <option value="1">Factory 1</option>
+                                <option value="2">Factory 2</option>
+                                <option value="3">Factory 3</option>
+                                <option value="4">Factory 4</option>
+                                <option value="5">Factory 5</option>
+                            </select>
                         </div>
                         
-                        <div class="factory-util-header">
-                            <span>Factory 1</span>
-                            <span class="util-val">75% ⌵</span>
-                        </div>
-                        <div class="machine-list">
-                            <div class="machine-item">
-                                <span class="check-icon">✓</span>
-                                <span class="machine-name">Cutting Machines</span>
-                                <div class="progress-wrap">
-                                    <div class="progress-bg"><div class="progress-fill" style="width: 80%;"></div></div>
-                                    <span class="progress-percent">80%</span>
-                                </div>
+                        <div id="factoryUtilContent">
+                            <div class="factory-util-header">
+                                <span id="selectedFactoryName">Factory 1</span>
+                                <span class="util-val" id="totalUtilVal">75% ⌵</span>
                             </div>
-                            <div class="machine-item">
-                                <span class="check-icon">✓</span>
-                                <span class="machine-name">Sewing Machines</span>
-                                <div class="progress-wrap">
-                                    <div class="progress-bg"><div class="progress-fill" style="width: 70%;"></div></div>
-                                    <span class="progress-percent">70%</span>
+                            <div class="machine-list" id="machineList">
+                                <div class="machine-item">
+                                    <span class="check-icon">✓</span>
+                                    <span class="machine-name">Cutting Machines</span>
+                                    <div class="progress-wrap">
+                                        <div class="progress-bg"><div class="progress-fill" style="width: 80%;"></div></div>
+                                        <span class="progress-percent">80%</span>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="machine-item">
-                                <span class="check-icon">✓</span>
-                                <span class="machine-name">Embroidery Machines</span>
-                                <div class="progress-wrap">
-                                    <div class="progress-bg"><div class="progress-fill" style="width: 75%;"></div></div>
-                                    <span class="progress-percent">75%</span>
+                                <div class="machine-item">
+                                    <span class="check-icon">✓</span>
+                                    <span class="machine-name">Sewing Machines</span>
+                                    <div class="progress-wrap">
+                                        <div class="progress-bg"><div class="progress-fill" style="width: 70%;"></div></div>
+                                        <span class="progress-percent">70%</span>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="machine-item">
-                                <span class="check-icon">✓</span>
-                                <span class="machine-name">Finishing Machines</span>
-                                <div class="progress-wrap">
-                                    <div class="progress-bg"><div class="progress-fill" style="width: 60%;"></div></div>
-                                    <span class="progress-percent">60%</span>
+                                <div class="machine-item">
+                                    <span class="check-icon">✓</span>
+                                    <span class="machine-name">Embroidery Machines</span>
+                                    <div class="progress-wrap">
+                                        <div class="progress-bg"><div class="progress-fill" style="width: 75%;"></div></div>
+                                        <span class="progress-percent">75%</span>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div class="factory-util-header" style="color: var(--primary-blue); margin-top: 25px;">
-                            <span>⌵ Factory 4</span>
-                            <span class="util-val" style="color: var(--primary-blue);">85% ⌵</span>
-                        </div>
-                        <div class="machine-list">
-                            <div class="machine-item">
-                                <div style="width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--primary-blue); display: flex; align-items: center; justify-content: center; color: var(--primary-blue); font-size: 8px;">✓</div>
-                                <span class="machine-name">Cutting Machines</span>
-                                <div class="progress-wrap">
-                                    <div class="progress-bg"><div class="progress-fill" style="width: 80%;"></div></div>
-                                    <span class="progress-percent">80%</span>
-                                </div>
-                            </div>
-                            <div class="machine-item">
-                                <div style="width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--primary-blue); display: flex; align-items: center; justify-content: center; color: var(--primary-blue); font-size: 8px;">✓</div>
-                                <span class="machine-name">Sewing Machines</span>
-                                <div class="progress-wrap">
-                                    <div class="progress-bg"><div class="progress-fill" style="width: 70%;"></div></div>
-                                    <span class="progress-percent">70%</span>
-                                </div>
-                            </div>
-                            <div class="machine-item">
-                                <div style="width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--primary-blue); display: flex; align-items: center; justify-content: center; color: var(--primary-blue); font-size: 8px;">✓</div>
-                                <span class="machine-name">Embroidery Machines</span>
-                                <div class="progress-wrap">
-                                    <div class="progress-bg"><div class="progress-fill" style="width: 75%;"></div></div>
-                                    <span class="progress-percent">65%</span>
-                                </div>
-                            </div>
-                            <div class="machine-item">
-                                <div style="width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--primary-blue); display: flex; align-items: center; justify-content: center; color: var(--primary-blue); font-size: 8px;">✓</div>
-                                <span class="machine-name">Finishing Machines</span>
-                                <div class="progress-wrap">
-                                    <div class="progress-bg"><div class="progress-fill" style="width: 60%;"></div></div>
-                                    <span class="progress-percent">80%</span>
+                                <div class="machine-item">
+                                    <span class="check-icon">✓</span>
+                                    <span class="machine-name">Finishing Machines</span>
+                                    <div class="progress-wrap">
+                                        <div class="progress-bg"><div class="progress-fill" style="width: 60%;"></div></div>
+                                        <span class="progress-percent">60%</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>

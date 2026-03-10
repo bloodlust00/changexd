@@ -387,11 +387,16 @@ body {
     color: #999;
 }
 
+.machine-utilization-card {
+    padding-top: 40px !important;
+    padding-bottom: 40px !important;
+}
+
 .machine-item {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 12px;
+    margin-bottom: 25px; /* Increased from 12px */
 }
 
 .check-icon {

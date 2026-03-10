@@ -148,6 +148,86 @@ document.addEventListener('DOMContentLoaded', function() {
     createLegend('onTimeLegend', ['Factory 1', 'Factory 3', 'Factory 5'], ['#3498db', '#9b59b6', '#00bcd4']);
     createLegend('lateLegend', ['Factory 2', 'Factory 4'], ['#e67e22', '#8e44ad']);
 
+    // Machine Utilization Factory Switching
+    const factorySelect = document.getElementById('factorySelect');
+    const selectedFactoryName = document.getElementById('selectedFactoryName');
+    const totalUtilVal = document.getElementById('totalUtilVal');
+    const machineList = document.getElementById('machineList');
+
+    const factoryData = {
+        '1': {
+            name: 'Factory 1',
+            total: '75%',
+            machines: [
+                { name: 'Cutting Machines', val: 80 },
+                { name: 'Sewing Machines', val: 70 },
+                { name: 'Embroidery Machines', val: 75 },
+                { name: 'Finishing Machines', val: 60 }
+            ]
+        },
+        '2': {
+            name: 'Factory 2',
+            total: '82%',
+            machines: [
+                { name: 'Cutting Machines', val: 85 },
+                { name: 'Sewing Machines', val: 78 },
+                { name: 'Embroidery Machines', val: 80 },
+                { name: 'Finishing Machines', val: 85 }
+            ]
+        },
+        '3': {
+            name: 'Factory 3',
+            total: '68%',
+            machines: [
+                { name: 'Cutting Machines', val: 60 },
+                { name: 'Sewing Machines', val: 65 },
+                { name: 'Embroidery Machines', val: 70 },
+                { name: 'Finishing Machines', val: 75 }
+            ]
+        },
+        '4': {
+            name: 'Factory 4',
+            total: '85%',
+            machines: [
+                { name: 'Cutting Machines', val: 80 },
+                { name: 'Sewing Machines', val: 70 },
+                { name: 'Embroidery Machines', val: 65 },
+                { name: 'Finishing Machines', val: 80 }
+            ]
+        },
+        '5': {
+            name: 'Factory 5',
+            total: '90%',
+            machines: [
+                { name: 'Cutting Machines', val: 95 },
+                { name: 'Sewing Machines', val: 88 },
+                { name: 'Embroidery Machines', val: 85 },
+                { name: 'Finishing Machines', val: 92 }
+            ]
+        }
+    };
+
+    if (factorySelect) {
+        factorySelect.addEventListener('change', function() {
+            const data = factoryData[this.value];
+            if (data) {
+                selectedFactoryName.textContent = data.name;
+                totalUtilVal.textContent = data.total + ' ⌵';
+                
+                machineList.innerHTML = data.machines.map(m => `
+                    <div class="machine-item">
+                        <span class="check-icon">✓</span>
+                        <span class="machine-name">${m.name}</span>
+                        <div class="progress-wrap">
+                            <div class="progress-bg"><div class="progress-fill" style="width: ${m.val}%;"></div></div>
+                            <span class="progress-percent">${m.val}%</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        });
+    }
+
     // Total Defects Chart (Main)
     const defectsCanvas = document.getElementById('defectsChart');
     if (defectsCanvas) {

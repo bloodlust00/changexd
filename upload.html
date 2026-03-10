@@ -94,20 +94,26 @@
         </nav>
 
         <main class="main-content">
+            <div style="display: flex; justify-content: flex-end; margin-bottom: -20px;">
+                <div style="background: #fff; padding: 8px 15px; border-radius: 8px; border: 1px solid #eee; font-size: 12px; color: #666; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-weight: 600;">
+                    <span style="color: var(--primary-blue); margin-right: 5px;">📅</span> Last update on : 09-03-26
+                </div>
+            </div>
             <div class="upload-section">
                 <h2 style="margin-bottom: 30px;">Upload Excel Sheets</h2>
                 <div class="upload-box">
                     <form id="uploadForm">
                         <div class="file-input-group">
                             <label for="excel1">Production Schedule (Excel)</label>
-                            <input type="file" id="excel1" class="file-input" accept=".xlsx, .xls" required>
+                            <input type="file" id="excel1" class="file-input" accept=".xlsx, .xls">
                         </div>
                         <div class="file-input-group">
                             <label for="excel2">Line Efficiency Report (Excel)</label>
-                            <input type="file" id="excel2" class="file-input" accept=".xlsx, .xls" required>
+                            <input type="file" id="excel2" class="file-input" accept=".xlsx, .xls">
                         </div>
                         <button type="submit" class="btn-upload" id="uploadBtn">UPLOAD FILES</button>
                         <div id="uploadStatus" class="upload-status">✓ Data uploaded successfully! Redirecting...</div>
+                        <div id="uploadError" style="color: #e74c3c; font-size: 13px; margin-top: 10px; display: none; font-weight: 600;">⚠ Please select at least one file to upload.</div>
                     </form>
                 </div>
                 <p style="color: #888; font-size: 13px;">Please upload files in .xlsx or .xls format only.</p>
@@ -119,9 +125,18 @@
     <script>
         document.getElementById('uploadForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            const excel1 = document.getElementById('excel1');
+            const excel2 = document.getElementById('excel2');
             const btn = document.getElementById('uploadBtn');
             const status = document.getElementById('uploadStatus');
+            const error = document.getElementById('uploadError');
             
+            if (excel1.files.length === 0 && excel2.files.length === 0) {
+                error.style.display = 'block';
+                return;
+            }
+            
+            error.style.display = 'none';
             btn.textContent = 'UPLOADING...';
             btn.disabled = true;
             
