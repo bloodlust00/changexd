@@ -266,59 +266,23 @@ document.addEventListener('DOMContentLoaded', function() {
     const machineList = document.getElementById('machineList');
 
     const factoryData = {
-        '1': {
-            name: 'Factory 1',
-            total: '75%',
-            machines: [
-                { name: 'Cutting Machines', val: 80 },
-                { name: 'Sewing Machines', val: 70 },
-                { name: 'Embroidery Machines', val: 75 },
-                { name: 'Finishing Machines', val: 60 }
-            ]
-        },
-        '2': {
-            name: 'Factory 2',
-            total: '82%',
-            machines: [
-                { name: 'Cutting Machines', val: 85 },
-                { name: 'Sewing Machines', val: 78 },
-                { name: 'Embroidery Machines', val: 80 },
-                { name: 'Finishing Machines', val: 85 }
-            ]
-        },
-        '3': {
-            name: 'Factory 3',
-            total: '68%',
-            machines: [
-                { name: 'Cutting Machines', val: 60 },
-                { name: 'Sewing Machines', val: 65 },
-                { name: 'Embroidery Machines', val: 70 },
-                { name: 'Finishing Machines', val: 75 }
-            ]
-        },
-        '4': {
-            name: 'Factory 4',
-            total: '85%',
-            machines: [
-                { name: 'Cutting Machines', val: 80 },
-                { name: 'Sewing Machines', val: 70 },
-                { name: 'Embroidery Machines', val: 65 },
-                { name: 'Finishing Machines', val: 80 }
-            ]
-        },
-        '5': {
-            name: 'Factory 5',
-            total: '90%',
-            machines: [
-                { name: 'Cutting Machines', val: 95 },
-                { name: 'Sewing Machines', val: 88 },
-                { name: 'Embroidery Machines', val: 85 },
-                { name: 'Finishing Machines', val: 92 }
-            ]
-        }
+        '1': { name: 'Line 1', total: '75%', machines: [{ name: 'Cutting', val: 80 }, { name: 'Sewing', val: 70 }, { name: 'Embroidery', val: 75 }, { name: 'Finishing', val: 60 }] },
+        '2': { name: 'Line 2', total: '82%', machines: [{ name: 'Cutting', val: 85 }, { name: 'Sewing', val: 78 }, { name: 'Embroidery', val: 80 }, { name: 'Finishing', val: 85 }] },
+        '3': { name: 'Line 3', total: '68%', machines: [{ name: 'Cutting', val: 60 }, { name: 'Sewing', val: 65 }, { name: 'Embroidery', val: 70 }, { name: 'Finishing', val: 75 }] },
+        '4': { name: 'Line 4', total: '85%', machines: [{ name: 'Cutting', val: 80 }, { name: 'Sewing', val: 70 }, { name: 'Embroidery', val: 65 }, { name: 'Finishing', val: 80 }] },
+        '5': { name: 'Line 5', total: '90%', machines: [{ name: 'Cutting', val: 95 }, { name: 'Sewing', val: 88 }, { name: 'Embroidery', val: 85 }, { name: 'Finishing', val: 92 }] },
+        '6': { name: 'Line 6', total: '72%', machines: [{ name: 'Cutting', val: 70 }, { name: 'Sewing', val: 75 }, { name: 'Embroidery', val: 68 }, { name: 'Finishing', val: 74 }] },
+        '7': { name: 'Line 7', total: '80%', machines: [{ name: 'Cutting', val: 82 }, { name: 'Sewing', val: 80 }, { name: 'Embroidery', val: 78 }, { name: 'Finishing', val: 80 }] },
+        '8': { name: 'Line 8', total: '65%', machines: [{ name: 'Cutting', val: 62 }, { name: 'Sewing', val: 68 }, { name: 'Embroidery', val: 65 }, { name: 'Finishing', val: 64 }] },
+        '9': { name: 'Line 9', total: '88%', machines: [{ name: 'Cutting', val: 90 }, { name: 'Sewing', val: 88 }, { name: 'Embroidery', val: 86 }, { name: 'Finishing', val: 88 }] },
+        '10': { name: 'Line 10', total: '78%', machines: [{ name: 'Cutting', val: 75 }, { name: 'Sewing', val: 80 }, { name: 'Embroidery', val: 76 }, { name: 'Finishing', val: 80 }] },
+        '11': { name: 'Line 11', total: '83%', machines: [{ name: 'Cutting', val: 85 }, { name: 'Sewing', val: 82 }, { name: 'Embroidery', val: 84 }, { name: 'Finishing', val: 81 }] }
     };
 
     if (factorySelect) {
+        // Set initial name
+        if (selectedFactoryName) selectedFactoryName.textContent = 'Line 1';
+        
         factorySelect.addEventListener('change', function() {
             const data = factoryData[this.value];
             if (data) {
