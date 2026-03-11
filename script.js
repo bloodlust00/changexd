@@ -124,7 +124,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // 4. Randomize Gauge values
         document.querySelectorAll('.gauge-wrapper').forEach(gauge => {
             const newVal = Math.floor(60 + Math.random() * 35);
+            const color = newVal < 80 ? '#e74c3c' : '#2ecc71';
+            
             gauge.style.setProperty('--gauge-percent', newVal);
+            gauge.style.setProperty('--gauge-color', color);
+            
             const valueSpan = gauge.querySelector('.gauge-value');
             if (valueSpan) valueSpan.textContent = newVal + '%';
             
@@ -133,6 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const dashArray = 125.66;
                 const dashOffset = dashArray * (1 - newVal / 100);
                 path.style.strokeDashoffset = dashOffset;
+                path.style.stroke = color;
             }
         });
     }
