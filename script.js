@@ -74,6 +74,69 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Date Picker Logic (Flatpickr)
+    const selectedDateText = document.getElementById('selectedDateText');
+    const datePickerInput = document.getElementById('datePicker');
+    
+    if (datePickerInput && selectedDateText) {
+        flatpickr(datePickerInput, {
+            dateFormat: "Y-m-d",
+            disableMobile: true, // Force custom calendar even on mobile
+            onChange: function(selectedDates, dateStr) {
+                if (selectedDateText) {
+                    selectedDateText.textContent = dateStr;
+                    console.log('Date selected:', dateStr);
+                    
+                    // Simulate data refresh for all charts
+                    refreshDashboardData();
+                }
+            }
+        });
+    }
+
+    function refreshDashboardData() {
+        // 1. Refresh Production Status Chart
+        const prodChart = Chart.getChart('productionStatusChart');
+        if (prodChart) {
+            prodChart.data.datasets[0].data = prodChart.data.datasets[0].data.map(v => Math.floor(v * (0.8 + Math.random() * 0.4)));
+            prodChart.data.datasets[1].data = prodChart.data.datasets[1].data.map(v => Math.floor(v * (0.8 + Math.random() * 0.4)));
+            prodChart.update();
+        }
+
+        // 2. Refresh Total Defects Chart
+        const defChart = Chart.getChart('defectsChart');
+        if (defChart) {
+            defChart.data.datasets[0].data = defChart.data.datasets[0].data.map(v => Math.floor(v * (0.8 + Math.random() * 0.4)));
+            defChart.update();
+        }
+
+        // 3. Refresh 3D Pie Chart (Highcharts)
+        const highChart = Highcharts.charts.find(c => c && c.renderTo.id === 'sideDefectsChart');
+        if (highChart) {
+            const newData = highChart.series[0].data.map(p => ({
+                name: p.name,
+                y: Math.floor(p.y * (0.8 + Math.random() * 0.4)),
+                color: p.color
+            }));
+            highChart.series[0].setData(newData);
+        }
+
+        // 4. Randomize Gauge values
+        document.querySelectorAll('.gauge-wrapper').forEach(gauge => {
+            const newVal = Math.floor(60 + Math.random() * 35);
+            gauge.style.setProperty('--gauge-percent', newVal);
+            const valueSpan = gauge.querySelector('.gauge-value');
+            if (valueSpan) valueSpan.textContent = newVal + '%';
+            
+            const path = gauge.querySelector('path:last-child');
+            if (path) {
+                const dashArray = 125.66;
+                const dashOffset = dashArray * (1 - newVal / 100);
+                path.style.strokeDashoffset = dashOffset;
+            }
+        });
+    }
+
     // Colors
     const colors = {
         green: '#2ecc71',
@@ -83,70 +146,113 @@ document.addEventListener('DOMContentLoaded', function() {
         blue: '#3498db'
     };
 
-    // On-Time Production Chart
-    const onTimeCanvas = document.getElementById('onTimeChart');
-    if (onTimeCanvas) {
-        const onTimeCtx = onTimeCanvas.getContext('2d');
-        new Chart(onTimeCtx, {
-            type: 'doughnut',
+    // Production Status Combined Chart
+    const prodStatusCanvas = document.getElementById('productionStatusChart');
+    if (prodStatusCanvas) {
+        const prodStatusCtx = prodStatusCanvas.getContext('2d');
+        new Chart(prodStatusCtx, {
+            type: 'bar',
             data: {
-                labels: ['Factory 1', 'Factory 3', 'Factory 5'],
-                datasets: [{
-                    data: [40, 35, 25],
-                    backgroundColor: ['#3498db', '#9b59b6', '#00bcd4'],
-                    borderWidth: 0
-                }]
+                labels: ['Line 1', 'Line 2', 'Line 3', 'Line 4', 'Line 5', 'Line 6', 'Line 7', 'Line 8', 'Line 9', 'Line 10', 'Line 11'],
+                datasets: [
+                    {
+                        type: 'line',
+                        label: 'Production Target',
+                        data: [1100, 1200, 1150, 1050, 1150, 950, 0, 1300, 1000, 600, 200],
+                        borderColor: '#ff6b81',
+                        backgroundColor: '#ffffff',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#ff6b81',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        fill: false,
+                        tension: 0
+                    },
+                    {
+                        type: 'bar',
+                        label: 'Production',
+                        data: [755, 805, 443, 490, 500, 300, 0, 341, 681, 184, 3],
+                        backgroundColor: '#48b3e8',
+                        borderRadius: 2,
+                        barPercentage: 0.3
+                    }
+                ]
             },
             options: {
-                cutout: '60%',
+                responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false }
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            boxWidth: 8,
+                            padding: 20,
+                            font: {
+                                family: 'Inter, sans-serif',
+                                size: 12
+                            },
+                            color: '#666'
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        display: false // Hide Y axis like in the screenshot
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45,
+                            font: {
+                                family: 'Inter, sans-serif',
+                                size: 11
+                            },
+                            color: '#888'
+                        }
+                    }
+                },
+                layout: {
+                    padding: {
+                        top: 20
+                    }
                 }
-            }
-        });
-    }
-
-    // Late Production Chart
-    const lateCanvas = document.getElementById('lateChart');
-    if (lateCanvas) {
-        const lateCtx = lateCanvas.getContext('2d');
-        new Chart(lateCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Factory 2', 'Factory 4'],
-                datasets: [{
-                    data: [60, 40],
-                    backgroundColor: ['#e67e22', '#8e44ad'],
-                    borderWidth: 0
-                }]
             },
-            options: {
-                cutout: '60%',
-                plugins: {
-                    legend: { display: false }
+            plugins: [{
+                id: 'customDataLabels',
+                afterDatasetsDraw: function(chart, args, options) {
+                    const ctx = chart.ctx;
+                    chart.data.datasets.forEach((dataset, i) => {
+                        if (dataset.type === 'bar') {
+                            const meta = chart.getDatasetMeta(i);
+                            if (!meta.hidden) {
+                                meta.data.forEach((element, index) => {
+                                    const dataString = dataset.data[index].toString();
+                                    if (dataString !== '0') {
+                                        ctx.fillStyle = '#48b3e8';
+                                        ctx.font = '11px Inter, sans-serif';
+                                        ctx.textAlign = 'center';
+                                        ctx.textBaseline = 'bottom';
+                                        const padding = 5;
+                                        const position = element.tooltipPosition();
+                                        ctx.fillText(dataString, position.x, position.y - padding);
+                                    }
+                                });
+                            }
+                        }
+                    });
                 }
-            }
+            }]
         });
     }
-
-    // Create custom legends
-    const createLegend = (id, data, legendColors) => {
-        const legend = document.getElementById(id);
-        if (!legend) return;
-        legend.innerHTML = '';
-        data.forEach((label, i) => {
-            const item = document.createElement('div');
-            item.className = 'legend-item';
-            item.innerHTML = `
-                <span class="legend-color" style="background: ${legendColors[i]}"></span>
-                <span>${label}</span>
-            `;
-            legend.appendChild(item);
-        });
-    };
-
-    createLegend('onTimeLegend', ['Factory 1', 'Factory 3', 'Factory 5'], ['#3498db', '#9b59b6', '#00bcd4']);
-    createLegend('lateLegend', ['Factory 2', 'Factory 4'], ['#e67e22', '#8e44ad']);
 
     // Machine Utilization Factory Switching
     const factorySelect = document.getElementById('factorySelect');
@@ -263,36 +369,114 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Side Defects Chart (Reasons for changeover delays)
-    const sideDefectsCanvas = document.getElementById('sideDefectsChart');
-    if (sideDefectsCanvas) {
-        const sideDefectsCtx = sideDefectsCanvas.getContext('2d');
-        new Chart(sideDefectsCtx, {
-            type: 'pie',
-            data: {
-                labels: ['Machine Failure', 'Material Shortage', 'Operator Delay', 'Quality Check', 'Tool Missing', 'Power Outage', 'Schedule Change', 'Maintenance', 'Supervisor Sync', 'Other'],
-                datasets: [{
-                    data: [15, 20, 10, 12, 8, 5, 10, 7, 8, 5],
-                    backgroundColor: [
-                        '#3498db', '#2ecc71', '#e74c3c', '#f1c40f', '#9b59b6', 
-                        '#1abc9c', '#e67e22', '#34495e', '#95a5a6', '#d35400'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: {
-                            boxWidth: 12,
-                            font: { size: 10 }
+    // Side Defects Chart (Reasons for changeover delays) - 3D Pie Chart
+    const sideDefectsContainer = document.getElementById('sideDefectsChart');
+    if (sideDefectsContainer) {
+        if (typeof Highcharts === 'undefined') {
+            console.error('Highcharts is not loaded!');
+            sideDefectsContainer.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;">Chart library loading...</div>';
+        } else {
+            try {
+                const chart = Highcharts.chart('sideDefectsChart', {
+                    chart: {
+                        type: 'pie',
+                        options3d: {
+                            enabled: true,
+                            alpha: 45,
+                            beta: 0
+                        },
+                        backgroundColor: 'transparent',
+                        style: {
+                            fontFamily: 'Inter, sans-serif'
+                        },
+                        marginTop: 40,
+                        marginBottom: 100,
+                        marginLeft: 40,
+                        marginRight: 40,
+                        events: {
+                            load: function() {
+                                const self = this;
+                                setTimeout(() => {
+                                    self.reflow();
+                                }, 100);
+                            }
                         }
-                    }
-                }
+                    },
+                    title: { text: '' },
+                    accessibility: {
+                        point: { valueSuffix: '%' }
+                    },
+                    tooltip: {
+                        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                    },
+                    legend: {
+                        enabled: true,
+                        verticalAlign: 'bottom',
+                        layout: 'horizontal',
+                        itemStyle: {
+                            fontSize: '10px',
+                            fontWeight: '600',
+                            color: '#666'
+                        },
+                        padding: 10
+                    },
+                    plotOptions: {
+                        pie: {
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            depth: 55,
+                            size: '85%', // Reduced slightly to prevent bubbles from hitting card edges
+                            center: ['50%', '40%'],
+                            showInLegend: true,
+                            dataLabels: {
+                                enabled: true,
+                                useHTML: true,
+                                connectorColor: '#eee',
+                                distance: 25,
+                                padding: 0, // Prevent internal Highcharts clipping
+                                overflow: 'allow', // Allow labels to go outside plot area
+                                crop: false, // Prevent cutting labels at chart edges
+                                formatter: function() {
+                                    const color = this.point.color;
+                                    return `
+                                        <div style="width: 38px; height: 38px; border-radius: 50%; border: 4px solid ${color}; display: flex; align-items: center; justify-content: center; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-weight: 800; font-size: 12px; color: #333; position: relative; z-index: 10;">
+                                            ${Math.round(this.point.percentage)}%
+                                        </div>
+                                    `;
+                                }
+                            },
+                            states: {
+                                hover: {
+                                    brightness: 0.1,
+                                    halo: {
+                                        size: 0
+                                    }
+                                }
+                            },
+                            slicedOffset: 25
+                        }
+                    },
+                    series: [{
+                        name: 'Delays',
+                        data: [
+                            { name: 'Machine Failure', y: 15, color: '#2b81d6' },
+                            { name: 'Material Shortage', y: 20, color: '#48b3e8', sliced: true, selected: true },
+                            { name: 'Operator Delay', y: 10, color: '#8ec641' },
+                            { name: 'Quality Check', y: 12, color: '#f7941d' },
+                            { name: 'Tool Missing', y: 8, color: '#e6e7e8' },
+                            { name: 'Power Outage', y: 5, color: '#3498db' },
+                            { name: 'Schedule Change', y: 10, color: '#2ecc71' },
+                            { name: 'Maintenance', y: 7, color: '#e74c3c' },
+                            { name: 'Supervisor Sync', y: 8, color: '#f1c40f' },
+                            { name: 'Other', y: 5, color: '#9b59b6' }
+                        ]
+                    }],
+                    credits: { enabled: false },
+                    exporting: { enabled: false }
+                });
+            } catch (err) {
+                console.error('Error initializing Highcharts:', err);
             }
-        });
+        }
     }
 });
