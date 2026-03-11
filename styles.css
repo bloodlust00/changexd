@@ -719,7 +719,7 @@ html.sidebar-pushed .sidebar {
     padding: 60px 50px;
     border: none;
     box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-    max-width: 1100px;
+    width: 100%;
 }
 
 .factory-title {

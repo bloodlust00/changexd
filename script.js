@@ -122,6 +122,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // 4. Randomize Gauge values
+        const reasons = ["Machine breakdown", "Absenteeism", "Mechanic delay", "Needle breakdown", "Material shortage", "Power outage"];
+        
         document.querySelectorAll('.gauge-wrapper').forEach(gauge => {
             const newVal = Math.floor(60 + Math.random() * 35);
             const color = newVal < 80 ? '#e74c3c' : '#2ecc71';
@@ -138,6 +140,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 const dashOffset = dashArray * (1 - newVal / 100);
                 path.style.strokeDashoffset = dashOffset;
                 path.style.stroke = color;
+            }
+
+            // Handle Efficiency Reasons
+            let tooltip = gauge.querySelector('.gauge-tooltip');
+            if (newVal < 80) {
+                const randomReason = reasons[Math.floor(Math.random() * reasons.length)];
+                if (!tooltip) {
+                    tooltip = document.createElement('div');
+                    tooltip.className = 'gauge-tooltip';
+                    gauge.appendChild(tooltip);
+                }
+                tooltip.textContent = "Reason: " + randomReason;
+            } else if (tooltip) {
+                tooltip.remove();
             }
         });
     }
