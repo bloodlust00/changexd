@@ -11,14 +11,78 @@
     <title>ChangeX - Upcoming Changeover</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Custom Popup Styles */
+        .details-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            animation: modalFadeIn 0.3s ease;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .close-modal {
+            position: absolute;
+            right: 15px;
+            top: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #888;
+        }
+        .modal-title {
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #2d3436;
+        }
+        .modal-body {
+            color: #636e72;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
     <script>
         // Check if user is logged in
         if (!localStorage.getItem('user')) {
             window.location.href = 'login.html';
         }
+
+        function showDetails() {
+            document.getElementById('detailsModal').style.display = 'flex';
+        }
+        function hideDetails() {
+            document.getElementById('detailsModal').style.display = 'none';
+        }
     </script>
 </head>
 <body class="dashboard-page">
+    <div id="detailsModal" class="details-modal" onclick="if(event.target == this) hideDetails()">
+        <div class="modal-content">
+            <span class="close-modal" onclick="hideDetails()">&times;</span>
+            <h3 class="modal-title">Changeover Details</h3>
+            <div class="modal-body">
+                Upcoming 7 days style with machine details
+            </div>
+        </div>
+    </div>
     <header class="header">
         <div class="logo-container" style="flex-direction: row; align-items: center;"><img src="assets/logo.jpg" alt="Company Logo" class="company-logo">
             <p class="welcome-text">Welcome to !</p>
@@ -36,9 +100,8 @@
         <nav class="sidebar">
             <ul class="nav-menu">
                 <li><a href="index.html" class="nav-item"><span class="nav-icon">🏠</span> Home</a></li>
-                <li><a href="running-line.html" class="nav-item"><span class="nav-icon">📉</span> Running Line Changeover</a></li>
+                <li><a href="running-line.html" class="nav-item"><span class="nav-icon">📉</span> Current Line Changeover</a></li>
                 <li><a href="upcoming.html" class="nav-item active"><span class="nav-icon">📅</span> Upcoming Changeover</a></li>
-                <li><a href="live-tracking.html" class="nav-item"><span class="nav-icon">📈</span> Live CO Tracking</a></li>
                 <li><a href="alerts.html" class="nav-item"><span class="nav-icon">🔔</span> Alerts</a></li>
                 <li><a href="upload.html" class="nav-item"><span class="nav-icon">📤</span> Upload Data</a></li>
             </ul>
@@ -54,21 +117,19 @@
 
             <div class="columns-1">
                 <div class="column">
-                    <h2 class="list-section-title">Upcoming Changeover</h2>
-
                     <script>
                         const upcomingData = [
-                            { id: 1, style: 'Casual Shirt', prep: 30, time: '45 min', manpower: '6 Operators', nextStep: 'PLC Setting Change' },
-                            { id: 2, style: 'Formal Shirt', prep: 0, time: '1 hr 20 min', manpower: '8 Operators', nextStep: 'Tool Arrangement' },
-                            { id: 3, style: 'Denim Jeans', prep: 45, time: '35 min', manpower: '4 Operators', nextStep: 'Material Setup' },
-                            { id: 4, style: 'Winter Jacket', prep: 15, time: '2 hr 10 min', manpower: '10 Operators', nextStep: 'Pattern Loading' },
-                            { id: 5, style: 'Summer Shorts', prep: 60, time: '20 min', manpower: '5 Operators', nextStep: 'Needle Check' },
-                            { id: 6, style: 'Cotton T-Shirt', prep: 10, time: '1 hr 15 min', manpower: '7 Operators', nextStep: 'Thread Loading' },
-                            { id: 7, style: 'Sports Trouser', prep: 25, time: '50 min', manpower: '6 Operators', nextStep: 'Guide Adjustment' },
-                            { id: 8, style: 'Polo Shirt', prep: 80, time: '15 min', manpower: '4 Operators', nextStep: 'Final Test' },
-                            { id: 9, style: 'Formal Trousers', prep: 5, time: '2 hr 30 min', manpower: '9 Operators', nextStep: 'Machine Setup' },
-                            { id: 10, style: 'Track Suit', prep: 40, time: '40 min', manpower: '6 Operators', nextStep: 'Size Chart Sync' },
-                            { id: 11, style: 'Woolen Sweater', prep: 20, time: '1 hr 45 min', manpower: '8 Operators', nextStep: 'Yarn Setup' }
+                            { id: 1, style: 'cK', prep: 30, time: '45 min', manpower: '6 Operators', nextStep: 'PLC Setting Change' },
+                            { id: 2, style: 'cK', prep: 0, time: '1 hr 20 min', manpower: '8 Operators', nextStep: 'Tool Arrangement' },
+                            { id: 3, style: 'cK', prep: 45, time: '35 min', manpower: '4 Operators', nextStep: 'Material Setup' },
+                            { id: 4, style: 'cK', prep: 15, time: '2 hr 10 min', manpower: '10 Operators', nextStep: 'Pattern Loading' },
+                            { id: 5, style: 'cK', prep: 60, time: '20 min', manpower: '5 Operators', nextStep: 'Needle Check' },
+                            { id: 6, style: 'cK', prep: 10, time: '1 hr 15 min', manpower: '7 Operators', nextStep: 'Thread Loading' },
+                            { id: 7, style: 'cK', prep: 25, time: '50 min', manpower: '6 Operators', nextStep: 'Guide Adjustment' },
+                            { id: 8, style: 'cK', prep: 80, time: '15 min', manpower: '4 Operators', nextStep: 'Final Test' },
+                            { id: 9, style: 'cK', prep: 5, time: '2 hr 30 min', manpower: '9 Operators', nextStep: 'Machine Setup' },
+                            { id: 10, style: 'cK', prep: 40, time: '40 min', manpower: '6 Operators', nextStep: 'Size Chart Sync' },
+                            { id: 11, style: 'cK', prep: 20, time: '1 hr 45 min', manpower: '8 Operators', nextStep: 'Yarn Setup' }
                         ];
 
                         document.write(upcomingData.map(line => `
@@ -89,15 +150,8 @@
                                     </div>
                                 </div>
                                 
-                                <div style="display: flex; justify-content: space-between; margin-left: 42px; margin-bottom: 15px;">
-                                    <p class="info-text" style="margin-left: 0; font-size: 13px;">Ideal Manpower: <span style="background-color: #f1f2f6; padding: 2px 6px; border-radius: 4px; color: #555;">${line.manpower}</span></p>
-                                    <p class="info-text" style="margin-left: 0; font-size: 13px;">Estimated: <span style="background-color: #f1f2f6; padding: 2px 6px; border-radius: 4px; color: #555;">${line.time}</span></p>
-                                </div>
-                                
                                 <div style="display: flex; align-items: center; gap: 8px; margin-left: 42px; font-size: 13px; color: #3498db;">
-                                    <span style="border: 1px solid #3498db; width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; border-radius: 2px;">✓</span> 
-                                    Next Steps: ${line.nextStep} 
-                                    <span style="margin-left: auto; cursor: pointer; text-decoration: underline;">🔗 View Details</span>
+                                    <span style="margin-left: auto; cursor: pointer; text-decoration: underline;" onclick="showDetails()">🔗 View Details</span>
                                 </div>
                             </div>
                         `).join(''));

@@ -81,7 +81,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (datePickerInput && selectedDateText) {
         flatpickr(datePickerInput, {
             dateFormat: "Y-m-d",
+            maxDate: "today",
+            defaultDate: "today",
             disableMobile: true, // Force custom calendar even on mobile
+            onReady: function(selectedDates, dateStr) {
+                if (selectedDateText) {
+                    selectedDateText.textContent = dateStr;
+                }
+            },
             onChange: function(selectedDates, dateStr) {
                 if (selectedDateText) {
                     selectedDateText.textContent = dateStr;
@@ -98,8 +105,17 @@ document.addEventListener('DOMContentLoaded', function() {
         // 1. Refresh Production Status Chart
         const prodChart = Chart.getChart('productionStatusChart');
         if (prodChart) {
-            prodChart.data.datasets[0].data = prodChart.data.datasets[0].data.map(v => Math.floor(v * (0.8 + Math.random() * 0.4)));
-            prodChart.data.datasets[1].data = prodChart.data.datasets[1].data.map(v => Math.floor(v * (0.8 + Math.random() * 0.4)));
+            // Randomize target for all lines (between 800 and 1400)
+            prodChart.data.datasets[0].data = prodChart.data.datasets[0].data.map(() => {
+                return Math.floor(800 + Math.random() * 600);
+            });
+
+            // Set production as a random percentage (e.g., 60% to 95%) of the new target
+            prodChart.data.datasets[1].data = prodChart.data.datasets[0].data.map(target => {
+                const efficiency = 0.6 + (Math.random() * 0.35); // 60% to 95% efficiency
+                return Math.floor(target * efficiency);
+            });
+            
             prodChart.update();
         }
 
@@ -156,6 +172,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 tooltip.remove();
             }
         });
+
+        // 5. Refresh Average Changeover Time Chart
+        const avgChart = Chart.getChart('averageChangeoverChart');
+        if (avgChart) {
+            const numLines = 11;
+            const actionNeededIndices = new Set();
+            while(actionNeededIndices.size < 4) {
+                actionNeededIndices.add(Math.floor(Math.random() * numLines));
+            }
+
+            const onTimeData = [];
+            const actionNeededData = [];
+
+            for (let i = 0; i < numLines; i++) {
+                if (actionNeededIndices.has(i)) {
+                    actionNeededData.push({ x: i + 1, y: 125 + Math.floor(Math.random() * 115) }); // 125 to 240
+                    onTimeData.push({ x: i + 1, y: null });
+                } else {
+                    onTimeData.push({ x: i + 1, y: Math.floor(Math.random() * 120) }); // 0 to 120
+                    actionNeededData.push({ x: i + 1, y: null });
+                }
+            }
+            avgChart.data.datasets[0].data = onTimeData;
+            avgChart.data.datasets[1].data = actionNeededData;
+            avgChart.update();
+        }
     }
 
     // Colors
@@ -166,6 +208,85 @@ document.addEventListener('DOMContentLoaded', function() {
         red: '#e74c3c',
         blue: '#3498db'
     };
+
+    // Initialize Average Changeover Time Chart
+    const avgCtx = document.getElementById('averageChangeoverChart');
+    if (avgCtx) {
+        new Chart(avgCtx, {
+            type: 'scatter',
+            data: {
+                datasets: [
+                    {
+                        label: 'On Time',
+                        data: [], 
+                        backgroundColor: '#2ecc71',
+                        borderColor: '#2ecc71',
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        showLine: true,
+                        spanGaps: true,
+                        borderWidth: 2,
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Action Needed',
+                        data: [], 
+                        backgroundColor: '#e74c3c',
+                        borderColor: '#e74c3c',
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        showLine: true,
+                        spanGaps: true,
+                        borderWidth: 2,
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: { display: true, text: 'Line Number', font: { weight: 'bold' } },
+                        min: 1,
+                        max: 11,
+                        ticks: { stepSize: 1, precision: 0 }
+                    },
+                    y: {
+                        title: { display: true, text: 'Minutes', font: { weight: 'bold' } },
+                        min: 0,
+                        max: 240,
+                        ticks: { stepSize: 30 }
+                    }
+                },
+                plugins: {
+                    legend: { position: 'top', labels: { usePointStyle: true } }
+                }
+            }
+        });
+        
+        // Initial data setup for the scatter chart
+        const avgChart = Chart.getChart('averageChangeoverChart');
+        if (avgChart) {
+            const actionNeededIndices = [2, 5, 8]; // Example initial ones
+            const onTimeData = [];
+            const actionNeededData = [];
+            for (let i = 0; i < 11; i++) {
+                if (actionNeededIndices.includes(i)) {
+                    actionNeededData.push({ x: i + 1, y: 130 + Math.random() * 50 });
+                    onTimeData.push({ x: i + 1, y: null });
+                } else {
+                    onTimeData.push({ x: i + 1, y: 30 + Math.random() * 60 });
+                    actionNeededData.push({ x: i + 1, y: null });
+                }
+            }
+            avgChart.data.datasets[0].data = onTimeData;
+            avgChart.data.datasets[1].data = actionNeededData;
+            avgChart.update();
+        }
+    }
 
     // Production Status Combined Chart
     const prodStatusCanvas = document.getElementById('productionStatusChart');

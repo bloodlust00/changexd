@@ -87,9 +87,8 @@
         <nav class="sidebar">
             <ul class="nav-menu">
                 <li><a href="index.html" class="nav-item"><span class="nav-icon">🏠</span> Home</a></li>
-                <li><a href="running-line.html" class="nav-item"><span class="nav-icon">📉</span> Running Line Changeover</a></li>
+                <li><a href="running-line.html" class="nav-item"><span class="nav-icon">📉</span> Current Line Changeover</a></li>
                 <li><a href="upcoming.html" class="nav-item"><span class="nav-icon">📅</span> Upcoming Changeover</a></li>
-                <li><a href="live-tracking.html" class="nav-item"><span class="nav-icon">📈</span> Live CO Tracking</a></li>
                 <li><a href="alerts.html" class="nav-item"><span class="nav-icon">🔔</span> Alerts</a></li>
                 <li><a href="upload.html" class="nav-item active"><span class="nav-icon">📤</span> Upload Data</a></li>
             </ul>
@@ -101,7 +100,7 @@
         <main class="main-content">
             <div style="display: flex; justify-content: flex-end; margin-bottom: -20px;">
                 <div style="background: #fff; padding: 8px 15px; border-radius: 8px; border: 1px solid #eee; font-size: 12px; color: #666; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-weight: 600;">
-                    <span style="color: var(--primary-blue); margin-right: 5px;">📅</span> Last update on : 09-03-26
+                    <span style="color: var(--primary-blue); margin-right: 5px;">📅</span> Last update on : <span id="lastUploadTime">09-03-26</span>
                 </div>
             </div>
             <div class="upload-section">
@@ -109,16 +108,18 @@
                 <div class="upload-box">
                     <form id="uploadForm">
                         <div class="file-input-group">
-                            <label for="excel1">Production Schedule (Excel)</label>
+                            <label for="excel1">Loading Plan (Excel)</label>
                             <input type="file" id="excel1" class="file-input" accept=".xlsx, .xls">
                         </div>
                         <div class="file-input-group">
-                            <label for="excel2">Line Efficiency Report (Excel)</label>
-                            <input type="file" id="excel2" class="file-input" accept=".xlsx, .xls">
+                            <label for="excel2">Line Wise OB (Excel)</label>
+                            <input type="file" id="excel2" class="file-input" accept=".xlsx, .xls" multiple>
+                            <small style="color: #888; display: block; margin-top: 4px;">You can upload up to 25 OB files at once.</small>
                         </div>
                         <button type="submit" class="btn-upload" id="uploadBtn">UPLOAD FILES</button>
                         <div id="uploadStatus" class="upload-status">✓ Data uploaded successfully! Redirecting...</div>
                         <div id="uploadError" style="color: #e74c3c; font-size: 13px; margin-top: 10px; display: none; font-weight: 600;">⚠ Please select at least one file to upload.</div>
+                        <div id="fileLimitError" style="color: #e74c3c; font-size: 13px; margin-top: 10px; display: none; font-weight: 600;">⚠ Maximum 25 files allowed for Line Wise OB.</div>
                     </form>
                 </div>
                 <p style="color: #888; font-size: 13px;">Please upload files in .xlsx or .xls format only.</p>
@@ -128,6 +129,12 @@
 
     <script src="script.js"></script>
     <script>
+        // Load last upload time from localStorage
+        const savedTime = localStorage.getItem('lastUploadTime');
+        if (savedTime) {
+            document.getElementById('lastUploadTime').textContent = savedTime;
+        }
+
         document.getElementById('uploadForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const excel1 = document.getElementById('excel1');
@@ -135,13 +142,22 @@
             const btn = document.getElementById('uploadBtn');
             const status = document.getElementById('uploadStatus');
             const error = document.getElementById('uploadError');
+            const limitError = document.getElementById('fileLimitError');
             
             if (excel1.files.length === 0 && excel2.files.length === 0) {
                 error.style.display = 'block';
+                limitError.style.display = 'none';
+                return;
+            }
+
+            if (excel2.files.length > 25) {
+                limitError.style.display = 'block';
+                error.style.display = 'none';
                 return;
             }
             
             error.style.display = 'none';
+            limitError.style.display = 'none';
             btn.textContent = 'UPLOADING...';
             btn.disabled = true;
             
@@ -150,6 +166,12 @@
                 btn.style.display = 'none';
                 status.style.display = 'block';
                 
+                // Save current date and time
+                const now = new Date();
+                const formattedDate = `${now.getDate().toString().padStart(2, '0')}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getFullYear().toString().slice(-2)} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+                localStorage.setItem('lastUploadTime', formattedDate);
+                document.getElementById('lastUploadTime').textContent = formattedDate;
+
                 // Redirect to home page after showing message
                 setTimeout(() => {
                     window.location.href = 'index.html';

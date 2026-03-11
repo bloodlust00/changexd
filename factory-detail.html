@@ -11,6 +11,51 @@
     <title>ChangeX - Factory Details</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .file-icon-container {
+            display: inline-block;
+            margin-right: 8px;
+            position: relative;
+            cursor: pointer;
+        }
+        .file-icon {
+            font-size: 14px;
+            color: #6c5ce7;
+        }
+        .file-tooltip {
+            visibility: hidden;
+            width: 80px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 4px;
+            padding: 4px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -40px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 10px;
+            font-weight: 700;
+            pointer-events: none;
+        }
+        .file-tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #333 transparent transparent transparent;
+        }
+        .file-icon-container:hover .file-tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
 </head>
 <body class="dashboard-page">
     <header class="header">
@@ -30,9 +75,8 @@
         <nav class="sidebar">
             <ul class="nav-menu">
                 <li><a href="index.html" class="nav-item"><span class="nav-icon">🏠</span> Home</a></li>
-                <li><a href="running-line.html" class="nav-item active"><span class="nav-icon">📉</span> Running Line Changeover</a></li>
+                <li><a href="running-line.html" class="nav-item active"><span class="nav-icon">📉</span> Current Line Changeover</a></li>
                 <li><a href="upcoming.html" class="nav-item"><span class="nav-icon">📅</span> Upcoming Changeover</a></li>
-                <li><a href="live-tracking.html" class="nav-item"><span class="nav-icon">📈</span> Live CO Tracking</a></li>
                 <li><a href="alerts.html" class="nav-item"><span class="nav-icon">🔔</span> Alerts</a></li>
                 <li><a href="upload.html" class="nav-item"><span class="nav-icon">📤</span> Upload Data</a></li>
             </ul>
@@ -71,16 +115,25 @@
 
     const delayReasons = ["Waiting for mechanic", "None", "Material shortage", "None", "Quality approval pending", "None", "Machine breakdown", "None", "Part misplaced", "None", "Power outage"];
 
+    const factoryLinesMapping = {
+        1: [0, 1],       // Lines 1, 2
+        2: [2, 3],       // Lines 3, 4
+        3: [4, 5],       // Lines 5, 6
+        4: [6, 7],       // Lines 7, 8
+        5: [8, 9, 10]    // Lines 9, 10, 11
+    };
+
     for (let fId = 1; fId <= 5; fId++) {
+        const lineIndices = factoryLinesMapping[fId];
         factoryData[fId] = {
             name: `Factory ${fId}`,
-            lines: styles.map((style, i) => ({
+            lines: lineIndices.map(i => ({
                 name: `Line ${i + 1}`,
-                runningStyle: style.run,
+                runningStyle: styles[i].run,
                 runningSMV: (20 + (i * 0.7) + (fId * 0.5)).toFixed(1),
-                upcomingStyle: style.up,
+                upcomingStyle: styles[i].up,
                 upcomingSMV: (22 + (i * 0.4) + (fId * 0.3)).toFixed(1),
-                requirements: style.req,
+                requirements: styles[i].req,
                 estimatedTime: `${30 + (i * 5)} min`,
                 delayReasons: delayReasons[i]
             }))
@@ -106,8 +159,20 @@
 
                     <div class="line-details">
                         <div class="detail-column">
-                            <p><strong>Running style</strong> : ${line.runningStyle}</p>
-                            <p><strong>Upcoming style</strong> : ${line.upcomingStyle}</p>
+                            <p>
+                                <span class="file-icon-container">
+                                    <span class="file-icon">📄</span>
+                                    <span class="file-tooltip">OPEN FILE</span>
+                                </span>
+                                <strong>Running style</strong> : ${line.runningStyle}
+                            </p>
+                            <p>
+                                <span class="file-icon-container">
+                                    <span class="file-icon">📄</span>
+                                    <span class="file-tooltip">OPEN FILE</span>
+                                </span>
+                                <strong>Upcoming style</strong> : ${line.upcomingStyle}
+                            </p>
                             <p><strong>Upcoming Style Requirements</strong> : ${line.requirements}</p>
                             <p><strong>Estimated Changeover time</strong> : ${line.estimatedTime}</p>
                         </div>
