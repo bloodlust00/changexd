@@ -303,7 +303,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Total Defects Chart (Main)
+    // Machine Availability Chart (Main)
     const defectsCanvas = document.getElementById('defectsChart');
     if (defectsCanvas) {
         const defectsCtx = defectsCanvas.getContext('2d');
@@ -312,7 +312,7 @@ document.addEventListener('DOMContentLoaded', function() {
             data: {
                 labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'],
                 datasets: [{
-                    label: 'Defects',
+                    label: 'Availability (%)',
                     data: [60, 65, 85, 75, 95, 62, 88, 60, 75, 82, 65],
                     backgroundColor: colors.blue,
                     borderRadius: 4
@@ -382,6 +382,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         enabled: true,
                         verticalAlign: 'bottom',
                         layout: 'horizontal',
+                        align: 'center',
+                        itemWidth: 150, // Force 2 columns if width is ~300px
                         itemStyle: {
                             fontSize: '10px',
                             fontWeight: '600',
@@ -395,7 +397,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             cursor: 'pointer',
                             depth: 55,
                             size: '85%', // Reduced slightly to prevent bubbles from hitting card edges
-                            center: ['50%', '40%'],
+                            center: ['50%', '35%'], // Shifted up more to accommodate 2-column legend
                             showInLegend: true,
                             dataLabels: {
                                 enabled: true,
@@ -428,19 +430,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     series: [{
                         name: 'Delays',
                         data: [
-                            { name: 'Machine Failure', y: 15, color: '#2b81d6' },
+                            { name: 'machine breakdown', y: 15, color: '#2b81d6' },
                             { name: 'Material Shortage', y: 20, color: '#48b3e8', sliced: true, selected: true },
                             { name: 'Operator Delay', y: 10, color: '#8ec641' },
                             { name: 'Quality Check', y: 12, color: '#f7941d' },
                             { name: 'Tool Missing', y: 8, color: '#e6e7e8' },
                             { name: 'Power Outage', y: 5, color: '#3498db' },
                             { name: 'Schedule Change', y: 10, color: '#2ecc71' },
-                            { name: 'Maintenance', y: 7, color: '#e74c3c' },
-                            { name: 'Supervisor Sync', y: 8, color: '#f1c40f' },
+                            { name: 'pressure foot setting', y: 7, color: '#e74c3c' },
+                            { name: 'operator learning curve', y: 8, color: '#f1c40f' },
                             { name: 'Other', y: 5, color: '#9b59b6' }
                         ]
-                    }],
-                    credits: { enabled: false },
+                    }],                    credits: { enabled: false },
                     exporting: { enabled: false }
                 });
             } catch (err) {
