@@ -116,47 +116,64 @@
             </div>
 
             <div class="columns-1">
-                <div class="column">
-                    <script>
-                        const upcomingData = [
-                            { id: 1, style: 'cK', prep: 30, time: '45 min', manpower: '6 Operators', nextStep: 'PLC Setting Change' },
-                            { id: 2, style: 'cK', prep: 0, time: '1 hr 20 min', manpower: '8 Operators', nextStep: 'Tool Arrangement' },
-                            { id: 3, style: 'cK', prep: 45, time: '35 min', manpower: '4 Operators', nextStep: 'Material Setup' },
-                            { id: 4, style: 'cK', prep: 15, time: '2 hr 10 min', manpower: '10 Operators', nextStep: 'Pattern Loading' },
-                            { id: 5, style: 'cK', prep: 60, time: '20 min', manpower: '5 Operators', nextStep: 'Needle Check' },
-                            { id: 6, style: 'cK', prep: 10, time: '1 hr 15 min', manpower: '7 Operators', nextStep: 'Thread Loading' },
-                            { id: 7, style: 'cK', prep: 25, time: '50 min', manpower: '6 Operators', nextStep: 'Guide Adjustment' },
-                            { id: 8, style: 'cK', prep: 80, time: '15 min', manpower: '4 Operators', nextStep: 'Final Test' },
-                            { id: 9, style: 'cK', prep: 5, time: '2 hr 30 min', manpower: '9 Operators', nextStep: 'Machine Setup' },
-                            { id: 10, style: 'cK', prep: 40, time: '40 min', manpower: '6 Operators', nextStep: 'Size Chart Sync' },
-                            { id: 11, style: 'cK', prep: 20, time: '1 hr 45 min', manpower: '8 Operators', nextStep: 'Yarn Setup' }
-                        ];
-
-                        document.write(upcomingData.map(line => `
-                            <div class="line-item" style="padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); margin-bottom: 20px; border: 1px solid #eaeaea;">
-                                <div class="line-header" style="margin-bottom: 15px;">
-                                    <div class="line-num" style="background-color: #3498db; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;">${line.id}</div>
-                                    <span class="line-name" style="font-size: 18px; font-weight: 700; color: #2d3436;">Line ${line.id}</span>
-                                </div>
-                                <div class="style-name" style="margin-left: 42px; margin-bottom: 15px; color: #636e72; font-size: 14px;">${line.style}</div>
-                                
-                                <div class="progress-section" style="margin-left: 42px; margin-bottom: 15px;">
-                                    <div class="progress-label" style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
-                                        <span style="color: #3498db; font-weight: 600;">Preparation ${line.prep}%</span>
-                                        <span style="font-weight: 700; color: #2d3436;">${line.time}</span>
-                                    </div>
-                                    <div class="small-progress" style="height: 6px; background-color: #f1f2f6; border-radius: 3px; position: relative;">
-                                        <div class="small-progress-fill" style="width: ${line.prep}%; height: 100%; background-color: #3498db; border-radius: 3px;"></div>
-                                    </div>
-                                </div>
-                                
-                                <div style="display: flex; align-items: center; gap: 8px; margin-left: 42px; font-size: 13px; color: #3498db;">
-                                    <span style="margin-left: auto; cursor: pointer; text-decoration: underline;" onclick="showDetails()">🔗 View Details</span>
-                                </div>
-                            </div>
-                        `).join(''));
-                    </script>
+                <div class="column" id="dynamicUpcomingList">
+                    <!-- Dynamic content will be loaded here -->
                 </div>
+
+                <script>
+                    async function loadUpcomingData() {
+                        const container = document.getElementById('dynamicUpcomingList');
+                        try {
+                            const response = await fetch('/api/lines');
+                            if (!response.ok) throw new Error('API failed');
+                            const apiData = await response.json();
+                            
+                            const dataToUse = (apiData && apiData.length > 0) ? apiData : [
+                                { lineNumber: 1, upcoming: { style: 'cK', prep: 30, time: '45 min', manpower: '6 Operators', nextStep: 'PLC Setting Change' } },
+                                { lineNumber: 2, upcoming: { style: 'cK', prep: 0, time: '1 hr 20 min', manpower: '8 Operators', nextStep: 'Tool Arrangement' } },
+                                { lineNumber: 3, upcoming: { style: 'cK', prep: 45, time: '35 min', manpower: '4 Operators', nextStep: 'Material Setup' } },
+                                { lineNumber: 4, upcoming: { style: 'cK', prep: 15, time: '2 hr 10 min', manpower: '10 Operators', nextStep: 'Pattern Loading' } },
+                                { lineNumber: 5, upcoming: { style: 'cK', prep: 60, time: '20 min', manpower: '5 Operators', nextStep: 'Needle Check' } },
+                                { lineNumber: 6, upcoming: { style: 'cK', prep: 10, time: '1 hr 15 min', manpower: '7 Operators', nextStep: 'Thread Loading' } },
+                                { lineNumber: 7, upcoming: { style: 'cK', prep: 25, time: '50 min', manpower: '6 Operators', nextStep: 'Guide Adjustment' } },
+                                { lineNumber: 8, upcoming: { style: 'cK', prep: 80, time: '15 min', manpower: '4 Operators', nextStep: 'Final Test' } },
+                                { lineNumber: 9, upcoming: { style: 'cK', prep: 5, time: '2 hr 30 min', manpower: '9 Operators', nextStep: 'Machine Setup' } },
+                                { lineNumber: 10, upcoming: { style: 'cK', prep: 40, time: '40 min', manpower: '6 Operators', nextStep: 'Size Chart Sync' } },
+                                { lineNumber: 11, upcoming: { style: 'cK', prep: 20, time: '1 hr 45 min', manpower: '8 Operators', nextStep: 'Yarn Setup' } }
+                            ];
+
+                            container.innerHTML = dataToUse.map(line => `
+                                <div class="line-item" style="padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); margin-bottom: 20px; border: 1px solid #eaeaea;">
+                                    <div class="line-header" style="margin-bottom: 15px;">
+                                        <div class="line-num" style="background-color: #3498db; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;">${line.lineNumber || line.id}</div>
+                                        <span class="line-name" style="font-size: 18px; font-weight: 700; color: #2d3436;">Line ${line.lineNumber || line.id}</span>
+                                    </div>
+                                    <div class="style-name" style="margin-left: 42px; margin-bottom: 15px; color: #636e72; font-size: 14px;">${line.upcoming.style}</div>
+                                    
+                                    <div class="progress-section" style="margin-left: 42px; margin-bottom: 15px;">
+                                        <div class="progress-label" style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
+                                            <span style="color: #3498db; font-weight: 600;">Preparation ${line.upcoming.prep}%</span>
+                                            <span style="font-weight: 700; color: #2d3436;">${line.upcoming.time}</span>
+                                        </div>
+                                        <div class="small-progress" style="height: 6px; background-color: #f1f2f6; border-radius: 3px; position: relative;">
+                                            <div class="small-progress-fill" style="width: ${line.upcoming.prep}%; height: 100%; background-color: #3498db; border-radius: 3px;"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-left: 42px; font-size: 13px; color: #3498db;">
+                                        <span>Manpower: <strong>${line.upcoming.manpower || 'TBD'}</strong></span>
+                                        <span style="margin-left: 15px;">Next Step: <strong>${line.upcoming.nextStep || 'Setup'}</strong></span>
+                                        <span style="margin-left: auto; cursor: pointer; text-decoration: underline;" onclick="showDetails()">🔗 View Details</span>
+                                    </div>
+
+                                </div>
+                            `).join('');
+                        } catch (err) {
+                            console.error('Failed to load upcoming data:', err);
+                        }
+                    }
+                    loadUpcomingData();
+                </script>
             </div>
         </main>
     </div>

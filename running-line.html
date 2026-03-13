@@ -75,65 +75,84 @@
             <div class="list-view-container" id="listView" style="display: none;">
                 <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 20px;">Current Line Changeover</h1>
 
-                <script>
-                    const linesData = [
-                        { id: 1, style: 'TOMMY HILFIGER ---> HUGOBOSS', progress: 68, time: '18:05', machineAvail: '85%', workaidsAvail: '92%', delay: 'Machine Breakdown' },
-                        { id: 2, style: 'TOMMY HILFIGER ---> HUGOBOSS', progress: 25, time: '41:10', machineAvail: '70%', workaidsAvail: '88%', delay: 'Machine Breakdown' },
-                        { id: 3, style: 'TOMMY HILFIGER ---> HUGOBOSS', progress: 80, time: '06:48', machineAvail: '95%', workaidsAvail: '98%', delay: 'None' },
-                        { id: 4, style: 'TOMMY HILFIGER ---> HUGOBOSS', progress: 45, time: '22:15', machineAvail: '65%', workaidsAvail: '80%', delay: 'Machine Breakdown' },
-                        { id: 5, style: 'TOMMY HILFIGER ---> HUGOBOSS', progress: 10, time: '55:30', machineAvail: '40%', workaidsAvail: '60%', delay: 'Machine Breakdown' },
-                        { id: 6, style: 'TOMMY HILFIGER ---> HUGOBOSS', progress: 90, time: '02:10', machineAvail: '98%', workaidsAvail: '100%', delay: 'None' },
-                        { id: 7, style: 'TOMMY HILFIGER ---> HUGOBOSS', progress: 60, time: '15:45', machineAvail: '82%', workaidsAvail: '90%', delay: 'Machine Breakdown' },
-                        { id: 8, style: 'TOMMY HILFIGER ---> HUGOBOSS', progress: 35, time: '30:20', machineAvail: '75%', workaidsAvail: '85%', delay: 'Machine Breakdown' },
-                        { id: 9, style: 'TOMMY HILFIGER ---> HUGOBOSS', progress: 5, time: '1:05:00', machineAvail: '30%', workaidsAvail: '50%', delay: 'Machine Breakdown' },
-                        { id: 10, style: 'TOMMY HILFIGER ---> HUGOBOSS', progress: 75, time: '10:05', machineAvail: '88%', workaidsAvail: '92%', delay: 'None' },
-                        { id: 11, style: 'TOMMY HILFIGER ---> HUGOBOSS', progress: 50, time: '20:00', machineAvail: '72%', workaidsAvail: '80%', delay: 'Machine Breakdown' }
-                    ];
+                <div id="dynamicLineList">
+                    <p style="text-align: center; padding: 20px; color: #888;">Loading line data...</p>
+                </div>
 
-                    document.write(linesData.map(line => `
-                        <div class="line-item" style="padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); margin-bottom: 20px; border: 1px solid #eaeaea;">
-                            <div class="line-header" style="margin-bottom: 15px;">
-                                <div class="line-num" style="background-color: #a29bfe; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;">${line.id}</div>
-                                <span class="line-name" style="font-size: 18px; font-weight: 700; color: #2d3436;">Line ${line.id}</span>
-                            </div>
-                            <div class="style-name" style="margin-left: 42px; margin-bottom: 15px; color: #636e72; font-size: 14px; font-weight: 700;">${line.style}</div>
-                            
-                            <div class="progress-section" style="margin-left: 42px; margin-bottom: 15px;">
-                                <div class="progress-label" style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
-                                    <span style="color: #6c5ce7; font-weight: 600;">Progress ${line.progress}%</span>
-                                    <span style="font-weight: 700; color: #2d3436;">${line.time}</span>
+                <script>
+                    async function loadLineData() {
+                        const container = document.getElementById('dynamicLineList');
+                        try {
+                            console.log('Fetching live data for list view...');
+                            const response = await fetch('/api/lines');
+                            if (!response.ok) throw new Error('API failed');
+                            const apiData = await response.json();
+
+                            // Use API data if available, otherwise use original placeholder values
+                            const dataToUse = (apiData && apiData.length > 0) ? apiData : [
+                                { lineNumber: 1, current: { style: 'TOMMY HILFIGER ---> HUGOBOSS', progress: 68, time: '18:05', machineAvail: '85%', workaidsAvail: '92%', delay: 'Machine Breakdown' } },
+                                { lineNumber: 2, current: { style: 'TOMMY HILFIGER ---> HUGOBOSS', progress: 25, time: '41:10', machineAvail: '70%', workaidsAvail: '88%', delay: 'Machine Breakdown' } },
+                                { lineNumber: 3, current: { style: 'TOMMY HILFIGER ---> HUGOBOSS', progress: 80, time: '06:48', machineAvail: '95%', workaidsAvail: '98%', delay: 'None' } },
+                                { lineNumber: 4, current: { style: 'TOMMY HILFIGER ---> HUGOBOSS', progress: 45, time: '22:15', machineAvail: '65%', workaidsAvail: '80%', delay: 'Machine Breakdown' } },
+                                { lineNumber: 5, current: { style: 'TOMMY HILFIGER ---> HUGOBOSS', progress: 10, time: '55:30', machineAvail: '40%', workaidsAvail: '60%', delay: 'Machine Breakdown' } },
+                                { lineNumber: 6, current: { style: 'TOMMY HILFIGER ---> HUGOBOSS', progress: 90, time: '02:10', machineAvail: '98%', workaidsAvail: '100%', delay: 'None' } },
+                                { lineNumber: 7, current: { style: 'TOMMY HILFIGER ---> HUGOBOSS', progress: 60, time: '15:45', machineAvail: '82%', workaidsAvail: '90%', delay: 'Machine Breakdown' } },
+                                { lineNumber: 8, current: { style: 'TOMMY HILFIGER ---> HUGOBOSS', progress: 35, time: '30:20', machineAvail: '75%', workaidsAvail: '85%', delay: 'Machine Breakdown' } },
+                                { lineNumber: 9, current: { style: 'TOMMY HILFIGER ---> HUGOBOSS', progress: 5, time: '1:05:00', machineAvail: '30%', workaidsAvail: '50%', delay: 'Machine Breakdown' } },
+                                { lineNumber: 10, current: { style: 'TOMMY HILFIGER ---> HUGOBOSS', progress: 75, time: '10:05', machineAvail: '88%', workaidsAvail: '92%', delay: 'None' } },
+                                { lineNumber: 11, current: { style: 'TOMMY HILFIGER ---> HUGOBOSS', progress: 50, time: '20:00', machineAvail: '72%', workaidsAvail: '80%', delay: 'Machine Breakdown' } }
+                            ];
+
+                            container.innerHTML = dataToUse.map(line => {
+                                const lNum = line.lineNumber || line.id;
+                                const curr = line.current || {};
+                                return `
+                                <div class="line-item" style="padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); margin-bottom: 20px; border: 1px solid #eaeaea;">
+                                    <div class="line-header" style="margin-bottom: 15px;">
+                                        <div class="line-num" style="background-color: #a29bfe; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;">${lNum}</div>
+                                        <span class="line-name" style="font-size: 18px; font-weight: 700; color: #2d3436;">Line ${lNum}</span>
+                                    </div>
+                                    <div class="style-name" style="margin-left: 42px; margin-bottom: 15px; color: #636e72; font-size: 14px; font-weight: 700;">${curr.style || 'N/A'}</div>
+
+                                    <div class="progress-section" style="margin-left: 42px; margin-bottom: 15px;">
+                                        <div class="progress-label" style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
+                                            <span style="color: #6c5ce7; font-weight: 600;">Progress ${curr.progress || 0}%</span>
+                                            <span style="font-weight: 700; color: #2d3436;">${curr.time || '00:00'}</span>
+                                        </div>
+                                        <div class="small-progress" style="height: 6px; background-color: #f1f2f6; border-radius: 3px; position: relative;">
+                                            <div class="small-progress-fill" style="width: ${curr.progress || 0}%; height: 100%; background-color: #6c5ce7; border-radius: 3px;"></div>
+                                            <span style="position: absolute; right: -12px; top: -7px; color: #6c5ce7; font-size: 14px;">→</span>
+                                        </div>
+                                    </div>
+
+                                    <div style="margin-left: 42px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                        <div style="display: flex; gap: 10px; align-items: center;">
+                                            <p style="color: #888; font-size: 13px; margin: 0;">Machine availability %</p>
+                                            <span style="background-color: #f1f2f6; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: #555; font-weight: 700;">${curr.machineAvail || '0%'}</span>
+                                        </div>
+                                        <div style="display: flex; gap: 10px; align-items: center;">
+                                            <p style="color: #888; font-size: 13px; margin: 0;">Workaids Availability %</p>
+                                            <span style="background-color: #f1f2f6; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: #555; font-weight: 700;">${curr.workaidsAvail || '0%'}</span>
+                                        </div>
+                                    </div>
+                                    <p style="margin-left: 42px; color: #888; font-size: 13px; margin-bottom: 0;">
+                                        Unavailable machine count - 
+                                        <span style="color: #555; font-weight: 600;">${curr.delay || 'None'}</span>
+                                    </p>
                                 </div>
-                                <div class="small-progress" style="height: 6px; background-color: #f1f2f6; border-radius: 3px; position: relative;">
-                                    <div class="small-progress-fill" style="width: ${line.progress}%; height: 100%; background-color: #6c5ce7; border-radius: 3px;"></div>
-                                    <span style="position: absolute; right: -12px; top: -7px; color: #6c5ce7; font-size: 14px;">→</span>
-                                </div>
-                            </div>
-                            
-                            <div style="margin-left: 42px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <div style="display: flex; gap: 10px; align-items: center;">
-                                    <p style="color: #888; font-size: 13px; margin: 0;">Machine availability %</p>
-                                    <span style="background-color: #f1f2f6; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: #555; font-weight: 700;">${line.machineAvail}</span>
-                                </div>
-                                <div style="display: flex; gap: 10px; align-items: center;">
-                                    <p style="color: #888; font-size: 13px; margin: 0;">Workaids Availability %</p>
-                                    <span style="background-color: #f1f2f6; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: #555; font-weight: 700;">${line.workaidsAvail}</span>
-                                </div>
-                            </div>
-                            <p style="margin-left: 42px; color: #888; font-size: 13px; margin-bottom: 0;">
-                                Unavailable machine count - 
-                                <span style="color: #555; font-weight: 600;">${line.delay}</span>
-                                ${line.delay !== 'None' ? `
-                                    <span style="color: #6c5ce7; cursor: pointer; margin-left: 5px; text-decoration: underline;" 
-                                          onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'inline' : 'none'">...More</span>
-                                    <span style="display: none; color: #666; font-style: italic; margin-left: 5px;">
-                                        (preventive maintenance, Operator assigned to another operation, WIP not available)
-                                    </span>
-                                ` : ''}
-                            </p>
-                        </div>
-                    `).join(''));
+                            `; }).join('');
+                        } catch (err) {
+                            console.error('Failed to load line data:', err);
+                            container.innerHTML = '<p style="text-align: center; color: red;">Error loading data. Ensure server is running.</p>';
+                        }
+                    }
+                    // Initial load
+                    loadLineData();
+                    // Reload when switching to list view
+                    document.getElementById('listBtn').addEventListener('click', loadLineData);
                 </script>
             </div>
+
         </main>
     </div>
     <script src="script.js"></script>

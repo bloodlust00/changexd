@@ -96,102 +96,95 @@
 
     <script src="script.js"></script>
     <script>
-    const factoryData = {};
-    
-    // Detailed style names and requirements for variety
-    const styles = [
-        { run: "H-LIAM-BD-E-C1-263-50566988", up: "KASON-A-25-50293691", req: "New needle plate, folder attachment" },
-        { run: "HUGOBOSS BASIC SHIRT", up: "CKML-BN-5D", req: "Bobbin change, thread color swap, Cuff template change" },
-        { run: "BOSS-CASUAL-SLIM-FIT", up: "G-STAR-RAW-DENIM", req: "Heavy duty needle, tension adjustment" },
-        { run: "LEVIS-501-CLASSIC", up: "ARMANI-EX-TEE", req: "Soft touch footer, 3-thread setup" },
-        { run: "RALPH-LAUREN-POLO", up: "TOMMY-HIL-SHIRT", req: "Collar attachment, buttonhole sync" },
-        { run: "CALVIN-KLEIN-JEANS", up: "ZARA-BASIC-KNIT", req: "Overlock adjustment, stretch thread" },
-        { run: "GUESS-SUMMER-DRESS", up: "PRADA-SILK-TOP", req: "Fine needle change, delicate feed dog" },
-        { run: "NIKE-SPORTS-WEAR", up: "ADIDAS-TECH-TEE", req: "Flatlock machine setup, heat seal check" },
-        { run: "PUMA-RUNNING-SHORTS", up: "REEBOK-TRAINING-PANTS", req: "Elastic folder, twin needle sync" },
-        { run: "LACOSTE-PIQUE-POLO", up: "FRED-PERRY-SHIRT", req: "Rib attachment, logo placement guide" },
-        { run: "DIOR-EVENING-GOWN", up: "CHANEL-TWEED-JACKET", req: "Custom template change, slow-feed setup" }
-    ];
-
-    const delayReasons = ["Waiting for mechanic", "None", "Material shortage", "None", "Quality approval pending", "None", "Machine breakdown", "None", "Part misplaced", "None", "Power outage"];
-
-    const factoryLinesMapping = {
-        1: [0, 1],       // Lines 1, 2
-        2: [2, 3],       // Lines 3, 4
-        3: [4, 5],       // Lines 5, 6
-        4: [6, 7],       // Lines 7, 8
-        5: [8, 9, 10]    // Lines 9, 10, 11
-    };
-
-    for (let fId = 1; fId <= 5; fId++) {
-        const lineIndices = factoryLinesMapping[fId];
-        factoryData[fId] = {
-            name: `Factory ${fId}`,
-            lines: lineIndices.map(i => ({
-                name: `Line ${i + 1}`,
-                runningStyle: styles[i].run,
-                runningSMV: (20 + (i * 0.7) + (fId * 0.5)).toFixed(1),
-                upcomingStyle: styles[i].up,
-                upcomingSMV: (22 + (i * 0.4) + (fId * 0.3)).toFixed(1),
-                requirements: styles[i].req,
-                estimatedTime: `${30 + (i * 5)} min`,
-                delayReasons: delayReasons[i]
-            }))
-        };
+    function openOBFile(style, type, line) {
+        if (!style || style === 'Loading...' || style === 'N/A') {
+            alert('No file available for this style.');
+            return;
+        }
+        window.open(`/api/open-ob?style=${encodeURIComponent(style)}&type=${type}&line=${line}`, '_blank');
     }
 
-    // Get factory ID from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const factoryId = parseInt(urlParams.get('id')) || 1;
+    async function loadFactoryDetail() {
+        const detailContainer = document.getElementById('factoryDetail');
+        
+        // Get factory ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const factoryId = parseInt(urlParams.get('id')) || 1;
 
-    const factory = factoryData[factoryId];
+        // Factory to Line mapping
+        const factoryLinesMapping = {
+            1: [1, 2],       // Factory 1 has Lines 1, 2
+            2: [3, 4],       // Factory 2 has Lines 3, 4
+            3: [5, 6],       // Factory 3 has Lines 5, 6
+            4: [7, 8],       // Factory 4 has Lines 7, 8
+            5: [9, 10, 11]   // Factory 5 has Lines 9, 10, 11
+        };
 
-    // Render factory details
-    const detailContainer = document.getElementById('factoryDetail');
+        try {
+            const response = await fetch('/api/lines');
+            if (!response.ok) throw new Error('API failed');
+            const allLinesData = await response.json();
+            
+            const lineNumbers = factoryLinesMapping[factoryId] || [];
+            
+            let html = `<h2 class="factory-title">Factory ${factoryId}</h2>`;
 
-    if (factory) {
-        let html = `<h2 class="factory-title">${factory.name}</h2>`;
+            if (lineNumbers.length === 0) {
+                detailContainer.innerHTML = "<h2>Factory not found</h2>";
+                return;
+            }
 
-        factory.lines.forEach((line, index) => {
-            html += `
-                <div class="line-section ${index > 0 ? 'line-border' : ''}">
-                    <h3 class="line-title">${line.name}</h3>
+            lineNumbers.forEach((lineNum, index) => {
+                // Find data for this specific line, or use fallback
+                const lineData = allLinesData.find(l => l.lineNumber === lineNum) || {
+                    lineNumber: lineNum,
+                    current: { style: 'Loading...', time: '00:00', delay: 'None' },
+                    upcoming: { style: 'Loading...', time: '00:00', nextStep: 'N/A' }
+                };
 
-                    <div class="line-details">
-                        <div class="detail-column">
-                            <p>
-                                <span class="file-icon-container">
-                                    <span class="file-icon">📄</span>
-                                    <span class="file-tooltip">OPEN FILE</span>
-                                </span>
-                                <strong>Running style</strong> : ${line.runningStyle}
-                            </p>
-                            <p>
-                                <span class="file-icon-container">
-                                    <span class="file-icon">📄</span>
-                                    <span class="file-tooltip">OPEN FILE</span>
-                                </span>
-                                <strong>Upcoming style</strong> : ${line.upcomingStyle}
-                            </p>
-                            <p><strong>Upcoming Style Requirements</strong> : ${line.requirements}</p>
-                            <p><strong>Estimated Changeover time</strong> : ${line.estimatedTime}</p>
-                        </div>
+                html += `
+                    <div class="line-section ${index > 0 ? 'line-border' : ''}">
+                        <h3 class="line-title">Line ${lineData.lineNumber}</h3>
 
-                        <div class="detail-column">
-                            <p><strong>Running style SMV</strong> : ${line.runningSMV}</p>
-                            <p><strong>Upcoming style SMV</strong> : ${line.upcomingSMV}</p>
-                            <p><strong>Delay Reasons</strong> : ${line.delayReasons}</p>
+                        <div class="line-details">
+                            <div class="detail-column">
+                                <p>
+                                    <span class="file-icon-container" onclick="openOBFile('${lineData.current.style}', 'current', ${lineData.lineNumber})">
+                                        <span class="file-icon">📄</span>
+                                        <span class="file-tooltip">OPEN FILE</span>
+                                    </span>
+                                    <strong>Running style</strong> : ${lineData.current.style}
+                                </p>
+                                <p>
+                                    <span class="file-icon-container" onclick="openOBFile('${lineData.upcoming.style}', 'upcoming', ${lineData.lineNumber})">
+                                        <span class="file-icon">📄</span>
+                                        <span class="file-tooltip">OPEN FILE</span>
+                                    </span>
+                                    <strong>Upcoming style</strong> : ${lineData.upcoming.style}
+                                </p>
+                                <p><strong>Upcoming Style Requirements</strong> : ${lineData.upcoming.nextStep || 'Standard setup'}</p>
+                                <p><strong>Estimated Changeover time</strong> : ${lineData.upcoming.time || '45 min'}</p>
+                            </div>
+
+                            <div class="detail-column">
+                                <p><strong>Running style SMV</strong> : ${lineData.current.smv || '0.00'}</p>
+                                <p><strong>Upcoming style SMV</strong> : ${lineData.upcoming.smv || '0.00'}</p>
+                                <p><strong>Delay Reasons</strong> : ${lineData.current.delay || 'None'}</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
-        });
+                `;
+            });
 
-        detailContainer.innerHTML = html;
+            detailContainer.innerHTML = html;
 
-    } else {
-        detailContainer.innerHTML = "<h2>Factory not found</h2>";
+        } catch (err) {
+            console.error('Failed to load factory detail:', err);
+            detailContainer.innerHTML = "<h2>Error loading data. Please try again.</h2>";
+        }
     }
+
+    loadFactoryDetail();
 </script>
 </body>
 </html>
