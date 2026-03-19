@@ -102,7 +102,8 @@ function parseOBFiles() {
                 }
                 
                 let tableHeaderRow = -1;
-                for (let r = 0; r < 20; r++) {
+                // Search entire sheet for header row
+                for (let r = 0; r < rows.length; r++) {
                     if (rows[r] && rows[r].includes('Machine')) { tableHeaderRow = r; break; }
                 }
 
@@ -113,20 +114,32 @@ function parseOBFiles() {
                     const tools = new Set();
                     let totalSMV = 0;
 
-                    for (let r = tableHeaderRow + 1; r < rows.length; r++) {
-                        const row = rows[r];
-                        if (!row || !row[0]) continue;
-                        if (row[toolIdx] && String(row[toolIdx]).trim() !== 'N/A') tools.add(String(row[toolIdx]).trim());
-                        if (row[smvIdx]) totalSMV += parseFloat(row[smvIdx]) || 0;
+                    if (smvIdx === -1) {
+                        console.warn(`⚠️ SMV column not found in ${file}`);
+                    } else {
+                        for (let r = tableHeaderRow + 1; r < rows.length; r++) {
+                            const row = rows[r];
+                            if (!row || !row[0]) continue;
+                            if (toolIdx !== -1 && row[toolIdx] && String(row[toolIdx]).trim() !== 'N/A') tools.add(String(row[toolIdx]).trim());
+                            const val = parseFloat(row[smvIdx]);
+                            if (!isNaN(val) && val > 0) totalSMV += val;
+                        }
                     }
-                    
-                    obDataList.push({ 
-                        styleName: file.replace('.xlsx', ''), 
-                        manpower, 
-                        smv: parseFloat(totalSMV.toFixed(2)), 
-                        tools: Array.from(tools), 
-                        filePath: fullPath 
-                    });
+
+                    // Only include files that have valid SMV data
+                    if (totalSMV > 0) {
+                        obDataList.push({ 
+                            styleName: file.replace('.xlsx', ''), 
+                            manpower, 
+                            smv: parseFloat(totalSMV.toFixed(2)), 
+                            tools: Array.from(tools), 
+                            filePath: fullPath 
+                        });
+                    } else {
+                        console.warn(`⚠️ Skipping ${file}: no valid SMV data found`);
+                    }
+                } else {
+                    console.warn(`⚠️ Skipping ${file}: no OB table header found`);
                 }
             } catch (e) { console.error(`Error parsing ${file}:`, e); }
         });

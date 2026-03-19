@@ -6,6 +6,28 @@ function logout() {
     window.location.href = 'login.html';
 }
 
+// Dark mode toggle — triggered by clicking the logo
+(function initDarkMode() {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const logoEl = document.querySelector('.logo-container, .logo-section');
+        if (!logoEl) return;
+
+        logoEl.addEventListener('click', function () {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+    });
+})();
+
 // Sidebar persistence logic
 document.addEventListener('DOMContentLoaded', function() {
     const sidebar = document.querySelector('.sidebar');

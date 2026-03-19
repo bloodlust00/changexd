@@ -5,6 +5,9 @@
         if (sessionStorage.getItem('sidebar_persistent_hover') === 'true') {
             document.documentElement.classList.add('sidebar-pushed');
         }
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -167,8 +170,8 @@
                             </div>
 
                             <div class="detail-column">
-                                <p><strong>Running style SMV</strong> : ${lineData.current.smv || '0.00'}</p>
-                                <p><strong>Upcoming style SMV</strong> : ${lineData.upcoming.smv || '0.00'}</p>
+                                <p><strong>Running style SMV</strong> : ${lineData.current.smv != null ? lineData.current.smv.toFixed(2) : '0.00'}</p>
+                                <p><strong>Upcoming style SMV</strong> : ${lineData.upcoming.smv != null ? lineData.upcoming.smv.toFixed(2) : '0.00'}</p>
                                 <p><strong>Delay Reasons</strong> : ${lineData.current.delay || 'None'}</p>
                             </div>
                         </div>

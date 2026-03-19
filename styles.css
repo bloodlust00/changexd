@@ -12,6 +12,37 @@
     --warning-yellow: #f1c40f;
     --danger-red: #e74c3c;
     --accent-orange: #e67e22;
+    --header-bg: #ffffff;
+    --input-bg: #ffffff;
+    --input-border: #ddd;
+    --muted-text: #888;
+}
+
+[data-theme="dark"] {
+    --bg-light: #0f1117;
+    --sidebar-bg: #1a1d27;
+    --card-bg: #1e2130;
+    --text-dark: #e8eaf0;
+    --text-grey: #a0a8b8;
+    --border-color: #2a2d3e;
+    --header-bg: #1a1d27;
+    --input-bg: #252836;
+    --input-border: #3a3d50;
+    --muted-text: #6b7280;
+}
+
+/* Smooth theme transition */
+*, *::before, *::after {
+    transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+/* Logo toggle cursor */
+.logo-container, .logo-section {
+    cursor: pointer;
+    user-select: none;
+}
+.logo-container:hover, .logo-section:hover {
+    opacity: 0.85;
 }
 
 * {
@@ -37,7 +68,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 10px 40px;
-    background-color: #fff;
+    background-color: var(--header-bg);
     border-bottom: 1px solid var(--border-color);
     flex-shrink: 0;
     z-index: 100;
@@ -116,7 +147,7 @@ body {
 
 .sidebar {
     width: 70px; /* Collapsed width showing only icons */
-    background-color: #fff;
+    background-color: var(--sidebar-bg);
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
@@ -154,18 +185,17 @@ html.sidebar-pushed .sidebar {
     display: flex;
     align-items: center;
     padding: 15px 20px;
-    color: #444;
+    color: var(--text-grey);
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
     gap: 20px;
     white-space: nowrap;
-    transition: background-color 0.2s;
 }
 
 .nav-item:hover {
     color: var(--primary-blue);
-    background-color: #f8f9fc;
+    background-color: var(--bg-light);
 }
 
 .nav-item.active {
@@ -199,12 +229,12 @@ html.sidebar-pushed .sidebar {
 
 /* Dashboard Cards */
 .content-card {
-    background-color: #fff;
+    background-color: var(--card-bg);
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 20px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    border: 1px solid #eee;
+    border: 1px solid var(--border-color);
 }
 
 .card-title {
@@ -491,7 +521,8 @@ html.sidebar-pushed .sidebar {
 .toggle-btn {
     padding: 6px 15px;
     border: none;
-    background: #fff;
+    background: var(--card-bg);
+    color: var(--text-dark);
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
@@ -515,11 +546,11 @@ html.sidebar-pushed .sidebar {
 }
 
 .line-item {
-    border: 1px solid #eee;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 15px;
     margin-bottom: 15px;
-    background: #fff;
+    background: var(--card-bg);
 }
 
 .line-header {
@@ -804,7 +835,7 @@ html.sidebar-pushed .sidebar {
 }
 
 .alert-card {
-    background: #fff;
+    background: var(--card-bg);
     border-radius: 12px;
     padding: 20px 25px;
     display: flex;
@@ -841,13 +872,13 @@ html.sidebar-pushed .sidebar {
 .alert-card-main-text {
     font-size: 15px;
     font-weight: 600;
-    color: #333;
+    color: var(--text-dark);
     margin-bottom: 4px;
 }
 
 .alert-card-time {
     font-size: 13px;
-    color: #999;
+    color: var(--muted-text);
 }
 
 /* Live Tracking Page Styles */
@@ -882,7 +913,7 @@ html.sidebar-pushed .sidebar {
 }
 
 .tracking-card {
-    background: #fff;
+    background: var(--card-bg);
     border-radius: 16px;
     padding: 30px 35px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
@@ -1287,3 +1318,192 @@ body.login-page {
     margin-right: auto;
 }
 
+
+/* ============================================
+   DARK MODE OVERRIDES
+   ============================================ */
+
+[data-theme="dark"] body {
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+}
+
+[data-theme="dark"] .header {
+    background-color: var(--header-bg);
+    border-bottom-color: var(--border-color);
+}
+
+[data-theme="dark"] .welcome-text,
+[data-theme="dark"] .user-email {
+    color: var(--muted-text);
+}
+
+[data-theme="dark"] .card-title,
+[data-theme="dark"] .line-title,
+[data-theme="dark"] .factory-title,
+[data-theme="dark"] .back-link {
+    color: var(--text-dark);
+}
+
+[data-theme="dark"] .content-card {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+[data-theme="dark"] .sidebar {
+    background-color: var(--sidebar-bg);
+    border-right-color: var(--border-color);
+}
+
+[data-theme="dark"] .nav-item {
+    color: var(--text-grey);
+}
+
+[data-theme="dark"] .nav-item:hover {
+    background-color: rgba(255,255,255,0.05);
+    color: var(--primary-blue);
+}
+
+[data-theme="dark"] .nav-item.active {
+    background: linear-gradient(to right, rgba(52,152,219,0.15), transparent);
+}
+
+[data-theme="dark"] .sidebar-footer {
+    border-top-color: var(--border-color);
+}
+
+[data-theme="dark"] .alert-card,
+[data-theme="dark"] .tracking-card,
+[data-theme="dark"] .line-item {
+    background: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .alert-card-main-text,
+[data-theme="dark"] .tracking-card-title {
+    color: var(--text-dark);
+}
+
+[data-theme="dark"] .alert-card-time,
+[data-theme="dark"] .tracking-card-time-info {
+    color: var(--muted-text);
+}
+
+[data-theme="dark"] .toggle-btn {
+    background: var(--card-bg);
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .toggle-btn.active {
+    background: var(--text-dark);
+    color: var(--bg-light);
+}
+
+[data-theme="dark"] .factory-pastel {
+    filter: brightness(0.75) saturate(0.9);
+}
+
+[data-theme="dark"] .factory-pastel:hover {
+    filter: brightness(0.85) saturate(1);
+}
+
+[data-theme="dark"] .login-page {
+    background: linear-gradient(135deg, #1a1d27 0%, #0f1117 100%);
+}
+
+[data-theme="dark"] .login-page .header {
+    background: var(--header-bg);
+}
+
+[data-theme="dark"] .login-card {
+    background-color: #252836;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+}
+
+[data-theme="dark"] .login-card h2,
+[data-theme="dark"] .form-group label {
+    color: var(--text-dark);
+}
+
+[data-theme="dark"] .form-group input {
+    background-color: #1e2130;
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .form-group input::placeholder {
+    color: var(--muted-text);
+}
+
+[data-theme="dark"] .signup-link {
+    color: var(--text-grey);
+}
+
+[data-theme="dark"] .signup-link a {
+    color: var(--text-dark);
+}
+
+[data-theme="dark"] select,
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="date"] {
+    background-color: var(--input-bg);
+    color: var(--text-dark);
+    border-color: var(--input-border);
+}
+
+[data-theme="dark"] .progress-bg,
+[data-theme="dark"] .live-progress-bar {
+    background-color: #2a2d3e;
+}
+
+[data-theme="dark"] .gauge-svg path:first-child {
+    stroke: #2a2d3e;
+}
+
+[data-theme="dark"] .contact-grid-6 {
+    background-color: var(--card-bg);
+}
+
+[data-theme="dark"] .item-title,
+[data-theme="dark"] .item-text {
+    color: var(--text-grey);
+}
+
+[data-theme="dark"] p strong,
+[data-theme="dark"] .line-details p {
+    color: var(--text-dark);
+}
+
+[data-theme="dark"] .detail-column p {
+    color: var(--text-grey);
+}
+
+/* Dark mode logo toggle hint */
+.logo-container::after,
+.logo-section::after {
+    content: '🌙';
+    font-size: 10px;
+    position: absolute;
+    bottom: -2px;
+    right: -4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+}
+
+[data-theme="dark"] .logo-container::after,
+[data-theme="dark"] .logo-section::after {
+    content: '☀️';
+}
+
+.logo-container:hover::after,
+.logo-section:hover::after {
+    opacity: 1;
+}
+
+.logo-container,
+.logo-section {
+    position: relative;
+}

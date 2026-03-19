@@ -5,6 +5,9 @@
         if (sessionStorage.getItem('sidebar_persistent_hover') === 'true') {
             document.documentElement.classList.add('sidebar-pushed');
         }
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

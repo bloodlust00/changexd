@@ -5,6 +5,9 @@
         if (sessionStorage.getItem('sidebar_persistent_hover') === 'true') {
             document.documentElement.classList.add('sidebar-pushed');
         }
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -71,6 +74,22 @@
                 console.error('Login error:', error);
                 errorMessage.textContent = 'Server connection failed. Please ensure the backend is running.';
             }
+        });
+
+        // Dark mode toggle via logo
+        document.addEventListener('DOMContentLoaded', function () {
+            const logoEl = document.querySelector('.logo-section');
+            if (!logoEl) return;
+            logoEl.addEventListener('click', function () {
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                if (isDark) {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                }
+            });
         });
     </script>
 </body>
