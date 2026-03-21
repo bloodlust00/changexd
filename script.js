@@ -63,6 +63,135 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Seeded random function for deterministic data based on date
+function seededRandom(seed) {
+    const x = Math.sin(seed++) * 10000;
+    return x - Math.floor(x);
+}
+
+window.getProductionDataForLine = function(lineNumber, dateStr) {
+    const seedBase = dateStr ? parseInt(dateStr.replace(/-/g, '')) : parseInt(new Date().toISOString().split('T')[0].replace(/-/g, ''));
+    let seed = seedBase;
+
+    const getNextRandom = () => {
+        const r = seededRandom(seed);
+        seed += 1;
+        return r;
+    };
+
+    const targets = [];
+    for(let i=0; i<11; i++) {
+        targets.push(Math.floor(5000 + getNextRandom() * 25000));
+    }
+
+    const productions = [];
+    for(let i=0; i<11; i++) {
+        const efficiency = 0.6 + (getNextRandom() * 0.35);
+        productions.push(Math.max(1000, Math.floor(targets[i] * efficiency)));
+    }
+
+    const idx = lineNumber - 1;
+    if (idx >= 0 && idx < 11) {
+        return { target: targets[idx], production: productions[idx] };
+    }
+    return { target: 15000, production: 12000 };
+};
+
+function refreshDashboardData(dateStr) {
+    // Create a numeric seed from the date string (YYYY-MM-DD)
+    const seedBase = dateStr ? parseInt(dateStr.replace(/-/g, '')) : parseInt(new Date().toISOString().split('T')[0].replace(/-/g, ''));
+    let seed = seedBase;
+
+    const getNextRandom = () => {
+        const r = seededRandom(seed);
+        seed += 1;
+        return r;
+    };
+
+    // 1. Refresh Production Status Chart
+    const prodChart = Chart.getChart('productionStatusChart');
+    if (prodChart) {
+        // Target between 5000 and 30000
+        prodChart.data.datasets[0].data = prodChart.data.datasets[0].data.map(() => {
+            return Math.floor(5000 + getNextRandom() * 25000);
+        });
+
+        // Production between 60% and 95% of target
+        prodChart.data.datasets[1].data = prodChart.data.datasets[0].data.map(target => {
+            const efficiency = 0.6 + (getNextRandom() * 0.35);
+            return Math.max(1000, Math.floor(target * efficiency)); // Min 1000 to avoid near-zero
+        });
+        
+        prodChart.update();
+    }
+
+    // 2. Refresh Total Defects Chart
+    const defChart = Chart.getChart('defectsChart');
+    if (defChart) {
+        defChart.data.datasets[0].data = defChart.data.datasets[0].data.map(() => Math.floor(40 + getNextRandom() * 60));
+        defChart.update();
+    }
+
+    // 3. Refresh 3D Pie Chart (Highcharts)
+    const highChart = Highcharts.charts.find(c => c && c.renderTo.id === 'sideDefectsChart');
+    if (highChart) {
+        const newData = highChart.series[0].data.map(p => {
+            return {
+                name: p.name,
+                y: Math.floor(5 + getNextRandom() * 20),
+                color: p.color
+            };
+        });
+        highChart.series[0].setData(newData);
+    }
+
+    // 4. Update Gauge values
+    const reasons = ["Machine Breakdown", "Absenteeism", "Mechanic Delay", "Needle Breakdown", "Material Shortage", "Power Outage"];
+    
+    document.querySelectorAll('.gauge-wrapper').forEach(gauge => {
+        const newVal = Math.floor(65 + getNextRandom() * 30); // 65% to 95%
+        const color = newVal < 80 ? '#e74c3c' : '#2ecc71';
+        
+        gauge.style.setProperty('--gauge-percent', newVal);
+        gauge.style.setProperty('--gauge-color', color);
+        
+        const valueSpan = gauge.querySelector('.gauge-value');
+        if (valueSpan) valueSpan.textContent = newVal + '%';
+        
+        const path = gauge.querySelector('path:last-child');
+        if (path) {
+            const dashArray = 125.66;
+            const dashOffset = dashArray * (1 - newVal / 100);
+            path.style.strokeDashoffset = dashOffset;
+            path.style.stroke = color;
+        }
+
+        let tooltip = gauge.querySelector('.gauge-tooltip');
+        if (newVal < 80) {
+            const randomReason = reasons[Math.floor(getNextRandom() * reasons.length)];
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.className = 'gauge-tooltip';
+                gauge.appendChild(tooltip);
+            }
+            tooltip.textContent = "Reason: " + randomReason;
+        } else if (tooltip) {
+            tooltip.remove();
+        }
+    });
+
+    // 5. Refresh Average Changeover Time Chart
+    const avgChart = Chart.getChart('averageChangeoverChart');
+    if (avgChart) {
+        const chartData = [];
+        for (let i = 0; i < 11; i++) {
+            chartData.push({ x: i + 1, y: Math.floor(30 + getNextRandom() * 100) });
+        }
+        avgChart.data.datasets[0].data = chartData;
+        avgChart.update();
+    }
+}
+
 // Main dashboard and other functionalities
 document.addEventListener('DOMContentLoaded', function() {
     // Populate user Employee ID
@@ -96,131 +225,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Date Picker Logic (Flatpickr)
-    const selectedDateText = document.getElementById('selectedDateText');
-    const datePickerInput = document.getElementById('datePicker');
-    
-    if (datePickerInput && selectedDateText) {
-        flatpickr(datePickerInput, {
-            dateFormat: "Y-m-d",
-            maxDate: "today",
-            defaultDate: "today",
-            disableMobile: true, // Force custom calendar even on mobile
-            onReady: function(selectedDates, dateStr) {
-                if (selectedDateText) {
-                    selectedDateText.textContent = dateStr;
-                }
-            },
-            onChange: function(selectedDates, dateStr) {
-                if (selectedDateText) {
-                    selectedDateText.textContent = dateStr;
-                    console.log('Date selected:', dateStr);
-                    
-                    // Simulate data refresh for all charts
-                    refreshDashboardData();
-                }
-            }
-        });
-    }
-
-    function refreshDashboardData() {
-        // 1. Refresh Production Status Chart
-        const prodChart = Chart.getChart('productionStatusChart');
-        if (prodChart) {
-            // Randomize target for all lines (between 800 and 1400)
-            prodChart.data.datasets[0].data = prodChart.data.datasets[0].data.map(() => {
-                return Math.floor(800 + Math.random() * 600);
-            });
-
-            // Set production as a random percentage (e.g., 60% to 95%) of the new target
-            prodChart.data.datasets[1].data = prodChart.data.datasets[0].data.map(target => {
-                const efficiency = 0.6 + (Math.random() * 0.35); // 60% to 95% efficiency
-                return Math.floor(target * efficiency);
-            });
-            
-            prodChart.update();
-        }
-
-        // 2. Refresh Total Defects Chart
-        const defChart = Chart.getChart('defectsChart');
-        if (defChart) {
-            defChart.data.datasets[0].data = defChart.data.datasets[0].data.map(v => Math.floor(v * (0.8 + Math.random() * 0.4)));
-            defChart.update();
-        }
-
-        // 3. Refresh 3D Pie Chart (Highcharts)
-        const highChart = Highcharts.charts.find(c => c && c.renderTo.id === 'sideDefectsChart');
-        if (highChart) {
-            const newData = highChart.series[0].data.map(p => ({
-                name: p.name,
-                y: Math.floor(p.y * (0.8 + Math.random() * 0.4)),
-                color: p.color
-            }));
-            highChart.series[0].setData(newData);
-        }
-
-        // 4. Randomize Gauge values
-        const reasons = ["Machine breakdown", "Absenteeism", "Mechanic delay", "Needle breakdown", "Material shortage", "Power outage"];
-        
-        document.querySelectorAll('.gauge-wrapper').forEach(gauge => {
-            const newVal = Math.floor(60 + Math.random() * 35);
-            const color = newVal < 80 ? '#e74c3c' : '#2ecc71';
-            
-            gauge.style.setProperty('--gauge-percent', newVal);
-            gauge.style.setProperty('--gauge-color', color);
-            
-            const valueSpan = gauge.querySelector('.gauge-value');
-            if (valueSpan) valueSpan.textContent = newVal + '%';
-            
-            const path = gauge.querySelector('path:last-child');
-            if (path) {
-                const dashArray = 125.66;
-                const dashOffset = dashArray * (1 - newVal / 100);
-                path.style.strokeDashoffset = dashOffset;
-                path.style.stroke = color;
-            }
-
-            // Handle Efficiency Reasons
-            let tooltip = gauge.querySelector('.gauge-tooltip');
-            if (newVal < 80) {
-                const randomReason = reasons[Math.floor(Math.random() * reasons.length)];
-                if (!tooltip) {
-                    tooltip = document.createElement('div');
-                    tooltip.className = 'gauge-tooltip';
-                    gauge.appendChild(tooltip);
-                }
-                tooltip.textContent = "Reason: " + randomReason;
-            } else if (tooltip) {
-                tooltip.remove();
-            }
-        });
-
-        // 5. Refresh Average Changeover Time Chart
-        const avgChart = Chart.getChart('averageChangeoverChart');
-        if (avgChart) {
-            const numLines = 11;
-            const actionNeededIndices = new Set();
-            while(actionNeededIndices.size < 4) {
-                actionNeededIndices.add(Math.floor(Math.random() * numLines));
-            }
-
-            const onTimeData = [];
-            const actionNeededData = [];
-
-            for (let i = 0; i < numLines; i++) {
-                if (actionNeededIndices.has(i)) {
-                    actionNeededData.push({ x: i + 1, y: 125 + Math.floor(Math.random() * 115) }); // 125 to 240
-                    onTimeData.push({ x: i + 1, y: null });
-                } else {
-                    onTimeData.push({ x: i + 1, y: Math.floor(Math.random() * 120) }); // 0 to 120
-                    actionNeededData.push({ x: i + 1, y: null });
-                }
-            }
-            avgChart.data.datasets[0].data = onTimeData;
-            avgChart.data.datasets[1].data = actionNeededData;
-            avgChart.update();
-        }
-    }
+    // --- CHART INITIALIZATIONS MUST HAPPEN BEFORE DATE PICKER onReady ---
 
     // Colors
     const colors = {
@@ -239,22 +244,10 @@ document.addEventListener('DOMContentLoaded', function() {
             data: {
                 datasets: [
                     {
-                        label: 'On Time',
+                        label: 'Average Changeover Time',
                         data: [], 
                         backgroundColor: '#2ecc71',
                         borderColor: '#2ecc71',
-                        pointRadius: 6,
-                        pointHoverRadius: 8,
-                        showLine: true,
-                        spanGaps: true,
-                        borderWidth: 2,
-                        tension: 0.3
-                    },
-                    {
-                        label: 'Action Needed',
-                        data: [], 
-                        backgroundColor: '#e74c3c',
-                        borderColor: '#e74c3c',
                         pointRadius: 6,
                         pointHoverRadius: 8,
                         showLine: true,
@@ -288,26 +281,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
-        
-        // Initial data setup for the scatter chart
-        const avgChart = Chart.getChart('averageChangeoverChart');
-        if (avgChart) {
-            const actionNeededIndices = [2, 5, 8]; // Example initial ones
-            const onTimeData = [];
-            const actionNeededData = [];
-            for (let i = 0; i < 11; i++) {
-                if (actionNeededIndices.includes(i)) {
-                    actionNeededData.push({ x: i + 1, y: 130 + Math.random() * 50 });
-                    onTimeData.push({ x: i + 1, y: null });
-                } else {
-                    onTimeData.push({ x: i + 1, y: 30 + Math.random() * 60 });
-                    actionNeededData.push({ x: i + 1, y: null });
-                }
-            }
-            avgChart.data.datasets[0].data = onTimeData;
-            avgChart.data.datasets[1].data = actionNeededData;
-            avgChart.update();
-        }
     }
 
     // Production Status Combined Chart
@@ -322,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     {
                         type: 'line',
                         label: 'Production Target',
-                        data: [1100, 1200, 1150, 1050, 1150, 950, 0, 1300, 1000, 600, 200],
+                        data: [15000, 22000, 18000, 12000, 29000, 8500, 25000, 30000, 14000, 6000, 21000],
                         borderColor: '#ff6b81',
                         backgroundColor: '#ffffff',
                         borderWidth: 2,
@@ -337,7 +310,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     {
                         type: 'bar',
                         label: 'Production',
-                        data: [755, 805, 443, 490, 500, 300, 0, 341, 681, 184, 3],
+                        data: [12000, 19000, 14000, 10000, 24000, 6000, 18000, 25000, 11000, 4000, 17000],
                         backgroundColor: '#48b3e8',
                         borderRadius: 2,
                         barPercentage: 0.3
@@ -415,50 +388,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 }
             }]
-        });
-    }
-
-    // Machine Utilization Factory Switching
-    const factorySelect = document.getElementById('factorySelect');
-    const selectedFactoryName = document.getElementById('selectedFactoryName');
-    const totalUtilVal = document.getElementById('totalUtilVal');
-    const machineList = document.getElementById('machineList');
-
-    const factoryData = {
-        '1': { name: 'Line 1', total: '75%', machines: [{ name: 'Cutting', val: 80 }, { name: 'Sewing', val: 70 }, { name: 'Embroidery', val: 75 }, { name: 'Finishing', val: 60 }] },
-        '2': { name: 'Line 2', total: '82%', machines: [{ name: 'Cutting', val: 85 }, { name: 'Sewing', val: 78 }, { name: 'Embroidery', val: 80 }, { name: 'Finishing', val: 85 }] },
-        '3': { name: 'Line 3', total: '68%', machines: [{ name: 'Cutting', val: 60 }, { name: 'Sewing', val: 65 }, { name: 'Embroidery', val: 70 }, { name: 'Finishing', val: 75 }] },
-        '4': { name: 'Line 4', total: '85%', machines: [{ name: 'Cutting', val: 80 }, { name: 'Sewing', val: 70 }, { name: 'Embroidery', val: 65 }, { name: 'Finishing', val: 80 }] },
-        '5': { name: 'Line 5', total: '90%', machines: [{ name: 'Cutting', val: 95 }, { name: 'Sewing', val: 88 }, { name: 'Embroidery', val: 85 }, { name: 'Finishing', val: 92 }] },
-        '6': { name: 'Line 6', total: '72%', machines: [{ name: 'Cutting', val: 70 }, { name: 'Sewing', val: 75 }, { name: 'Embroidery', val: 68 }, { name: 'Finishing', val: 74 }] },
-        '7': { name: 'Line 7', total: '80%', machines: [{ name: 'Cutting', val: 82 }, { name: 'Sewing', val: 80 }, { name: 'Embroidery', val: 78 }, { name: 'Finishing', val: 80 }] },
-        '8': { name: 'Line 8', total: '65%', machines: [{ name: 'Cutting', val: 62 }, { name: 'Sewing', val: 68 }, { name: 'Embroidery', val: 65 }, { name: 'Finishing', val: 64 }] },
-        '9': { name: 'Line 9', total: '88%', machines: [{ name: 'Cutting', val: 90 }, { name: 'Sewing', val: 88 }, { name: 'Embroidery', val: 86 }, { name: 'Finishing', val: 88 }] },
-        '10': { name: 'Line 10', total: '78%', machines: [{ name: 'Cutting', val: 75 }, { name: 'Sewing', val: 80 }, { name: 'Embroidery', val: 76 }, { name: 'Finishing', val: 80 }] },
-        '11': { name: 'Line 11', total: '83%', machines: [{ name: 'Cutting', val: 85 }, { name: 'Sewing', val: 82 }, { name: 'Embroidery', val: 84 }, { name: 'Finishing', val: 81 }] }
-    };
-
-    if (factorySelect) {
-        // Set initial name
-        if (selectedFactoryName) selectedFactoryName.textContent = 'Line 1';
-        
-        factorySelect.addEventListener('change', function() {
-            const data = factoryData[this.value];
-            if (data) {
-                selectedFactoryName.textContent = data.name;
-                totalUtilVal.textContent = data.total + ' ⌵';
-                
-                machineList.innerHTML = data.machines.map(m => `
-                    <div class="machine-item">
-                        <span class="check-icon">✓</span>
-                        <span class="machine-name">${m.name}</span>
-                        <div class="progress-wrap">
-                            <div class="progress-bg"><div class="progress-fill" style="width: ${m.val}%;"></div></div>
-                            <span class="progress-percent">${m.val}%</span>
-                        </div>
-                    </div>
-                `).join('');
-            }
         });
     }
 
@@ -589,16 +518,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     series: [{
                         name: 'Delays',
                         data: [
-                            { name: 'machine breakdown', y: 15, color: '#2b81d6' },
-                            { name: 'Material Shortage', y: 20, color: '#48b3e8', sliced: true, selected: true },
-                            { name: 'Operator Delay', y: 10, color: '#8ec641' },
-                            { name: 'Quality Check', y: 12, color: '#f7941d' },
-                            { name: 'Tool Missing', y: 8, color: '#e6e7e8' },
-                            { name: 'Power Outage', y: 5, color: '#3498db' },
-                            { name: 'Schedule Change', y: 10, color: '#2ecc71' },
-                            { name: 'pressure foot setting', y: 7, color: '#e74c3c' },
-                            { name: 'operator learning curve', y: 8, color: '#f1c40f' },
-                            { name: 'Other', y: 5, color: '#9b59b6' }
+                            { name: 'Machine Breakdown', y: 15, color: '#0000ff' },     // Blue
+                            { name: 'Material Shortage', y: 20, color: '#00a6a6', sliced: true, selected: true }, // Teal
+                            { name: 'Operator Delay', y: 10, color: '#228b22' },        // Green
+                            { name: 'Quality Check', y: 12, color: '#9acd32' },        // Yellow-Green
+                            { name: 'Tool Missing', y: 8, color: '#cca300' },         // Golden
+                            { name: 'Power Outage', y: 5, color: '#e65c00' },         // Orange-Red
+                            { name: 'Schedule Change', y: 10, color: '#a00000' },       // Darker Red
+                            { name: 'Pressure Foot Setting', y: 7, color: '#e6008e' },   // Lighter Magenta
+                            { name: 'Operator Learning Curve', y: 8, color: '#800080' }, // Purple
+                            { name: 'Other', y: 5, color: '#00008b' }                 // Dark Blue
                         ]
                     }],                    credits: { enabled: false },
                     exporting: { enabled: false }
@@ -607,5 +536,79 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error initializing Highcharts:', err);
             }
         }
+    }
+
+    // Date Picker Logic (Flatpickr)
+    const selectedDateText = document.getElementById('selectedDateText');
+    const datePickerInput = document.getElementById('datePicker');
+    
+    if (datePickerInput && selectedDateText) {
+        const today = new Date().toISOString().split('T')[0];
+        flatpickr(datePickerInput, {
+            dateFormat: "Y-m-d",
+            maxDate: "today",
+            defaultDate: today,
+            disableMobile: true, // Force custom calendar even on mobile
+            onReady: function(selectedDates, dateStr) {
+                if (selectedDateText) {
+                    selectedDateText.textContent = dateStr;
+                    // Ensure initial data matches the default date (Charts exist now)
+                    refreshDashboardData(dateStr);
+                }
+            },
+            onChange: function(selectedDates, dateStr) {
+                if (selectedDateText) {
+                    selectedDateText.textContent = dateStr;
+                    console.log('Date selected:', dateStr);
+                    
+                    // Simulate data refresh for all charts
+                    refreshDashboardData(dateStr);
+                }
+            }
+        });
+    }
+
+    // Machine Details Factory Switching
+    const factorySelect = document.getElementById('factorySelect');
+    const selectedFactoryName = document.getElementById('selectedFactoryName');
+    const totalUtilVal = document.getElementById('totalUtilVal');
+    const machineList = document.getElementById('machineList');
+
+    const factoryData = {
+        '1': { name: 'Line 1', total: '75%', machines: [{ name: 'Cutting', val: 80 }, { name: 'Sewing', val: 70 }, { name: 'Embroidery', val: 75 }, { name: 'Finishing', val: 60 }] },
+        '2': { name: 'Line 2', total: '82%', machines: [{ name: 'Cutting', val: 85 }, { name: 'Sewing', val: 78 }, { name: 'Embroidery', val: 80 }, { name: 'Finishing', val: 85 }] },
+        '3': { name: 'Line 3', total: '68%', machines: [{ name: 'Cutting', val: 60 }, { name: 'Sewing', val: 65 }, { name: 'Embroidery', val: 70 }, { name: 'Finishing', val: 75 }] },
+        '4': { name: 'Line 4', total: '85%', machines: [{ name: 'Cutting', val: 80 }, { name: 'Sewing', val: 70 }, { name: 'Embroidery', val: 65 }, { name: 'Finishing', val: 80 }] },
+        '5': { name: 'Line 5', total: '90%', machines: [{ name: 'Cutting', val: 95 }, { name: 'Sewing', val: 88 }, { name: 'Embroidery', val: 85 }, { name: 'Finishing', val: 92 }] },
+        '6': { name: 'Line 6', total: '72%', machines: [{ name: 'Cutting', val: 70 }, { name: 'Sewing', val: 75 }, { name: 'Embroidery', val: 68 }, { name: 'Finishing', val: 74 }] },
+        '7': { name: 'Line 7', total: '80%', machines: [{ name: 'Cutting', val: 82 }, { name: 'Sewing', val: 80 }, { name: 'Embroidery', val: 78 }, { name: 'Finishing', val: 80 }] },
+        '8': { name: 'Line 8', total: '65%', machines: [{ name: 'Cutting', val: 62 }, { name: 'Sewing', val: 68 }, { name: 'Embroidery', val: 65 }, { name: 'Finishing', val: 64 }] },
+        '9': { name: 'Line 9', total: '88%', machines: [{ name: 'Cutting', val: 90 }, { name: 'Sewing', val: 88 }, { name: 'Embroidery', val: 86 }, { name: 'Finishing', val: 88 }] },
+        '10': { name: 'Line 10', total: '78%', machines: [{ name: 'Cutting', val: 75 }, { name: 'Sewing', val: 80 }, { name: 'Embroidery', val: 76 }, { name: 'Finishing', val: 80 }] },
+        '11': { name: 'Line 11', total: '83%', machines: [{ name: 'Cutting', val: 85 }, { name: 'Sewing', val: 82 }, { name: 'Embroidery', val: 84 }, { name: 'Finishing', val: 81 }] }
+    };
+
+    if (factorySelect) {
+        // Set initial name
+        if (selectedFactoryName) selectedFactoryName.textContent = 'Line 1';
+        
+        factorySelect.addEventListener('change', function() {
+            const data = factoryData[this.value];
+            if (data) {
+                selectedFactoryName.textContent = data.name;
+                totalUtilVal.textContent = data.total + ' ⌵';
+                
+                machineList.innerHTML = data.machines.map(m => `
+                    <div class="machine-item">
+                        <span class="check-icon">✓</span>
+                        <span class="machine-name">${m.name}</span>
+                        <div class="progress-wrap">
+                            <div class="progress-bg"><div class="progress-fill" style="width: ${m.val}%;"></div></div>
+                            <span class="progress-percent">${m.val}%</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        });
     }
 });

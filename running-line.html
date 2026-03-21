@@ -93,6 +93,28 @@
         .line-details { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
         .detail-column p { font-size: 14px; margin-bottom: 12px; line-height: 1.4; }
         
+        .detail-grid {
+            display: grid;
+            grid-template-columns: auto auto 1fr;
+            row-gap: 12px;
+            align-items: start;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        .detail-label {
+            font-weight: 600;
+            padding-right: 8px;
+            display: flex;
+            align-items: center;
+        }
+        .detail-colon {
+            padding-right: 12px;
+            font-weight: 600;
+        }
+        .detail-value {
+            word-break: break-word;
+        }
+
         .file-icon-container { display: inline-block; margin-right: 8px; cursor: pointer; }
         .file-icon { font-size: 14px; color: #6c5ce7; }
 
@@ -122,9 +144,12 @@
     </div>
 
     <header class="header">
-        <div class="logo-container" style="flex-direction: row; align-items: center;"><img src="assets/logo.jpg" alt="Company Logo" class="company-logo">
-            <p class="welcome-text">Welcome to !</p>
-            <h1 class="logo"><span class="purple">Change</span><span class="red">X</span></h1>
+        <div class="logo-container" style="flex-direction: row; align-items: center;">
+            <img src="assets/logo.jpg" alt="Company Logo" class="company-logo">
+            <div>
+                <p class="welcome-text">Welcome to ChangeX!</p>
+                <h1 class="logo"><span class="purple">Change</span><span class="red">X</span></h1>
+            </div>
         </div>
         <div class="header-right">
             <span class="user-email" id="userEmployeeID">ID: 12345</span>
@@ -183,6 +208,58 @@
                     window.open(`/api/open-ob?style=${encodeURIComponent(style)}&type=${type}&line=${line}`, '_blank');
                 }
 
+                function handleLineUpload(input, lineNum, type) {
+                    if (input.files && input.files.length > 0) {
+                        const fileNames = Array.from(input.files).map(f => f.name).join(', ');
+                        alert(`Selected ${type} file(s) for Line ${lineNum}:\n${fileNames}\n(Upload logic can be connected here)`);
+                        // Hide the dropdown menu
+                        const menu = input.closest('.upload-dropdown-menu');
+                        if (menu) menu.style.display = 'none';
+                        // Reset input so the same files can be selected again if needed
+                        input.value = '';
+                    }
+                }
+
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.upload-dropdown-container')) {
+                        document.querySelectorAll('.upload-dropdown-menu').forEach(menu => {
+                            menu.style.display = 'none';
+                        });
+                    }
+                    if (!e.target.closest('.view-file-dropdown-container')) {
+                        document.querySelectorAll('.view-file-dropdown-menu').forEach(menu => {
+                            menu.style.display = 'none';
+                        });
+                    }
+                });
+
+                function generateFileDropdownHtml(style, type, lineNumber) {
+                    if (!style || style === 'Loading...' || style === 'N/A') {
+                        return '<span class="file-icon-container"><span class="file-icon" style="color:#ccc;">📄</span></span>';
+                    }
+                    return `
+                        <div class="view-file-dropdown-container" style="position: relative; display: inline-block;">
+                            <span class="file-icon-container" title="View Options" onclick="
+                                const menu = this.nextElementSibling;
+                                const isVisible = menu.style.display === 'block';
+                                document.querySelectorAll('.upload-dropdown-menu, .view-file-dropdown-menu').forEach(m => m.style.display = 'none');
+                                menu.style.display = isVisible ? 'none' : 'block';
+                                event.stopPropagation();
+                            ">
+                                <span class="file-icon">📄</span>
+                            </span>
+                            <div class="view-file-dropdown-menu" style="display: none; position: absolute; left: 0; top: 100%; margin-top: 5px; background: white; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 1px solid #eaeaea; z-index: 1001; min-width: 140px; overflow: hidden; text-align: left;">
+                                <div onclick="openOBFile('${style}', '${type}', ${lineNumber}); this.parentElement.style.display='none'; event.stopPropagation();" style="display: flex; align-items: center; gap: 8px; padding: 10px 15px; cursor: pointer; color: #2d3436; font-size: 13px; font-weight: 600; border-bottom: 1px solid #eee; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
+                                    <span style="font-size: 16px;">📊</span> View Excel
+                                </div>
+                                <div onclick="alert('PDF viewing will be added soon!'); this.parentElement.style.display='none'; event.stopPropagation();" style="display: flex; align-items: center; gap: 8px; padding: 10px 15px; cursor: pointer; color: #2d3436; font-size: 13px; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
+                                    <span style="font-size: 16px;">📄</span> View PDF
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
                 function closeFactoryModal() {
                     document.getElementById('factoryModal').style.display = 'none';
                     document.body.style.overflow = 'auto';
@@ -213,31 +290,76 @@
                                 current: { style: 'Loading...', time: '00:00', delay: 'None', smv: 0 },
                                 upcoming: { style: 'Loading...', time: '00:00', nextStep: 'N/A', smv: 0 }
                             };
+                            
+                            const prodData = typeof window.getProductionDataForLine === 'function' ? window.getProductionDataForLine(lineData.lineNumber) : { production: 'N/A', target: 'N/A' };
 
                             html += `
                                 <div class="line-section ${index > 0 ? 'line-border' : ''}">
-                                    <h3 class="line-title">Line ${lineData.lineNumber}</h3>
-                                    <div class="line-details">
-                                        <div class="detail-column">
-                                            <p>
-                                                <span class="file-icon-container" onclick="openOBFile('${lineData.current.style}', 'current', ${lineData.lineNumber})">
-                                                    <span class="file-icon">📄</span>
-                                                </span>
-                                                <strong>Running style</strong> : ${lineData.current.style}
-                                            </p>
-                                            <p>
-                                                <span class="file-icon-container" onclick="openOBFile('${lineData.upcoming.style}', 'upcoming', ${lineData.lineNumber})">
-                                                    <span class="file-icon">📄</span>
-                                                </span>
-                                                <strong>Upcoming style</strong> : ${lineData.upcoming.style}
-                                            </p>
-                                            <p><strong>Upcoming Style Requirements</strong> : ${lineData.upcoming.nextStep || 'Standard setup'}</p>
-                                            <p><strong>Estimated Changeover time</strong> : ${lineData.upcoming.time || '45 min'}</p>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                        <h3 class="line-title" style="margin-bottom: 0;">Line ${lineData.lineNumber}</h3>
+                                        <div class="upload-dropdown-container" style="position: relative; display: inline-block;">
+                                            <button type="button" onclick="
+                                                const menu = this.nextElementSibling;
+                                                const isVisible = menu.style.display === 'block';
+                                                document.querySelectorAll('.upload-dropdown-menu').forEach(m => m.style.display = 'none');
+                                                menu.style.display = isVisible ? 'none' : 'block';
+                                                event.stopPropagation();
+                                            " style="cursor: pointer; background: #6c5ce7; border: none; color: white; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                                                <span>📤 Upload Data</span>
+                                                <span style="font-size: 10px;">▼</span>
+                                            </button>
+                                            <div class="upload-dropdown-menu" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 5px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border: 1px solid #eaeaea; z-index: 1000; min-width: 155px; overflow: hidden; text-align: left;">
+                                                <label style="display: flex; align-items: center; gap: 8px; padding: 10px 15px; cursor: pointer; color: #2d3436; font-size: 13px; font-weight: 600; border-bottom: 1px solid #f1f2f6; transition: background 0.2s; margin: 0;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
+                                                    <span style="font-size: 16px;">📄</span> Upload PDF
+                                                    <input type="file" multiple accept=".pdf" style="display: none;" onchange="handleLineUpload(this, ${lineData.lineNumber}, 'PDF')">
+                                                </label>
+                                                <label style="display: flex; align-items: center; gap: 8px; padding: 10px 15px; cursor: pointer; color: #2d3436; font-size: 13px; font-weight: 600; transition: background 0.2s; margin: 0;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
+                                                    <span style="font-size: 16px;">📊</span> Upload Excel
+                                                    <input type="file" multiple accept=".xlsx, .xls" style="display: none;" onchange="handleLineUpload(this, ${lineData.lineNumber}, 'Excel')">
+                                                </label>
+                                            </div>
                                         </div>
-                                        <div class="detail-column">
-                                            <p><strong>Running style SAM</strong> : ${(lineData.current.smv || 0).toFixed(2)}</p>
-                                            <p><strong>Upcoming style SAM</strong> : ${(lineData.upcoming.smv || 0).toFixed(2)}</p>
-                                            <p><strong>Delay Reasons</strong> : ${lineData.current.delay || 'None'}</p>
+                                    </div>
+                                    <div class="line-details">
+                                        <div class="detail-column detail-grid">
+                                            <div class="detail-label">
+                                                ${generateFileDropdownHtml(lineData.current.style, 'current', lineData.lineNumber)}
+                                                Running style
+                                            </div>
+                                            <div class="detail-colon">:</div>
+                                            <div class="detail-value">${lineData.current.style}</div>
+
+                                            <div class="detail-label">
+                                                ${generateFileDropdownHtml(lineData.upcoming.style, 'upcoming', lineData.lineNumber)}
+                                                Upcoming style
+                                            </div>
+                                            <div class="detail-colon">:</div>
+                                            <div class="detail-value">${lineData.upcoming.style}</div>
+
+                                            <div class="detail-label">Upcoming Style Requirements</div>
+                                            <div class="detail-colon">:</div>
+                                            <div class="detail-value">${lineData.upcoming.nextStep || 'Standard setup'}</div>
+
+                                            <div class="detail-label">Changeover Time</div>
+                                            <div class="detail-colon">:</div>
+                                            <div class="detail-value">${lineData.upcoming.time || '45 min'}</div>
+                                        </div>
+                                        <div class="detail-column detail-grid">
+                                            <div class="detail-label">Running style SAM</div>
+                                            <div class="detail-colon">:</div>
+                                            <div class="detail-value">${(lineData.current.smv || 0).toFixed(2)}</div>
+
+                                            <div class="detail-label">Upcoming style SAM</div>
+                                            <div class="detail-colon">:</div>
+                                            <div class="detail-value">${(lineData.upcoming.smv || 0).toFixed(2)}</div>
+
+                                            <div class="detail-label">Delay Reasons</div>
+                                            <div class="detail-colon">:</div>
+                                            <div class="detail-value">${lineData.current.delay || 'None'}</div>
+
+                                            <div class="detail-label">Quantity</div>
+                                            <div class="detail-colon">:</div>
+                                            <div class="detail-value">${prodData.production.toLocaleString()} / ${prodData.target.toLocaleString()}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -282,9 +404,23 @@
                                 { lineNumber: 11, current: { style: 'TOMMY HILFIGER ---> HUGOBOSS', progress: 50, time: '20:00', machineAvail: '72%', workaidsAvail: '80%', delay: 'Machine Breakdown' } }
                             ];
 
+                            function getProgressHtml(progress) {
+                                if (progress < 10) return `<div style="background: white; padding: 5px;"><strong style="color:#636e72;">0–10% → Order Initialization</strong><ul style="margin: 6px 0 0 15px; padding: 0;"><li>Order created in system</li><li>Fabric, trims, BOM confirmed</li><li>Production plan scheduled</li><li>No physical production yet</li></ul></div>`;
+                                if (progress < 20) return `<div style="background: white; padding: 5px;"><strong style="color:#e67e22;">🟠 10–20% → Fabric Preparation</strong><ul style="margin: 6px 0 0 15px; padding: 0;"><li>Fabric received & inspected</li><li>Defect checking (4-point system etc.)</li><li>Relaxation of fabric (important for cotton)</li></ul></div>`;
+                                if (progress < 30) return `<div style="background: white; padding: 5px;"><strong style="color:#e67e22;">🟠 20–30% → Cutting Stage</strong><ul style="margin: 6px 0 0 15px; padding: 0;"><li>Marker planning done</li><li>Fabric spreading</li><li>Cutting completed for batch</li></ul></div>`;
+                                if (progress < 40) return `<div style="background: white; padding: 5px;"><strong style="color:#f1c40f;">🟡 30–40% → Bundling & Line Feeding</strong><ul style="margin: 6px 0 0 15px; padding: 0;"><li>Cut pieces bundled</li><li>Sent to sewing lines</li><li>Line setup (machines, operators)</li></ul></div>`;
+                                if (progress < 50) return `<div style="background: white; padding: 5px;"><strong style="color:#f1c40f;">🟡 40–50% → Initial Stitching</strong><ul style="margin: 6px 0 0 15px; padding: 0;"><li>Collar, cuffs, plackets prepared</li><li>First assembly operations start</li></ul></div>`;
+                                if (progress < 60) return `<div style="background: white; padding: 5px;"><strong style="color:#f1c40f;">🟡 50–60% → Major Assembly</strong><ul style="margin: 6px 0 0 15px; padding: 0;"><li>Body stitching (front + back)</li><li>Sleeve attachment begins</li></ul></div>`;
+                                if (progress < 70) return `<div style="background: white; padding: 5px;"><strong style="color:#2ecc71;">🟢 60–70% → Full Stitch Completion</strong><ul style="margin: 6px 0 0 15px; padding: 0;"><li>Side seams done</li><li>Sleeves attached</li><li>Collar attached</li></ul></div>`;
+                                if (progress < 80) return `<div style="background: white; padding: 5px;"><strong style="color:#2ecc71;">🟢 70–80% → Finishing Operations</strong><ul style="margin: 6px 0 0 15px; padding: 0;"><li>Buttoning</li><li>Buttonholes</li><li>Thread trimming</li></ul></div>`;
+                                if (progress < 90) return `<div style="background: white; padding: 5px;"><strong style="color:#0984e3;">🔵 80–90% → Quality Check & Ironing</strong><ul style="margin: 6px 0 0 15px; padding: 0;"><li>Inline QC + final QC</li><li>Defect fixing (rework if needed)</li><li>Pressing / ironing</li></ul></div>`;
+                                return `<div style="background: white; padding: 5px;"><strong style="color:#0984e3;">🔵 90–100% → Packing & Dispatch</strong><ul style="margin: 6px 0 0 15px; padding: 0;"><li>Folding</li><li>Tagging / labeling</li><li>Packing</li><li>Ready for shipment</li></ul></div>`;
+                            }
+
                             container.innerHTML = dataToUse.map(line => {
                                 const lNum = line.lineNumber || line.id;
                                 const curr = line.current || {};
+                                const progRangeHtml = getProgressHtml(curr.progress || 0);
                                 return `
                                 <div class="line-item" style="padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); margin-bottom: 20px; border: 1px solid #eaeaea;">
                                     <div class="line-header" style="margin-bottom: 15px;">
@@ -293,14 +429,22 @@
                                     </div>
                                     <div class="style-name" style="margin-left: 42px; margin-bottom: 15px; color: #636e72; font-size: 14px; font-weight: 700;">${curr.style || 'N/A'}</div>
 
-                                    <div class="progress-section" style="margin-left: 42px; margin-bottom: 15px;">
-                                        <div class="progress-label" style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
-                                            <span style="color: #6c5ce7; font-weight: 600;">Progress ${curr.progress || 0}%</span>
+                                    <div class="progress-section" style="margin-left: 42px; margin-bottom: 15px; cursor: pointer; position: relative;" onclick="const crit = this.querySelector('.progress-criteria'); crit.style.display = crit.style.display === 'block' ? 'none' : 'block'; event.stopPropagation();">
+                                        <div class="progress-label" style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
+                                            <span style="color: #6c5ce7; font-weight: 600; text-decoration: underline; text-underline-offset: 3px;" title="Click to view criteria">Progress ${curr.progress || 0}% ℹ️</span>
                                             <span style="font-weight: 700; color: #2d3436;">${curr.time || '00:00'}</span>
                                         </div>
                                         <div class="small-progress" style="height: 6px; background-color: #f1f2f6; border-radius: 3px; position: relative;">
                                             <div class="small-progress-fill" style="width: ${curr.progress || 0}%; height: 100%; background-color: #6c5ce7; border-radius: 3px;"></div>
                                             <span style="position: absolute; right: -12px; top: -7px; color: #6c5ce7; font-size: 14px;">→</span>
+                                        </div>
+
+                                        <div class="progress-criteria" style="display: none; margin-top: 15px; background: white; border: 1px solid #eaeaea; border-radius: 8px; padding: 15px; font-size: 13px; color: #555; line-height: 1.4; box-shadow: 0 4px 15px rgba(0,0,0,0.05); cursor: default;" onclick="event.stopPropagation();">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f2f6; padding-bottom: 10px; margin-bottom: 10px;">
+                                                <h4 style="margin: 0; color: #2d3436; font-size: 14px; display: flex; align-items: center; gap: 6px;"><span>ℹ️</span> Current Progress Phase</h4>
+                                                <span onclick="this.closest('.progress-criteria').style.display='none'" style="cursor: pointer; font-size: 18px; color: #a4b0be; transition: color 0.2s;" onmouseover="this.style.color='#ff6b81'" onmouseout="this.style.color='#a4b0be'">&times;</span>
+                                            </div>
+                                            ${progRangeHtml}
                                         </div>
                                     </div>
 

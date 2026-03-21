@@ -93,8 +93,10 @@ body {
     letter-spacing: -1px;
 }
 
-.logo .purple { color: #6a11cb; }
+.logo .purple { color: #6c5ce7; }
 .logo .red { color: #f5576c; }
+
+[data-theme="dark"] .logo .purple { color: #a29bfe; } /* Lighter purple for dark mode */
 
 .header-right {
     display: flex;
@@ -115,6 +117,25 @@ body {
     text-decoration: none;
     cursor: pointer;
     transition: all 0.2s;
+}
+
+.btn-date {
+    background: var(--card-bg);
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    font-size: 13px;
+    position: relative;
+}
+
+.btn-date:hover {
+    background: var(--bg-light);
 }
 
 .btn-contact {
@@ -349,7 +370,7 @@ html.sidebar-pushed .sidebar {
     position: relative;
     width: 100%;
     margin-bottom: 5px;
-    cursor: help;
+    cursor: default;
 }
 
 .gauge-tooltip {
@@ -411,7 +432,7 @@ html.sidebar-pushed .sidebar {
     white-space: nowrap;
 }
 
-/* Machine Utilization List */
+/* Machine Details List */
 .factory-util-header {
     display: flex;
     justify-content: space-between;
