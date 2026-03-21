@@ -16,7 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         /* Custom Popup Styles */
-        .details-modal {
+        .details-modal, .history-modal {
             display: none;
             position: fixed;
             z-index: 1000;
@@ -38,6 +38,10 @@
             text-align: center;
             position: relative;
             animation: modalFadeIn 0.3s ease;
+        }
+        .history-modal .modal-content {
+            max-width: 600px;
+            text-align: left;
         }
         @keyframes modalFadeIn {
             from { opacity: 0; transform: translateY(-20px); }
@@ -61,6 +65,66 @@
             font-size: 14px;
             line-height: 1.5;
         }
+        .history-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+        .history-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        .history-line {
+            font-weight: 700;
+            color: #2d3436;
+            width: 60px;
+        }
+        .history-info {
+            flex: 1;
+            font-size: 13px;
+        }
+        .history-date {
+            font-size: 12px;
+            color: #999;
+        }
+        .btn-history {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+        .btn-history:hover {
+            transform: scale(1.1);
+        }
+        .btn-history img {
+            width: 24px;
+            height: 24px;
+            filter: grayscale(1) opacity(0.7);
+            transition: filter 0.3s ease;
+        }
+        [data-theme="dark"] .btn-history img {
+            filter: grayscale(1) invert(1) opacity(0.9);
+        }
+        [data-theme="dark"] .modal-content {
+            background-color: var(--card-bg);
+            color: var(--text-dark);
+        }
+        [data-theme="dark"] .modal-title {
+            color: var(--text-dark);
+        }
+        [data-theme="dark"] .history-item {
+            border-bottom-color: var(--border-color);
+        }
     </style>
     <script>
         // Check if user is logged in
@@ -74,6 +138,34 @@
         function hideDetails() {
             document.getElementById('detailsModal').style.display = 'none';
         }
+
+        function showHistory() {
+            const historyList = document.getElementById('historyList');
+            const mockHistory = [
+                { line: 1, style: 'TOMMY HILFIGER -> CK', date: '2026-03-18', duration: '42 min' },
+                { line: 2, style: 'HUGOBOSS -> LEVIS', date: '2026-03-18', duration: '55 min' },
+                { line: 3, style: 'CK -> TOMMY HILFIGER', date: '2026-03-17', duration: '38 min' },
+                { line: 4, style: 'ZARA -> GUESS', date: '2026-03-17', duration: '1 hr 10 min' },
+                { line: 5, style: 'GAP -> CK', date: '2026-03-16', duration: '45 min' },
+                { line: 1, style: 'ADIDAS -> PUMA', date: '2026-03-15', duration: '30 min' },
+            ];
+
+            historyList.innerHTML = mockHistory.map(item => `
+                <div class="history-item">
+                    <div class="history-line">Line ${item.line}</div>
+                    <div class="history-info">
+                        <strong>${item.style}</strong><br>
+                        <span class="history-date">${item.date} | Duration: ${item.duration}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('historyModal').style.display = 'flex';
+        }
+
+        function hideHistory() {
+            document.getElementById('historyModal').style.display = 'none';
+        }
     </script>
 </head>
 <body class="dashboard-page">
@@ -86,6 +178,17 @@
             </div>
         </div>
     </div>
+
+    <div id="historyModal" class="history-modal" onclick="if(event.target == this) hideHistory()">
+        <div class="modal-content">
+            <span class="close-modal" onclick="hideHistory()">&times;</span>
+            <h3 class="modal-title">Previously Done Changeovers</h3>
+            <div class="history-list" id="historyList">
+                <!-- History items will be loaded here -->
+            </div>
+        </div>
+    </div>
+
     <header class="header">
         <div class="logo-container" style="flex-direction: row; align-items: center;"><img src="assets/logo.jpg" alt="Company Logo" class="company-logo">
             <p class="welcome-text">Welcome to !</p>
@@ -114,8 +217,11 @@
         </nav>
 
         <main class="main-content">
-            <div class="view-header">
+            <div class="view-header" style="align-items: center;">
                 <h1 style="font-size: 18px; font-weight: 600;">Upcoming Changeover</h1>
+                <button class="btn-history" onclick="showHistory()" title="View History">
+                    <img src="https://cdn-icons-png.flaticon.com/512/32/32223.png" alt="History">
+                </button>
             </div>
 
             <div class="columns-1">

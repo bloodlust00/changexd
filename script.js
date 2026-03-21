@@ -462,7 +462,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Machine Availability Chart (Main)
+    // Machine Required Chart (Main)
     const defectsCanvas = document.getElementById('defectsChart');
     if (defectsCanvas) {
         const defectsCtx = defectsCanvas.getContext('2d');

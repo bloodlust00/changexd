@@ -20,8 +20,107 @@
             window.location.href = 'login.html';
         }
     </script>
+    <style>
+        /* Factory Details Modal Styles */
+        .factory-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.3);
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .factory-modal-content {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border-radius: 24px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+            width: 90%;
+            max-width: 900px;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            animation: modalFadeIn 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        [data-theme="dark"] .factory-modal-content {
+            background: linear-gradient(135deg, rgba(17, 25, 40, 0.8), rgba(17, 25, 40, 0.6));
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .close-factory-modal {
+            position: absolute;
+            right: 25px;
+            top: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--text-dark);
+            opacity: 0.6;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+        .close-factory-modal:hover { opacity: 1; }
+
+        .factory-modal-body h2 {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 30px;
+            border-bottom: 3px solid var(--text-dark);
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        /* Reusing detail styles inside modal */
+        .line-section { margin-bottom: 30px; }
+        .line-border { border-top: 1px solid rgba(0,0,0,0.1); padding-top: 30px; }
+        [data-theme="dark"] .line-border { border-top-color: rgba(255,255,255,0.1); }
+        .line-title { font-size: 22px; font-weight: 700; margin-bottom: 20px; }
+        .line-details { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        .detail-column p { font-size: 14px; margin-bottom: 12px; line-height: 1.4; }
+        
+        .file-icon-container { display: inline-block; margin-right: 8px; cursor: pointer; }
+        .file-icon { font-size: 14px; color: #6c5ce7; }
+
+        /* Background blobs for modal area */
+        .modal-blob {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.2;
+            z-index: -1;
+        }
+    </style>
 </head>
 <body class="dashboard-page">
+    <!-- Factory Details Modal -->
+    <div id="factoryModal" class="factory-modal" onclick="if(event.target == this) closeFactoryModal()">
+        <div class="factory-modal-content">
+            <span class="close-factory-modal" onclick="closeFactoryModal()">&times;</span>
+            <div class="modal-blob" style="background: #6c5ce7; top: 10%; left: 10%;"></div>
+            <div class="modal-blob" style="background: #3498db; bottom: 10%; right: 10%;"></div>
+            <div id="factoryModalBody" class="factory-modal-body">
+                <!-- Content loaded via JS -->
+            </div>
+        </div>
+    </div>
+
     <header class="header">
         <div class="logo-container" style="flex-direction: row; align-items: center;"><img src="assets/logo.jpg" alt="Company Logo" class="company-logo">
             <p class="welcome-text">Welcome to !</p>
@@ -58,22 +157,99 @@
             </div>
 
             <div class="factory-grid" id="gridView">
-                <a href="factory-detail.html?id=1" class="factory-pastel green">
+                <div class="factory-pastel green" onclick="openFactoryModal(1)" style="cursor: pointer;">
                     <span class="factory-title-text">Factory 1</span>
-                </a>
-                <a href="factory-detail.html?id=2" class="factory-pastel blue">
+                </div>
+                <div class="factory-pastel blue" onclick="openFactoryModal(2)" style="cursor: pointer;">
                     <span class="factory-title-text">Factory 2</span>
-                </a>
-                <a href="factory-detail.html?id=3" class="factory-pastel purple">
+                </div>
+                <div class="factory-pastel purple" onclick="openFactoryModal(3)" style="cursor: pointer;">
                     <span class="factory-title-text">Factory 3</span>
-                </a>
-                <a href="factory-detail.html?id=4" class="factory-pastel orange">
+                </div>
+                <div class="factory-pastel orange" onclick="openFactoryModal(4)" style="cursor: pointer;">
                     <span class="factory-title-text">Factory 4</span>
-                </a>
-                <a href="factory-detail.html?id=5" class="factory-pastel pink">
+                </div>
+                <div class="factory-pastel pink" onclick="openFactoryModal(5)" style="cursor: pointer;">
                     <span class="factory-title-text">Factory 5</span>
-                </a>
+                </div>
             </div>
+
+            <script>
+                function openOBFile(style, type, line) {
+                    if (!style || style === 'Loading...' || style === 'N/A') {
+                        alert('No file available for this style.');
+                        return;
+                    }
+                    window.open(`/api/open-ob?style=${encodeURIComponent(style)}&type=${type}&line=${line}`, '_blank');
+                }
+
+                function closeFactoryModal() {
+                    document.getElementById('factoryModal').style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+
+                async function openFactoryModal(factoryId) {
+                    const modal = document.getElementById('factoryModal');
+                    const modalBody = document.getElementById('factoryModalBody');
+                    modal.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                    modalBody.innerHTML = '<p style="text-align: center; padding: 40px; color: var(--text-dark);">Loading details...</p>';
+
+                    const factoryLinesMapping = {
+                        1: [1, 2], 2: [3, 4], 3: [5, 6], 4: [7, 8], 5: [9, 10, 11]
+                    };
+
+                    try {
+                        const response = await fetch('/api/lines');
+                        if (!response.ok) throw new Error('API failed');
+                        const allLinesData = await response.json();
+                        const lineNumbers = factoryLinesMapping[factoryId] || [];
+                        
+                        let html = `<h2>Factory ${factoryId}</h2>`;
+
+                        lineNumbers.forEach((lineNum, index) => {
+                            const lineData = allLinesData.find(l => l.lineNumber === lineNum) || {
+                                lineNumber: lineNum,
+                                current: { style: 'Loading...', time: '00:00', delay: 'None', smv: 0 },
+                                upcoming: { style: 'Loading...', time: '00:00', nextStep: 'N/A', smv: 0 }
+                            };
+
+                            html += `
+                                <div class="line-section ${index > 0 ? 'line-border' : ''}">
+                                    <h3 class="line-title">Line ${lineData.lineNumber}</h3>
+                                    <div class="line-details">
+                                        <div class="detail-column">
+                                            <p>
+                                                <span class="file-icon-container" onclick="openOBFile('${lineData.current.style}', 'current', ${lineData.lineNumber})">
+                                                    <span class="file-icon">📄</span>
+                                                </span>
+                                                <strong>Running style</strong> : ${lineData.current.style}
+                                            </p>
+                                            <p>
+                                                <span class="file-icon-container" onclick="openOBFile('${lineData.upcoming.style}', 'upcoming', ${lineData.lineNumber})">
+                                                    <span class="file-icon">📄</span>
+                                                </span>
+                                                <strong>Upcoming style</strong> : ${lineData.upcoming.style}
+                                            </p>
+                                            <p><strong>Upcoming Style Requirements</strong> : ${lineData.upcoming.nextStep || 'Standard setup'}</p>
+                                            <p><strong>Estimated Changeover time</strong> : ${lineData.upcoming.time || '45 min'}</p>
+                                        </div>
+                                        <div class="detail-column">
+                                            <p><strong>Running style SAM</strong> : ${(lineData.current.smv || 0).toFixed(2)}</p>
+                                            <p><strong>Upcoming style SAM</strong> : ${(lineData.upcoming.smv || 0).toFixed(2)}</p>
+                                            <p><strong>Delay Reasons</strong> : ${lineData.current.delay || 'None'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        modalBody.innerHTML = html;
+                    } catch (err) {
+                        console.error('Failed to load factory detail:', err);
+                        modalBody.innerHTML = "<h2>Error loading data.</h2>";
+                    }
+                }
+            </script>
 
             <div class="list-view-container" id="listView" style="display: none;">
                 <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 20px;">Current Line Changeover</h1>
