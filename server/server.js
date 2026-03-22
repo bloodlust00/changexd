@@ -53,6 +53,8 @@ const lineSchema = new mongoose.Schema({
         smv: { type: Number, default: 0 },
         obFilePath: { type: String, default: null }
     },
+    upcomingQueue: { type: Array, default: [] },
+    pushHistory: { type: Array, default: [] },
     machineUtilization: {
         cutting: { type: Number, default: 0 },
         sewing: { type: Number, default: 0 },
@@ -165,6 +167,21 @@ async function syncDataFromLocalFile() {
             const rOB = obDataList[idx1];
             const uOB = obDataList[idx2];
 
+            const queue = [];
+            for (let k = 0; k < 7; k++) {
+                const qIdx = Math.floor(Math.random() * obDataList.length);
+                const qOB = obDataList[qIdx];
+                queue.push({
+                    style: qOB.styleName,
+                    prep: Math.floor(Math.random() * 80) + 10,
+                    time: '45 min',
+                    nextStep: qOB.tools.length > 0 ? qOB.tools.slice(0, 2).join(', ') : 'Standard Setup',
+                    manpower: qOB.manpower + ' Operators',
+                    smv: qOB.smv,
+                    obFilePath: qOB.filePath
+                });
+            }
+
             await Line.findOneAndUpdate({ lineNumber: i }, {
                 $set: {
                     'current.style': rOB.styleName,
@@ -175,12 +192,13 @@ async function syncDataFromLocalFile() {
                     'current.smv': rOB.smv,
                     'current.obFilePath': rOB.filePath,
                     'upcoming.style': uOB.styleName,
-                    'upcoming.prep': 30,
+                    'upcoming.prep': Math.floor(Math.random() * 80) + 10,
                     'upcoming.time': '45 min',
                     'upcoming.nextStep': uOB.tools.length > 0 ? uOB.tools.slice(0, 2).join(', ') : 'Standard Setup',
                     'upcoming.manpower': uOB.manpower + ' Operators',
                     'upcoming.smv': uOB.smv,
                     'upcoming.obFilePath': uOB.filePath,
+                    'upcomingQueue': queue,
                     lastUpdated: new Date()
                 }
             }, { upsert: true });
@@ -195,6 +213,59 @@ app.get('/api/lines', async (req, res) => {
         const lines = await Line.find().sort({ lineNumber: 1 });
         res.json(lines);
     } catch (e) { res.status(500).json([]); }
+});
+
+app.post('/api/lines/push/:lineNumber', async (req, res) => {
+    try {
+        const lineNumber = parseInt(req.params.lineNumber);
+        const line = await Line.findOne({ lineNumber });
+        if (!line) return res.status(404).json({ message: 'Line not found' });
+
+        const obDataList = parseOBFiles();
+
+        line.current = {
+            style: line.upcoming.style,
+            progress: 0,
+            time: '00:00',
+            machineAvail: '100%',
+            workaidsAvail: '100%',
+            delay: 'None',
+            smv: line.upcoming.smv,
+            obFilePath: line.upcoming.obFilePath
+        };
+
+        if (!line.pushHistory) line.pushHistory = [];
+        line.pushHistory.push({
+            style: line.upcoming.style,
+            date: new Date()
+        });
+
+        if (line.upcomingQueue && line.upcomingQueue.length > 0) {
+            line.upcoming = line.upcomingQueue.shift();
+            
+            if (obDataList.length > 0) {
+                const qIdx = Math.floor(Math.random() * obDataList.length);
+                const qOB = obDataList[qIdx];
+                line.upcomingQueue.push({
+                    style: qOB.styleName,
+                    prep: 0,
+                    time: '45 min',
+                    nextStep: qOB.tools.length > 0 ? qOB.tools.slice(0, 2).join(', ') : 'Standard Setup',
+                    manpower: qOB.manpower + ' Operators',
+                    smv: qOB.smv,
+                    obFilePath: qOB.filePath
+                });
+            }
+        }
+        
+        line.lastUpdated = new Date();
+        await line.save();
+        
+        res.json({ message: 'Success', line });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ message: 'Error pushing line' });
+    }
 });
 
 app.get('/api/open-ob', async (req, res) => {

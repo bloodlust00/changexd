@@ -132,11 +132,117 @@
             window.location.href = 'login.html';
         }
 
-        function showDetails() {
+        window.lineQueueData = {};
+
+        function openOBFile(style, type, line) {
+            if (!style || style === 'Loading...' || style === 'N/A') {
+                alert('No file available for this style.');
+                return;
+            }
+            window.open(`/api/open-ob?style=${encodeURIComponent(style)}&type=${type}&line=${line}`, '_blank');
+        }
+
+        function generateFileDropdownHtml(style, type, lineNumber) {
+            if (!style || style === 'Loading...' || style === 'N/A') {
+                return '<span class="file-icon-container"><span class="file-icon" style="color:#ccc;">📄</span></span>';
+            }
+            return `
+                <div class="view-file-dropdown-container" style="position: relative; display: inline-block;">
+                    <span class="file-icon-container" title="View Options" onclick="
+                        const menu = this.nextElementSibling;
+                        const isVisible = menu.style.display === 'block';
+                        document.querySelectorAll('.upload-dropdown-menu, .view-file-dropdown-menu').forEach(m => m.style.display = 'none');
+                        menu.style.display = isVisible ? 'none' : 'block';
+                        event.stopPropagation();
+                    ">
+                        <span class="file-icon" style="cursor: pointer;">📄</span>
+                    </span>
+                    <div class="view-file-dropdown-menu" style="display: none; position: absolute; left: 0; top: 100%; margin-top: 5px; background: white; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 1px solid #eaeaea; z-index: 1001; min-width: 140px; overflow: hidden; text-align: left;">
+                        <div onclick="openOBFile('${style}', '${type}', ${lineNumber}); this.parentElement.style.display='none'; event.stopPropagation();" style="display: flex; align-items: center; gap: 8px; padding: 10px 15px; cursor: pointer; color: #2d3436; font-size: 13px; font-weight: 600; border-bottom: 1px solid #eee; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
+                            <span style="font-size: 16px;">📊</span> View Excel
+                        </div>
+                        <div onclick="alert('PDF viewing will be added soon!'); this.parentElement.style.display='none'; event.stopPropagation();" style="display: flex; align-items: center; gap: 8px; padding: 10px 15px; cursor: pointer; color: #2d3436; font-size: 13px; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
+                            <span style="font-size: 16px;">📄</span> View PDF
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.view-file-dropdown-container')) {
+                document.querySelectorAll('.view-file-dropdown-menu').forEach(menu => {
+                    menu.style.display = 'none';
+                });
+            }
+        });
+
+        function showDetails(lineNumber) {
+            const queue = window.lineQueueData[lineNumber] || [];
+            const modalBody = document.querySelector('#detailsModal .modal-body');
+            
+            if (queue.length === 0) {
+                modalBody.innerHTML = '<p>No queued styles available. Update backend mapping.</p>';
+            } else {
+                modalBody.innerHTML = '<div class="history-list" style="margin-top: 0;">' + queue.map((item, idx) => `
+                    <div class="history-item" style="display: flex; align-items: center; justify-content: space-between; padding: 15px 10px;">
+                        <div>
+                            <span style="font-weight: 700; color: #2d3436;">${idx + 1}. ${item.style}</span>
+                            <div style="font-size: 12px; color: #888; margin-top: 6px;">Prep: ${item.prep}% | Manpower: ${item.manpower}</div>
+                        </div>
+                        <div style="background: #f1f2f6; padding: 6px 10px; border-radius: 6px;">
+                            ${generateFileDropdownHtml(item.style, 'upcoming', lineNumber)}
+                        </div>
+                    </div>
+                `).join('') + '</div>';
+            }
+            
             document.getElementById('detailsModal').style.display = 'flex';
         }
         function hideDetails() {
             document.getElementById('detailsModal').style.display = 'none';
+        }
+
+        function showPushLog() {
+            const pushList = document.getElementById('pushLogList');
+            let allPushes = [];
+            
+            if (window.cachedApiData) {
+                window.cachedApiData.forEach(line => {
+                    if (line.pushHistory && line.pushHistory.length > 0) {
+                        line.pushHistory.forEach(entry => {
+                            allPushes.push({
+                                line: line.lineNumber || line.id,
+                                style: entry.style,
+                                dateObj: new Date(entry.date),
+                                dateStr: new Date(entry.date).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })
+                            });
+                        });
+                    }
+                });
+            }
+            
+            allPushes.sort((a, b) => b.dateObj - a.dateObj);
+            
+            if (allPushes.length === 0) {
+                pushList.innerHTML = '<div style="padding: 15px; text-align: center; color: #888;">No push history found.</div>';
+            } else {
+                pushList.innerHTML = allPushes.map(item => `
+                    <div class="history-item">
+                        <div class="history-line">Line ${item.line}</div>
+                        <div class="history-info">
+                            <strong>${item.style}</strong><br>
+                            <span class="history-date">${item.dateStr}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('pushLogModal').style.display = 'flex';
+        }
+
+        function hidePushLog() {
+            document.getElementById('pushLogModal').style.display = 'none';
         }
 
         function showHistory() {
@@ -170,11 +276,11 @@
 </head>
 <body class="dashboard-page">
     <div id="detailsModal" class="details-modal" onclick="if(event.target == this) hideDetails()">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 500px; text-align: left;">
             <span class="close-modal" onclick="hideDetails()">&times;</span>
-            <h3 class="modal-title">Changeover Details</h3>
-            <div class="modal-body">
-                Upcoming 7 days style with machine details
+            <h3 class="modal-title" style="border-bottom: 2px solid #eee; padding-bottom: 15px;">Upcoming Queued Styles</h3>
+            <div class="modal-body" style="padding-top: 10px;">
+                <!-- Dynamically loaded queue styles -->
             </div>
         </div>
     </div>
@@ -185,6 +291,16 @@
             <h3 class="modal-title">Previously Done Changeovers</h3>
             <div class="history-list" id="historyList">
                 <!-- History items will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <div id="pushLogModal" class="history-modal" onclick="if(event.target == this) hidePushLog()">
+        <div class="modal-content" style="max-width: 500px; text-align: left;">
+            <span class="close-modal" onclick="hidePushLog()">&times;</span>
+            <h3 class="modal-title" style="border-bottom: 2px solid #eee; padding-bottom: 15px;">Line Push History</h3>
+            <div class="history-list" id="pushLogList" style="margin-top: 10px;">
+                <!-- Push items will be loaded here -->
             </div>
         </div>
     </div>
@@ -222,9 +338,14 @@
         <main class="main-content">
             <div class="view-header" style="align-items: center;">
                 <h1 style="font-size: 18px; font-weight: 600;">Upcoming Changeover</h1>
-                <button class="btn-history" onclick="showHistory()" title="View History">
-                    <img src="https://cdn-icons-png.flaticon.com/512/32/32223.png" alt="History">
-                </button>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-history" onclick="showPushLog()" title="Push Log" style="font-size: 24px;">
+                        📋
+                    </button>
+                    <button class="btn-history" onclick="showHistory()" title="View History">
+                        <img src="https://cdn-icons-png.flaticon.com/512/32/32223.png" alt="History">
+                    </button>
+                </div>
             </div>
 
             <div class="columns-1">
@@ -239,6 +360,7 @@
                             const response = await fetch('/api/lines');
                             if (!response.ok) throw new Error('API failed');
                             const apiData = await response.json();
+                            window.cachedApiData = apiData;
                             
                             const dataToUse = (apiData && apiData.length > 0) ? apiData : [
                                 { lineNumber: 1, upcoming: { style: 'cK', prep: 30, time: '45 min', manpower: '6 Operators', nextStep: 'PLC Setting Change' } },
@@ -254,32 +376,81 @@
                                 { lineNumber: 11, upcoming: { style: 'cK', prep: 20, time: '1 hr 45 min', manpower: '8 Operators', nextStep: 'Yarn Setup' } }
                             ];
 
-                            container.innerHTML = dataToUse.map(line => `
+                            function getPrepProgressHtml(prep) {
+                                if (prep < 20) return `<div style="background: white; padding: 5px;"><strong style="color:#636e72;">0–20% → Initial Planning</strong><ul style="margin: 6px 0 0 15px; padding: 0;"><li>Tech pack & BOM reviewed</li><li>Line balancing plan created</li><li>Setup requirements identified</li></ul></div>`;
+                                if (prep < 40) return `<div style="background: white; padding: 5px;"><strong style="color:#e67e22;">🟠 20–40% → Material Synchronization</strong><ul style="margin: 6px 0 0 15px; padding: 0;"><li>Fabrics requested from warehouse</li><li>Trims/accessories sorted</li><li>Cut panels verified for completeness</li></ul></div>`;
+                                if (prep < 60) return `<div style="background: white; padding: 5px;"><strong style="color:#f1c40f;">🟡 40–60% → Machine & Tools Alignment</strong><ul style="margin: 6px 0 0 15px; padding: 0;"><li>Specialized folders/attachments sourced</li><li>Needles & threads pre-positioned</li><li>Mechanic schedule confirmed</li></ul></div>`;
+                                if (prep < 80) return `<div style="background: white; padding: 5px;"><strong style="color:#2ecc71;">🟢 60–80% → Manpower Allocation</strong><ul style="margin: 6px 0 0 15px; padding: 0;"><li>Operators briefed on operations</li><li>Critical path skills verified</li><li>Quality checkpoints established</li></ul></div>`;
+                                return `<div style="background: white; padding: 5px;"><strong style="color:#0984e3;">🔵 80–100% → Final Readiness</strong><ul style="margin: 6px 0 0 15px; padding: 0;"><li>All resources available at line</li><li>Mock-up samples prepared</li><li>Ready for switch-on</li></ul></div>`;
+                            }
+
+                            window.pushLineStyle = async function(lineNumber) {
+                                if (!confirm(`Are you sure you want to push Line ${lineNumber}'s upcoming style into the current live changeover?`)) return;
+                                
+                                try {
+                                    const response = await fetch(`/api/lines/push/${lineNumber}`, { method: 'POST' });
+                                    if (response.ok) {
+                                        alert('Successfully pushed to current line changeover!');
+                                        loadUpcomingData();
+                                    } else {
+                                        alert('Error pushing line to current.');
+                                    }
+                                } catch (err) {
+                                    console.error(err);
+                                    alert('Network error pushing line.');
+                                }
+                            }
+
+                            container.innerHTML = dataToUse.map(line => {
+                                const lNum = line.lineNumber || line.id;
+                                const prepRangeHtml = getPrepProgressHtml(line.upcoming.prep || 0);
+
+                                window.lineQueueData[lNum] = line.upcomingQueue || [];
+
+                                return `
                                 <div class="line-item" style="padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); margin-bottom: 20px; border: 1px solid #eaeaea;">
-                                    <div class="line-header" style="margin-bottom: 15px;">
-                                        <div class="line-num" style="background-color: #3498db; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;">${line.lineNumber || line.id}</div>
-                                        <span class="line-name" style="font-size: 18px; font-weight: 700; color: #2d3436;">Line ${line.lineNumber || line.id}</span>
+                                    <div class="line-header" style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                            <div class="line-num" style="background-color: #3498db; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;">${lNum}</div>
+                                            <span class="line-name" style="font-size: 18px; font-weight: 700; color: #2d3436;">Line ${lNum}</span>
+                                        </div>
+                                        <button onclick="pushLineStyle(${lNum})" style="background-color: #e84393; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(232, 67, 147, 0.2); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                                            <span>🚀</span> Push to Current
+                                        </button>
                                     </div>
-                                    <div class="style-name" style="margin-left: 42px; margin-bottom: 15px; color: #636e72; font-size: 14px;">${line.upcoming.style}</div>
+                                    <div class="style-name" style="margin-left: 42px; margin-bottom: 15px; color: #636e72; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+                                        <div style="background: #f1f2f6; padding: 4px 8px; border-radius: 6px;">
+                                            ${generateFileDropdownHtml(line.upcoming.style, 'upcoming', lNum)}
+                                        </div>
+                                        ${line.upcoming.style}
+                                    </div>
                                     
-                                    <div class="progress-section" style="margin-left: 42px; margin-bottom: 15px;">
-                                        <div class="progress-label" style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
-                                            <span style="color: #3498db; font-weight: 600;">Preparation ${line.upcoming.prep}%</span>
-                                            <span style="font-weight: 700; color: #2d3436;">${line.upcoming.time}</span>
+                                    <div class="progress-section" style="margin-left: 42px; margin-bottom: 15px; cursor: pointer; position: relative;" onclick="const crit = this.querySelector('.progress-criteria'); crit.style.display = crit.style.display === 'block' ? 'none' : 'block'; event.stopPropagation();">
+                                        <div class="progress-label" style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
+                                            <span style="color: #3498db; font-weight: 600; text-decoration: underline; text-underline-offset: 3px;" title="Click to view criteria">Preparation ${line.upcoming.prep}% ℹ️</span>
                                         </div>
                                         <div class="small-progress" style="height: 6px; background-color: #f1f2f6; border-radius: 3px; position: relative;">
                                             <div class="small-progress-fill" style="width: ${line.upcoming.prep}%; height: 100%; background-color: #3498db; border-radius: 3px;"></div>
+                                            <span style="position: absolute; right: -12px; top: -7px; color: #3498db; font-size: 14px;">→</span>
+                                        </div>
+
+                                        <div class="progress-criteria" style="display: none; margin-top: 15px; background: white; border: 1px solid #eaeaea; border-radius: 8px; padding: 15px; font-size: 13px; color: #555; line-height: 1.4; box-shadow: 0 4px 15px rgba(0,0,0,0.05); cursor: default;" onclick="event.stopPropagation();">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f2f6; padding-bottom: 10px; margin-bottom: 10px;">
+                                                <h4 style="margin: 0; color: #2d3436; font-size: 14px; display: flex; align-items: center; gap: 6px;"><span>ℹ️</span> Preparation Phase</h4>
+                                                <span onclick="this.closest('.progress-criteria').style.display='none'" style="cursor: pointer; font-size: 18px; color: #a4b0be; transition: color 0.2s;" onmouseover="this.style.color='#ff6b81'" onmouseout="this.style.color='#a4b0be'">&times;</span>
+                                            </div>
+                                            ${prepRangeHtml}
                                         </div>
                                     </div>
                                     
                                     <div style="display: flex; align-items: center; gap: 8px; margin-left: 42px; font-size: 13px; color: #3498db;">
                                         <span>Manpower: <strong>${line.upcoming.manpower || 'TBD'}</strong></span>
-                                        <span style="margin-left: 15px;">Next Step: <strong>${line.upcoming.nextStep || 'Setup'}</strong></span>
-                                        <span style="margin-left: auto; cursor: pointer; text-decoration: underline;" onclick="showDetails()">🔗 View Details</span>
+                                        <span style="margin-left: auto; cursor: pointer; text-decoration: underline; font-weight: 600;" onclick="showDetails(${lNum})">🔗 View Details</span>
                                     </div>
 
                                 </div>
-                            `).join('');
+                            `;
+                            }).join('');
                         } catch (err) {
                             console.error('Failed to load upcoming data:', err);
                         }

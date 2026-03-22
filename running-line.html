@@ -143,6 +143,55 @@
         </div>
     </div>
 
+    <!-- Internal-External Activities Modal -->
+    <div id="ieModal" class="factory-modal" onclick="if(event.target == this) closeIEModal()">
+        <div class="factory-modal-content" style="max-width: 800px; padding: 40px; text-align: left; max-height: 85vh; overflow-y: auto;">
+            <span class="close-factory-modal" onclick="closeIEModal()">&times;</span>
+            <div class="factory-modal-body">
+                <h2 style="font-size: 28px; font-weight: 800; margin-bottom: 25px; border-bottom: 3px solid var(--text-dark); display: inline-block; padding-bottom: 5px; color: var(--text-dark);">Internal vs External Activities</h2>
+                
+                <div style="background: rgba(108, 92, 231, 0.05); padding: 25px; border-radius: 12px; margin-bottom: 30px; border-left: 4px solid #6c5ce7;">
+                    <h3 style="color: #6c5ce7; font-size: 20px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 10px;">
+                        <span>⚙️</span> Internal Activities (Inside the Machine)
+                    </h3>
+                    <p style="font-size: 14px; color: #636e72; margin-bottom: 15px; font-style: italic;">These are automatic mechanical operations you don’t directly control once the machine is running:</p>
+                    <ul style="font-size: 15px; color: var(--text-dark); margin-bottom: 0; padding-left: 20px; line-height: 1.7;">
+                        <li><strong>Core Stitch Formation:</strong> Needle moves up and down; Needle carries upper thread through fabric; Hook (rotary/oscillating) catches loop from needle; Bobbin thread interlocks with upper thread → forms stitch.</li>
+                        <li><strong>Thread Handling:</strong> Upper thread tension regulation; Bobbin thread tension control; Thread take-up lever pulling thread tight after each stitch.</li>
+                        <li><strong>Feed Mechanism:</strong> Feed dogs move fabric forward/backward after each stitch; Stitch length mechanism controls how far fabric moves.</li>
+                        <li><strong>Motion System:</strong> Motor converts electrical energy → rotational motion; Belt/gear system transfers motion to needle and hook; Timing synchronization between needle and hook.</li>
+                        <li><strong>Control Systems:</strong> Speed control (via motor controller); Stitch pattern mechanism (cams/electronic control in modern machines).</li>
+                    </ul>
+                </div>
+
+                <div style="background: rgba(232, 67, 147, 0.05); padding: 25px; border-radius: 12px; border-left: 4px solid #e84393;">
+                    <h3 style="color: #e84393; font-size: 20px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 10px;">
+                        <span>🧵</span> External Activities (Operator / Outside Actions)
+                    </h3>
+                    <p style="font-size: 14px; color: #636e72; margin-bottom: 15px; font-style: italic;">This is where most people underestimate complexity—bad handling here ruins everything.</p>
+                    <ul style="font-size: 15px; color: var(--text-dark); margin-bottom: 0; padding-left: 20px; line-height: 1.7;">
+                        <li><strong>Setup Activities:</strong> Threading the machine (upper thread path); Winding and inserting bobbin; Selecting stitch type and length; Adjusting tension manually (if needed).</li>
+                        <li><strong>Fabric Handling:</strong> Positioning fabric under presser foot; Lowering/raising presser foot; Guiding fabric direction (you—not the machine—control alignment).</li>
+                        <li><strong>Operation:</strong> Pressing foot pedal to control speed; Starting/stopping stitching; Backstitching to lock seams.</li>
+                        <li><strong>Monitoring & Adjustment:</strong> Watching stitch quality; Adjusting tension if stitches are loose/tight; Changing needle if fabric type changes.</li>
+                        <li><strong>Maintenance:</strong> Cleaning lint from bobbin area; Oiling moving parts (in mechanical machines); Replacing needles regularly.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function openIEModal() {
+            document.getElementById('ieModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        function closeIEModal() {
+            document.getElementById('ieModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    </script>
+
     <header class="header">
         <div class="logo-container" style="flex-direction: row; align-items: center;">
             <img src="assets/logo.jpg" alt="Company Logo" class="company-logo">
@@ -421,6 +470,26 @@
                                 const lNum = line.lineNumber || line.id;
                                 const curr = line.current || {};
                                 const progRangeHtml = getProgressHtml(curr.progress || 0);
+
+                                // Generate start and end times with 3-4 hours difference if not provided
+                                let startTimeStr = curr.startTime;
+                                let endTimeStr = curr.endTime;
+                                if (!startTimeStr || !endTimeStr) {
+                                    const baseHour = 8 + (lNum % 3); // 8, 9, 10 AM
+                                    const baseMin = (lNum * 15) % 60;
+                                    const diffHours = 3 + (lNum % 2); // 3 or 4 hours difference
+                                    
+                                    const formatHM = (h, m) => {
+                                        const ampm = h >= 12 ? 'PM' : 'AM';
+                                        let h12 = h % 12;
+                                        if (h12 === 0) h12 = 12;
+                                        return `${h12.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')} ${ampm}`;
+                                    };
+                                    
+                                    startTimeStr = formatHM(baseHour, baseMin);
+                                    endTimeStr = formatHM(baseHour + diffHours, baseMin);
+                                }
+
                                 return `
                                 <div class="line-item" style="padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); margin-bottom: 20px; border: 1px solid #eaeaea;">
                                     <div class="line-header" style="margin-bottom: 15px;">
@@ -430,9 +499,9 @@
                                     <div class="style-name" style="margin-left: 42px; margin-bottom: 15px; color: #636e72; font-size: 14px; font-weight: 700;">${curr.style || 'N/A'}</div>
 
                                     <div class="progress-section" style="margin-left: 42px; margin-bottom: 15px; cursor: pointer; position: relative;" onclick="const crit = this.querySelector('.progress-criteria'); crit.style.display = crit.style.display === 'block' ? 'none' : 'block'; event.stopPropagation();">
-                                        <div class="progress-label" style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
+                                        <div class="progress-label" style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; transition: opacity 0.2s; align-items: center;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
                                             <span style="color: #6c5ce7; font-weight: 600; text-decoration: underline; text-underline-offset: 3px;" title="Click to view criteria">Progress ${curr.progress || 0}% ℹ️</span>
-                                            <span style="font-weight: 700; color: #2d3436;">${curr.time || '00:00'}</span>
+                                            <span style="font-weight: 700; color: #2d3436;">${startTimeStr} - ${endTimeStr}</span>
                                         </div>
                                         <div class="small-progress" style="height: 6px; background-color: #f1f2f6; border-radius: 3px; position: relative;">
                                             <div class="small-progress-fill" style="width: ${curr.progress || 0}%; height: 100%; background-color: #6c5ce7; border-radius: 3px;"></div>
@@ -448,20 +517,30 @@
                                         </div>
                                     </div>
 
-                                    <div style="margin-left: 42px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                        <div style="display: flex; gap: 10px; align-items: center;">
-                                            <p style="color: #888; font-size: 13px; margin: 0;">Machine availability %</p>
-                                            <span style="background-color: #f1f2f6; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: #555; font-weight: 700;">${curr.machineAvail || '0%'}</span>
+                                    <div style="margin-left: 42px; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                                            <div style="display: flex; gap: 10px; align-items: center;">
+                                                <p style="color: #888; font-size: 13px; margin: 0;">Machine availability %</p>
+                                                <span style="background-color: #f1f2f6; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: #555; font-weight: 700;">${curr.machineAvail || '0%'}</span>
+                                            </div>
+                                            <p style="color: #888; font-size: 13px; margin: 0;">
+                                                Unavailable machine count - 
+                                                <span style="color: #555; font-weight: 600;">${curr.delay || 'None'}</span>
+                                            </p>
                                         </div>
-                                        <div style="display: flex; gap: 10px; align-items: center;">
-                                            <p style="color: #888; font-size: 13px; margin: 0;">Workaids Availability %</p>
-                                            <span style="background-color: #f1f2f6; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: #555; font-weight: 700;">${curr.workaidsAvail || '0%'}</span>
+                                        <div style="display: flex; flex-direction: column; gap: 10px; align-items: flex-end;">
+                                            <div style="display: flex; gap: 10px; align-items: center;">
+                                                <p style="color: #888; font-size: 13px; margin: 0;">Workaids Availability %</p>
+                                                <span style="background-color: #f1f2f6; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: #555; font-weight: 700;">${curr.workaidsAvail || '0%'}</span>
+                                            </div>
+                                            <div style="display: flex; gap: 10px; align-items: center;">
+                                                <p style="color: #888; font-size: 13px; margin: 0;">Internal-External</p>
+                                                <span style="background-color: #e84393; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: white; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'" onclick="openIEModal()">
+                                                    <span>ℹ️</span> View Details
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                    <p style="margin-left: 42px; color: #888; font-size: 13px; margin-bottom: 0;">
-                                        Unavailable machine count - 
-                                        <span style="color: #555; font-weight: 600;">${curr.delay || 'None'}</span>
-                                    </p>
                                 </div>
                             `; }).join('');
                         } catch (err) {
