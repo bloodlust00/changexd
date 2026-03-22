@@ -56,51 +56,56 @@
             <div class="alerts-page-container">
                 <h1 class="alerts-header-title">Alerts</h1>
                 
-                <div class="alerts-list">
-                    <!-- Alert 1: Error -->
-                    <div class="alert-card error">
-                        <div class="alert-card-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                <div class="alerts-list" id="alertsListContainer"></div>
+                <script>
+                    const alertsList = document.getElementById('alertsListContainer');
+                    const alertItems = [];
+                    for (let i = 1; i <= 11; i++) {
+                        let f = 1;
+                        if (i >= 3 && i <= 4) f = 2;
+                        else if (i >= 5 && i <= 6) f = 3;
+                        else if (i >= 7 && i <= 8) f = 4;
+                        else if (i >= 9 && i <= 11) f = 5;
+                        
+                        const colors = ['warning', 'error', 'success', 'warning'];
+                        const cls = colors[i % 4];
+                        let icon = '';
+                        if (cls === 'error') icon = '<circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>';
+                        else if (cls === 'success') icon = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>';
+                        else icon = '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>';
+                        
+                        alertItems.push(`
+                        <div class="alert-card ${cls}" style="flex-direction: column; align-items: stretch; padding: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="const body = this.nextElementSibling; body.style.display = body.style.display === 'block' ? 'none' : 'block';">
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <div class="alert-card-icon" style="margin: 0; display: flex; align-items: center;">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icon}</svg>
+                                    </div>
+                                    <div class="alert-card-main-text" style="font-weight: 700;">Factory ${f}, Line ${i}</div>
+                                </div>
+                                <div style="font-size: 14px; font-weight: bold; color: #636e72;">▼ View Details</div>
+                            </div>
+                            <div style="display: none; padding-top: 15px; margin-top: 15px; border-top: 1px solid #eaeaea;">
+                                <ul style="margin: 0; padding-left: 20px; color: #2d3436; font-size: 14px; line-height: 1.8;">
+                                    <li>1. Delay Reasons</li>
+                                    <li>2. Schedule Change</li>
+                                    <li>3. Quality Failure</li>
+                                    <li>4. Critical Points</li>
+                                    <li>5. Precautions</li>
+                                </ul>
+                            </div>
                         </div>
-                        <div class="alert-card-content">
-                            <div class="alert-card-main-text">Factory 3, Line 1 — Changeover exceeded estimated time by 15 min</div>
-                            <div class="alert-card-time">10 min ago</div>
-                        </div>
-                    </div>
+                        `);
+                    }
 
-                    <!-- Alert 2: Warning -->
-                    <div class="alert-card warning">
-                        <div class="alert-card-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                        </div>
-                        <div class="alert-card-content">
-                            <div class="alert-card-main-text">Factory 1, Line 2 — Mechanic not yet assigned for upcoming changeover</div>
-                            <div class="alert-card-time">25 min ago</div>
-                        </div>
-                    </div>
+                    // Shuffle the array so lines display out of order
+                    for (let i = alertItems.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [alertItems[i], alertItems[j]] = [alertItems[j], alertItems[i]];
+                    }
 
-                    <!-- Alert 3: Success -->
-                    <div class="alert-card success">
-                        <div class="alert-card-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                        </div>
-                        <div class="alert-card-content">
-                            <div class="alert-card-main-text">Factory 5, Line 1 — Changeover completed successfully</div>
-                            <div class="alert-card-time">1 hr ago</div>
-                        </div>
-                    </div>
-
-                    <!-- Alert 4: Warning -->
-                    <div class="alert-card warning">
-                        <div class="alert-card-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                        </div>
-                        <div class="alert-card-content">
-                            <div class="alert-card-main-text">Factory 2 — Material shortage reported for Style N-102</div>
-                            <div class="alert-card-time">2 hrs ago</div>
-                        </div>
-                    </div>
-                </div>
+                    alertsList.innerHTML = alertItems.join('');
+                </script>
             </div>
         </main>
     </div>
