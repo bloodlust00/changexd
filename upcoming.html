@@ -134,12 +134,16 @@
 
         window.lineQueueData = {};
 
-        function openOBFile(style, type, line) {
+        function openDocFile(style, type, line, format) {
             if (!style || style === 'Loading...' || style === 'N/A') {
-                alert('No file available for this style.');
                 return;
             }
-            window.open(`/api/open-ob?style=${encodeURIComponent(style)}&type=${type}&line=${line}`, '_blank');
+            const uri = `/api/open-doc?style=${encodeURIComponent(style)}&type=${type}&line=${line}&format=${format}`;
+            if (format === 'excel') {
+                window.location.href = uri;
+            } else {
+                window.open(uri, '_blank');
+            }
         }
 
         function generateFileDropdownHtml(style, type, lineNumber) {
@@ -158,10 +162,10 @@
                         <span class="file-icon" style="cursor: pointer;">📄</span>
                     </span>
                     <div class="view-file-dropdown-menu" style="display: none; position: absolute; left: 0; top: 100%; margin-top: 5px; background: white; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 1px solid #eaeaea; z-index: 1001; min-width: 140px; overflow: hidden; text-align: left;">
-                        <div onclick="openOBFile('${style}', '${type}', ${lineNumber}); this.parentElement.style.display='none'; event.stopPropagation();" style="display: flex; align-items: center; gap: 8px; padding: 10px 15px; cursor: pointer; color: #2d3436; font-size: 13px; font-weight: 600; border-bottom: 1px solid #eee; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
+                        <div onclick="openDocFile('${style}', '${type}', ${lineNumber}, 'excel'); this.parentElement.style.display='none'; event.stopPropagation();" style="display: flex; align-items: center; gap: 8px; padding: 10px 15px; cursor: pointer; color: #2d3436; font-size: 13px; font-weight: 600; border-bottom: 1px solid #eee; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
                             <span style="font-size: 16px;">📊</span> View Excel
                         </div>
-                        <div onclick="alert('PDF viewing will be added soon!'); this.parentElement.style.display='none'; event.stopPropagation();" style="display: flex; align-items: center; gap: 8px; padding: 10px 15px; cursor: pointer; color: #2d3436; font-size: 13px; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
+                        <div onclick="openDocFile('${style}', '${type}', ${lineNumber}, 'pdf'); this.parentElement.style.display='none'; event.stopPropagation();" style="display: flex; align-items: center; gap: 8px; padding: 10px 15px; cursor: pointer; color: #2d3436; font-size: 13px; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
                             <span style="font-size: 16px;">📄</span> View PDF
                         </div>
                     </div>

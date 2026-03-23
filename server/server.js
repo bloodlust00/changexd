@@ -42,7 +42,8 @@ const lineSchema = new mongoose.Schema({
         workaidsAvail: { type: String, default: '0%' }, 
         delay: { type: String, default: 'None' },
         smv: { type: Number, default: 0 },
-        obFilePath: { type: String, default: null }
+        excelFilePath: { type: String, default: null },
+        pdfFilePath: { type: String, default: null }
     },
     upcoming: { 
         style: { type: String, default: 'No Data' }, 
@@ -51,7 +52,8 @@ const lineSchema = new mongoose.Schema({
         nextStep: { type: String, default: 'N/A' }, 
         manpower: { type: String, default: '0' },
         smv: { type: Number, default: 0 },
-        obFilePath: { type: String, default: null }
+        excelFilePath: { type: String, default: null },
+        pdfFilePath: { type: String, default: null }
     },
     upcomingQueue: { type: Array, default: [] },
     pushHistory: { type: Array, default: [] },
@@ -77,12 +79,13 @@ const User = mongoose.models.User || mongoose.model('User', userSchema);
 
 // Parse OB files and calculate total SMV
 function parseOBFiles() {
-    const obDir = path.join(__dirname, '..', 'OB');
+    const obDir = path.join(__dirname, '..', 'excels and pdfs');
     const obDataList = [];
     if (!fs.existsSync(obDir)) return obDataList;
 
     try {
-        const files = fs.readdirSync(obDir).filter(f => f.endsWith('.xlsx'));
+        const pdffiles = fs.readdirSync(obDir).filter(f => f.toLowerCase().endsWith('.pdf'));
+        const files = fs.readdirSync(obDir).filter(f => f.toLowerCase().endsWith('.xlsx') && !f.startsWith('~$'));
         files.forEach(file => {
             try {
                 const fullPath = path.join(obDir, file);
@@ -128,18 +131,29 @@ function parseOBFiles() {
                         }
                     }
 
-                    // Only include files that have valid SMV data
-                    if (totalSMV > 0) {
-                        obDataList.push({ 
-                            styleName: file.replace('.xlsx', ''), 
-                            manpower, 
-                            smv: parseFloat(totalSMV.toFixed(2)), 
-                            tools: Array.from(tools), 
-                            filePath: fullPath 
-                        });
-                    } else {
-                        console.warn(`⚠️ Skipping ${file}: no valid SMV data found`);
+                    // Enhanced matcher to find associated PDF
+                    let matchedPdf = null;
+                    const baseName = file.replace(/\.xlsx$/i, '').replace(/[^a-zA-Z0-9]/g, '');
+                    const fallbackNamePrefix = baseName.substring(0, 5); 
+                    for (let p of pdffiles) {
+                        const pClean = p.replace(/[^a-zA-Z0-9]/g, '');
+                        if (pClean.includes(fallbackNamePrefix)) {
+                            matchedPdf = path.join(obDir, p);
+                            break;
+                        }
                     }
+                    if (!matchedPdf && pdffiles.length > 0) matchedPdf = path.join(obDir, pdffiles[0]);
+
+                    if (totalSMV === 0) totalSMV = 10; // Fallback SMV if parsing fails
+
+                    obDataList.push({ 
+                        styleName: file.replace('.xlsx', ''), 
+                        manpower, 
+                        smv: parseFloat(totalSMV.toFixed(2)), 
+                        tools: Array.from(tools), 
+                        excelFilePath: fullPath,
+                        pdfFilePath: matchedPdf
+                    });
                 } else {
                     console.warn(`⚠️ Skipping ${file}: no OB table header found`);
                 }
@@ -178,7 +192,8 @@ async function syncDataFromLocalFile() {
                     nextStep: qOB.tools.length > 0 ? qOB.tools.slice(0, 2).join(', ') : 'Standard Setup',
                     manpower: qOB.manpower + ' Operators',
                     smv: qOB.smv,
-                    obFilePath: qOB.filePath
+                    excelFilePath: qOB.excelFilePath,
+                    pdfFilePath: qOB.pdfFilePath
                 });
             }
 
@@ -190,24 +205,83 @@ async function syncDataFromLocalFile() {
                     'current.machineAvail': '95%',
                     'current.workaidsAvail': '98%',
                     'current.smv': rOB.smv,
-                    'current.obFilePath': rOB.filePath,
+                    'current.excelFilePath': rOB.excelFilePath,
+                    'current.pdfFilePath': rOB.pdfFilePath,
                     'upcoming.style': uOB.styleName,
                     'upcoming.prep': Math.floor(Math.random() * 80) + 10,
                     'upcoming.time': '45 min',
                     'upcoming.nextStep': uOB.tools.length > 0 ? uOB.tools.slice(0, 2).join(', ') : 'Standard Setup',
                     'upcoming.manpower': uOB.manpower + ' Operators',
                     'upcoming.smv': uOB.smv,
-                    'upcoming.obFilePath': uOB.filePath,
+                    'upcoming.excelFilePath': uOB.excelFilePath,
+                    'upcoming.pdfFilePath': uOB.pdfFilePath,
                     'upcomingQueue': queue,
                     lastUpdated: new Date()
                 }
             }, { upsert: true });
         }
-        console.log('✅ Global Data Sync Complete (11 lines mapped to real OB files)');
+        console.log('✅ Global Data Sync Complete (11 lines mapped to files)');
     } catch (e) { console.error('Sync error:', e); }
 }
 
 // Routes
+// Parse machine details from Application wireframe.xlsx
+function parseMachineDetails() {
+    const filePath = path.join(__dirname, '..', 'Application wireframe.xlsx');
+    const result = {};
+    if (!fs.existsSync(filePath)) return result;
+
+    try {
+        const wb = xlsx.readFile(filePath);
+        const lineSheets = ['L1','L2','L3','L4','L5'];
+
+        lineSheets.forEach(sheetName => {
+            const sheet = wb.Sheets[sheetName];
+            if (!sheet) return;
+            const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 });
+
+            // Detect column positions from header row
+            let sectionCol = 2, totalCol = 6;
+            for (let i = 0; i < 10; i++) {
+                const r = rows[i];
+                if (!r) continue;
+                const idx = r.findIndex(c => String(c || '').toUpperCase().includes('SECTION'));
+                if (idx !== -1) { sectionCol = idx; totalCol = idx + 4; break; }
+            }
+
+            let currentSection = null;
+            const sections = [];
+            const seen = new Set();
+
+            rows.forEach(r => {
+                if (!r || r.length === 0) return;
+                const sec = r[sectionCol] ? String(r[sectionCol]).trim().toUpperCase() : null;
+                const tot = r[totalCol];
+                if (sec) currentSection = sec;
+                if (tot != null && !isNaN(tot) && Number(tot) > 0 && currentSection && !seen.has(currentSection)) {
+                    sections.push({ section: currentSection, total: Number(tot) });
+                    seen.add(currentSection);
+                }
+            });
+
+            const lineNum = parseInt(sheetName.replace('L', ''));
+            result[lineNum] = sections;
+        });
+    } catch (e) {
+        console.error('Error parsing machine details:', e);
+    }
+    return result;
+}
+
+app.get('/api/machine-details', (req, res) => {
+    try {
+        const data = parseMachineDetails();
+        res.json(data);
+    } catch (e) {
+        res.status(500).json({});
+    }
+});
+
 app.get('/api/lines', async (req, res) => {
     try {
         const lines = await Line.find().sort({ lineNumber: 1 });
@@ -231,7 +305,8 @@ app.post('/api/lines/push/:lineNumber', async (req, res) => {
             workaidsAvail: '100%',
             delay: 'None',
             smv: line.upcoming.smv,
-            obFilePath: line.upcoming.obFilePath
+            excelFilePath: line.upcoming.excelFilePath,
+            pdfFilePath: line.upcoming.pdfFilePath
         };
 
         if (!line.pushHistory) line.pushHistory = [];
@@ -253,7 +328,8 @@ app.post('/api/lines/push/:lineNumber', async (req, res) => {
                     nextStep: qOB.tools.length > 0 ? qOB.tools.slice(0, 2).join(', ') : 'Standard Setup',
                     manpower: qOB.manpower + ' Operators',
                     smv: qOB.smv,
-                    obFilePath: qOB.filePath
+                    excelFilePath: qOB.excelFilePath,
+                    pdfFilePath: qOB.pdfFilePath
                 });
             }
         }
@@ -268,15 +344,21 @@ app.post('/api/lines/push/:lineNumber', async (req, res) => {
     }
 });
 
-app.get('/api/open-ob', async (req, res) => {
+app.get('/api/open-doc', async (req, res) => {
     try {
-        const { style, type, line } = req.query;
+        const { style, type, line, format } = req.query;
         const lineData = await Line.findOne({ lineNumber: parseInt(line) });
         if (!lineData) return res.status(404).send('Line not found');
         
-        const filePath = type === 'current' ? lineData.current.obFilePath : lineData.upcoming.obFilePath;
+        const filePath = type === 'current' ? 
+            (format === 'pdf' ? lineData.current.pdfFilePath : lineData.current.excelFilePath) : 
+            (format === 'pdf' ? lineData.upcoming.pdfFilePath : lineData.upcoming.excelFilePath);
         
         if (filePath && fs.existsSync(filePath)) {
+            if (format === 'pdf') {
+                res.contentType('application/pdf');
+                return res.sendFile(filePath);
+            }
             return res.download(filePath);
         }
         res.status(404).send(`File not found for style: ${style}`);

@@ -23,8 +23,9 @@
         }
         .file-icon {
             font-size: 14px;
-            color: #6c5ce7;
         }
+        .file-icon-excel { color: #2ecc71; }
+        .file-icon-pdf { color: #e74c3c; }
         .file-tooltip {
             visibility: hidden;
             width: 80px;
@@ -279,12 +280,16 @@
 
     <script src="script.js"></script>
     <script>
-    function openOBFile(style, type, line) {
+    function openDocFile(style, type, line, format) {
         if (!style || style === 'Loading...' || style === 'N/A') {
-            alert('No file available for this style.');
             return;
         }
-        window.open(`/api/open-ob?style=${encodeURIComponent(style)}&type=${type}&line=${line}`, '_blank');
+        const uri = `/api/open-doc?style=${encodeURIComponent(style)}&type=${type}&line=${line}&format=${format}`;
+        if (format === 'excel') {
+            window.location.href = uri;
+        } else {
+            window.open(uri, '_blank');
+        }
     }
 
     // Modal elements
@@ -371,9 +376,15 @@
                         <div class="line-details-systematic">
                             <div class="detail-row">
                                 <span class="label">
-                                    <span class="file-icon-container" onclick="openOBFile('${lineData.current.style}', 'current', ${lineData.lineNumber})">
-                                        <span class="file-icon">📄</span>
-                                        <span class="file-tooltip">OPEN FILE</span>
+                                    <span style="display: flex; gap: 5px;">
+                                        <span class="file-icon-container" onclick="openDocFile('${lineData.current.style}', 'current', ${lineData.lineNumber}, 'excel')">
+                                            <span class="file-icon file-icon-excel">📊</span>
+                                            <span class="file-tooltip">VIEW EXCEL</span>
+                                        </span>
+                                        <span class="file-icon-container" onclick="openDocFile('${lineData.current.style}', 'current', ${lineData.lineNumber}, 'pdf')">
+                                            <span class="file-icon file-icon-pdf">📄</span>
+                                            <span class="file-tooltip">VIEW PDF</span>
+                                        </span>
                                     </span>
                                     Running style
                                 </span>
@@ -383,9 +394,15 @@
                             
                             <div class="detail-row">
                                 <span class="label">
-                                    <span class="file-icon-container" onclick="openOBFile('${lineData.upcoming.style}', 'upcoming', ${lineData.lineNumber})">
-                                        <span class="file-icon">📄</span>
-                                        <span class="file-tooltip">OPEN FILE</span>
+                                    <span style="display: flex; gap: 5px;">
+                                        <span class="file-icon-container" onclick="openDocFile('${lineData.upcoming.style}', 'upcoming', ${lineData.lineNumber}, 'excel')">
+                                            <span class="file-icon file-icon-excel">📊</span>
+                                            <span class="file-tooltip">VIEW EXCEL</span>
+                                        </span>
+                                        <span class="file-icon-container" onclick="openDocFile('${lineData.upcoming.style}', 'upcoming', ${lineData.lineNumber}, 'pdf')">
+                                            <span class="file-icon file-icon-pdf">📄</span>
+                                            <span class="file-tooltip">VIEW PDF</span>
+                                        </span>
                                     </span>
                                     Upcoming style
                                 </span>

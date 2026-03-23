@@ -456,38 +456,36 @@ html.sidebar-pushed .sidebar {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 25px; /* Increased from 12px */
-}
-
-.check-icon {
-    font-size: 10px;
-    color: #999;
+    margin-bottom: 10px;
 }
 
 .machine-name {
     font-size: 11px;
-    flex: 1;
-    color: #555;
+    min-width: 110px;
+    color: var(--text-grey);
+    font-weight: 500;
 }
 
 .progress-wrap {
     display: flex;
     align-items: center;
     gap: 10px;
-    width: 140px;
+    flex: 1;
 }
 
 .progress-bg {
-    height: 6px;
-    background-color: #f0f0f0;
-    border-radius: 3px;
+    height: 7px;
+    background-color: var(--border-color);
+    border-radius: 4px;
     flex: 1;
+    overflow: hidden;
 }
 
 .progress-fill {
     height: 100%;
     background-color: var(--primary-blue);
-    border-radius: 3px;
+    border-radius: 4px;
+    transition: width 0.4s ease;
 }
 
 .progress-percent {

@@ -81,20 +81,20 @@ window.getProductionDataForLine = function(lineNumber, dateStr) {
 
     const targets = [];
     for(let i=0; i<11; i++) {
-        targets.push(Math.floor(5000 + getNextRandom() * 25000));
+        targets.push(Math.floor(1500 + getNextRandom() * 300));
     }
 
     const productions = [];
     for(let i=0; i<11; i++) {
-        const efficiency = 0.6 + (getNextRandom() * 0.35);
-        productions.push(Math.max(1000, Math.floor(targets[i] * efficiency)));
+        const efficiency = 0.8 + (getNextRandom() * 0.2);
+        productions.push(Math.max(1200, Math.floor(targets[i] * efficiency)));
     }
 
     const idx = lineNumber - 1;
     if (idx >= 0 && idx < 11) {
         return { target: targets[idx], production: productions[idx] };
     }
-    return { target: 15000, production: 12000 };
+    return { target: 1800, production: 1500 };
 };
 
 function refreshDashboardData(dateStr) {
@@ -111,15 +111,15 @@ function refreshDashboardData(dateStr) {
     // 1. Refresh Production Status Chart
     const prodChart = Chart.getChart('productionStatusChart');
     if (prodChart) {
-        // Target between 5000 and 30000
+        // Target up to 1800
         prodChart.data.datasets[0].data = prodChart.data.datasets[0].data.map(() => {
-            return Math.floor(5000 + getNextRandom() * 25000);
+            return Math.floor(1500 + getNextRandom() * 300);
         });
 
-        // Production between 60% and 95% of target
+        // Production between 1200 and target
         prodChart.data.datasets[1].data = prodChart.data.datasets[0].data.map(target => {
-            const efficiency = 0.6 + (getNextRandom() * 0.35);
-            return Math.max(1000, Math.floor(target * efficiency)); // Min 1000 to avoid near-zero
+            const efficiency = 0.8 + (getNextRandom() * 0.2);
+            return Math.max(1200, Math.floor(target * efficiency)); // Min 1200
         });
         
         prodChart.update();
@@ -295,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     {
                         type: 'line',
                         label: 'Production Target',
-                        data: [15000, 22000, 18000, 12000, 29000, 8500, 25000, 30000, 14000, 6000, 21000],
+                        data: [1600, 1750, 1800, 1500, 1700, 1400, 1650, 1800, 1550, 1300, 1700],
                         borderColor: '#ff6b81',
                         backgroundColor: '#ffffff',
                         borderWidth: 2,
@@ -310,7 +310,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     {
                         type: 'bar',
                         label: 'Production',
-                        data: [12000, 19000, 14000, 10000, 24000, 6000, 18000, 25000, 11000, 4000, 17000],
+                        data: [1400, 1600, 1700, 1250, 1500, 1200, 1450, 1750, 1350, 1200, 1550],
                         backgroundColor: '#48b3e8',
                         borderRadius: 2,
                         barPercentage: 0.3
@@ -341,7 +341,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 scales: {
                     y: {
-                        beginAtZero: true,
+                        min: 1200,
+                        max: 1800,
                         display: false // Hide Y axis like in the screenshot
                     },
                     x: {
@@ -568,47 +569,58 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Machine Details Factory Switching
+    // Machine Details Card — load from Excel via API
     const factorySelect = document.getElementById('factorySelect');
     const selectedFactoryName = document.getElementById('selectedFactoryName');
     const totalUtilVal = document.getElementById('totalUtilVal');
     const machineList = document.getElementById('machineList');
 
-    const factoryData = {
-        '1': { name: 'Line 1', total: '75%', machines: [{ name: 'Cutting', val: 80 }, { name: 'Sewing', val: 70 }, { name: 'Embroidery', val: 75 }, { name: 'Finishing', val: 60 }] },
-        '2': { name: 'Line 2', total: '82%', machines: [{ name: 'Cutting', val: 85 }, { name: 'Sewing', val: 78 }, { name: 'Embroidery', val: 80 }, { name: 'Finishing', val: 85 }] },
-        '3': { name: 'Line 3', total: '68%', machines: [{ name: 'Cutting', val: 60 }, { name: 'Sewing', val: 65 }, { name: 'Embroidery', val: 70 }, { name: 'Finishing', val: 75 }] },
-        '4': { name: 'Line 4', total: '85%', machines: [{ name: 'Cutting', val: 80 }, { name: 'Sewing', val: 70 }, { name: 'Embroidery', val: 65 }, { name: 'Finishing', val: 80 }] },
-        '5': { name: 'Line 5', total: '90%', machines: [{ name: 'Cutting', val: 95 }, { name: 'Sewing', val: 88 }, { name: 'Embroidery', val: 85 }, { name: 'Finishing', val: 92 }] },
-        '6': { name: 'Line 6', total: '72%', machines: [{ name: 'Cutting', val: 70 }, { name: 'Sewing', val: 75 }, { name: 'Embroidery', val: 68 }, { name: 'Finishing', val: 74 }] },
-        '7': { name: 'Line 7', total: '80%', machines: [{ name: 'Cutting', val: 82 }, { name: 'Sewing', val: 80 }, { name: 'Embroidery', val: 78 }, { name: 'Finishing', val: 80 }] },
-        '8': { name: 'Line 8', total: '65%', machines: [{ name: 'Cutting', val: 62 }, { name: 'Sewing', val: 68 }, { name: 'Embroidery', val: 65 }, { name: 'Finishing', val: 64 }] },
-        '9': { name: 'Line 9', total: '88%', machines: [{ name: 'Cutting', val: 90 }, { name: 'Sewing', val: 88 }, { name: 'Embroidery', val: 86 }, { name: 'Finishing', val: 88 }] },
-        '10': { name: 'Line 10', total: '78%', machines: [{ name: 'Cutting', val: 75 }, { name: 'Sewing', val: 80 }, { name: 'Embroidery', val: 76 }, { name: 'Finishing', val: 80 }] },
-        '11': { name: 'Line 11', total: '83%', machines: [{ name: 'Cutting', val: 85 }, { name: 'Sewing', val: 82 }, { name: 'Embroidery', val: 84 }, { name: 'Finishing', val: 81 }] }
-    };
+    let machineData = {};
 
-    if (factorySelect) {
-        // Set initial name
-        if (selectedFactoryName) selectedFactoryName.textContent = 'Line 1';
-        
-        factorySelect.addEventListener('change', function() {
-            const data = factoryData[this.value];
-            if (data) {
-                selectedFactoryName.textContent = data.name;
-                totalUtilVal.textContent = data.total + ' ⌵';
-                
-                machineList.innerHTML = data.machines.map(m => `
-                    <div class="machine-item">
-                        <span class="check-icon">✓</span>
-                        <span class="machine-name">${m.name}</span>
-                        <div class="progress-wrap">
-                            <div class="progress-bg"><div class="progress-fill" style="width: ${m.val}%;"></div></div>
-                            <span class="progress-percent">${m.val}%</span>
+    function renderMachineList(lineNum) {
+        const sections = machineData[lineNum];
+        if (!sections || sections.length === 0) {
+            machineList.innerHTML = '<p style="color:#aaa;font-size:13px;">No data available</p>';
+            totalUtilVal.textContent = '';
+            return;
+        }
+        const total = sections.reduce((s, x) => s + x.total, 0);
+        selectedFactoryName.textContent = 'Line ' + lineNum;
+        totalUtilVal.textContent = 'Total: ' + total + ' machines';
+
+        // Find max for bar scaling
+        const max = Math.max(...sections.map(s => s.total));
+
+        machineList.innerHTML = sections.map(s => {
+            const pct = Math.round((s.total / max) * 100);
+            // Colour by count: green ≥15, yellow ≥8, red <8
+            const color = s.total >= 15 ? '#2ecc71' : s.total >= 8 ? '#f1c40f' : '#e74c3c';
+            return `
+                <div class="machine-item" style="margin-bottom: 10px;">
+                    <span class="machine-name" style="min-width: 110px; font-size: 11px; text-transform: capitalize;">${s.section.charAt(0) + s.section.slice(1).toLowerCase()}</span>
+                    <div class="progress-wrap" style="flex:1;">
+                        <div class="progress-bg">
+                            <div class="progress-fill" style="width:${pct}%; background-color:${color};"></div>
                         </div>
                     </div>
-                `).join('');
-            }
+                    <span style="min-width:28px; text-align:right; font-size:12px; font-weight:700; color:${color}; margin-left:8px;">${s.total}</span>
+                </div>`;
+        }).join('');
+    }
+
+    if (factorySelect && machineList) {
+        fetch('/api/machine-details')
+            .then(r => r.json())
+            .then(data => {
+                machineData = data;
+                renderMachineList(1);
+            })
+            .catch(() => {
+                machineList.innerHTML = '<p style="color:#e74c3c;font-size:13px;">Failed to load data</p>';
+            });
+
+        factorySelect.addEventListener('change', function () {
+            renderMachineList(parseInt(this.value));
         });
     }
 });
