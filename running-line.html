@@ -9,6 +9,7 @@
             document.documentElement.setAttribute('data-theme', 'dark');
         }
     </script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChangeX - Current Line Changeover</title>
@@ -261,6 +262,33 @@
                     }
                 }
 
+                function downloadMachineList(lineNum, type) {
+                    let fileName = '';
+                    
+                    // Exact data mapping for Line 1 & Line 2
+                    if (lineNum === 1) {
+                        fileName = type === 'idle' ? 'LINE 1 IDLE MACHINE LIST.xlsx' : 'LINE 1 RUNNING MACHINE LIST.xlsx';
+                    } else if (lineNum === 2) {
+                        fileName = type === 'idle' ? 'line 2 idle machine list.xlsx' : 'line 2 Running machine list.xlsx';
+                    } else {
+                        // Scalable mapping for other lines (Line 3 to 11)
+                        fileName = `Line_${lineNum}_${type}_machines.xlsx`;
+                    }
+
+                    // Assuming files are locally positioned relative to the root or served directly
+                    const fileUrl = `./${fileName}`;
+                    
+                    console.log(`Downloading ${fileName} for Line ${lineNum}...`);
+                    
+                    // Trigger native file download (React equivalent would use a similar approach or blob from API)
+                    const a = document.createElement('a');
+                    a.href = fileUrl;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }
+
                 function handleLineUpload(input, lineNum, type) {
                     if (input.files && input.files.length > 0) {
                         const fileNames = Array.from(input.files).map(f => f.name).join(', ');
@@ -284,6 +312,11 @@
                             menu.style.display = 'none';
                         });
                     }
+                    if (!e.target.closest('.machine-details-dropdown-container')) {
+                        document.querySelectorAll('.machine-details-dropdown-menu').forEach(menu => {
+                            menu.style.display = 'none';
+                        });
+                    }
                 });
 
                 function generateFileDropdownHtml(style, type, lineNumber) {
@@ -295,7 +328,7 @@
                             <span class="file-icon-container" title="View Options" onclick="
                                 const menu = this.nextElementSibling;
                                 const isVisible = menu.style.display === 'block';
-                                document.querySelectorAll('.upload-dropdown-menu, .view-file-dropdown-menu').forEach(m => m.style.display = 'none');
+                                document.querySelectorAll('.upload-dropdown-menu, .view-file-dropdown-menu, .machine-details-dropdown-menu').forEach(m => m.style.display = 'none');
                                 menu.style.display = isVisible ? 'none' : 'block';
                                 event.stopPropagation();
                             ">
@@ -316,6 +349,121 @@
                 function closeFactoryModal() {
                     document.getElementById('factoryModal').style.display = 'none';
                     document.body.style.overflow = 'auto';
+                }
+
+                // --- Dynamic Machine Requirements Logic ---
+                async function fetchAndParseExcel(url) {
+                    try {
+                        const response = await fetch(url);
+                        if (!response.ok) return null;
+                        const arrayBuffer = await response.arrayBuffer();
+                        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                        const firstSheetName = workbook.SheetNames[0];
+                        const sheet = workbook.Sheets[firstSheetName];
+                        // Parse as Array of Objects (each row is an object with headers as keys)
+                        const rawData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+                        return rawData;
+                    } catch (error) {
+                        console.warn(`[ChangeX] Excel file not loaded or formatting error for ${url}`);
+                        return null;
+                    }
+                }
+
+                function extractMachineCounts(data) {
+                    const counts = {};
+                    if (!data || data.length === 0) return counts;
+                    
+                    data.forEach(row => {
+                        // Fuzzy search for machine name key and quantity key
+                        let machineKey = Object.keys(row).find(k => /machine|type|equipment|name/i.test(k));
+                        let qtyKey = Object.keys(row).find(k => /qty|quantity|count|req/i.test(k));
+                        
+                        // If no headers match exactly, assume first string col is Machine, first number col is Qty
+                        if (!machineKey) {
+                            machineKey = Object.keys(row).find(k => typeof row[k] === 'string' && row[k].trim() !== '');
+                        }
+                        if (!qtyKey) {
+                            qtyKey = Object.keys(row).find(k => typeof row[k] === 'number' || !isNaN(parseInt(row[k])));
+                        }
+
+                        if (machineKey && row[machineKey]) {
+                            const name = row[machineKey].toString().trim().toLowerCase().replace(/\s+/g, ' ');
+                            const qtyStr = qtyKey ? row[qtyKey].toString().trim() : '1';
+                            const qty = parseInt(qtyStr, 10) || 1;
+                            
+                            // Only valid strings > 2 length
+                            if (name.length > 2) {
+                                Object.keys(counts).forEach(existingKey => {
+                                    if(existingKey === name) {}
+                                });
+                                counts[name] = (counts[name] || 0) + qty;
+                            }
+                        }
+                    });
+                    return counts;
+                }
+
+                function formatMachineName(name) {
+                    return name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                }
+
+                async function calculateUpcomingRequirements(lineNum) {
+                    const reqElement = document.getElementById(`dynamic-req-line-${lineNum}`);
+                    if (!reqElement) return;
+
+                    let runningFileName = '';
+                    let upcomingFileName = '';
+
+                    // Exact file mapping logic for Line 1 and Line 2
+                    if (lineNum === 1) {
+                        runningFileName = 'LINE 1 RUNNING MACHINE LIST.xlsx';
+                        upcomingFileName = 'LINE 1 IDLE MACHINE LIST.xlsx'; 
+                    } else if (lineNum === 2) {
+                        runningFileName = 'line 2 Running machine list.xlsx';
+                        upcomingFileName = 'line 2 idle machine list.xlsx';
+                    } else {
+                        // Scalable mapping for scaling to all 11 lines
+                        runningFileName = `Line_${lineNum}_RUNNING_MACHINE_LIST.xlsx`;
+                        upcomingFileName = `Line_${lineNum}_IDLE_MACHINE_LIST.xlsx`;
+                    }
+
+                    // Fallback local paths
+                    const runningUrl = `./${runningFileName}`;
+                    const upcomingUrl = `./${upcomingFileName}`;
+
+                    const [runningData, upcomingData] = await Promise.all([
+                        fetchAndParseExcel(runningUrl),
+                        fetchAndParseExcel(upcomingUrl)
+                    ]);
+
+                    // Graceful fallback if files don't exist yet
+                    if (!runningData || !upcomingData) {
+                        reqElement.innerHTML = `<span style="color: #636e72;">Standard setup</span>`;
+                        return;
+                    }
+
+                    const runningCounts = extractMachineCounts(runningData);
+                    const upcomingCounts = extractMachineCounts(upcomingData);
+                    const additionalReqs = [];
+                    
+                    // Compare Logic: difference > 0
+                    for (const [machine, requiredQty] of Object.entries(upcomingCounts)) {
+                        const currentQty = runningCounts[machine] || 0;
+                        const diff = requiredQty - currentQty;
+                        
+                        // Output logic: If additional machines are found, add them.
+                        if (diff > 0) {
+                            additionalReqs.push(`+${diff} ${formatMachineName(machine)}`);
+                        }
+                    }
+
+                    // UI Update integration
+                    if (additionalReqs.length === 0) {
+                        reqElement.innerHTML = `<span style="color: #27ae60; font-weight: 600;">No Machine Requirements</span>`;
+                    } else {
+                        const reqString = additionalReqs.join(', ');
+                        reqElement.innerHTML = `<span style="color: #d63031; font-weight: 700;">${reqString}</span>`;
+                    }
                 }
 
                 async function openFactoryModal(factoryId) {
@@ -350,26 +498,56 @@
                                 <div class="line-section ${index > 0 ? 'line-border' : ''}">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                                         <h3 class="line-title" style="margin-bottom: 0;">Line ${lineData.lineNumber}</h3>
-                                        <div class="upload-dropdown-container" style="position: relative; display: inline-block;">
-                                            <button type="button" onclick="
-                                                const menu = this.nextElementSibling;
-                                                const isVisible = menu.style.display === 'block';
-                                                document.querySelectorAll('.upload-dropdown-menu').forEach(m => m.style.display = 'none');
-                                                menu.style.display = isVisible ? 'none' : 'block';
-                                                event.stopPropagation();
-                                            " style="cursor: pointer; background: #6c5ce7; border: none; color: white; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                                                <span>📤 Upload Data</span>
-                                                <span style="font-size: 10px;">▼</span>
-                                            </button>
-                                            <div class="upload-dropdown-menu" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 5px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border: 1px solid #eaeaea; z-index: 1000; min-width: 155px; overflow: hidden; text-align: left;">
-                                                <label style="display: flex; align-items: center; gap: 8px; padding: 10px 15px; cursor: pointer; color: #2d3436; font-size: 13px; font-weight: 600; border-bottom: 1px solid #f1f2f6; transition: background 0.2s; margin: 0;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
-                                                    <span style="font-size: 16px;">📄</span> Upload PDF
-                                                    <input type="file" multiple accept=".pdf" style="display: none;" onchange="handleLineUpload(this, ${lineData.lineNumber}, 'PDF')">
-                                                </label>
-                                                <label style="display: flex; align-items: center; gap: 8px; padding: 10px 15px; cursor: pointer; color: #2d3436; font-size: 13px; font-weight: 600; transition: background 0.2s; margin: 0;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
-                                                    <span style="font-size: 16px;">📊</span> Upload Excel
-                                                    <input type="file" multiple accept=".xlsx, .xls" style="display: none;" onchange="handleLineUpload(this, ${lineData.lineNumber}, 'Excel')">
-                                                </label>
+                                        <div style="display: flex; gap: 10px; align-items: center;">
+                                            <div class="machine-details-dropdown-container" style="position: relative; display: inline-block;">
+                                                <button type="button" title="Machine Details" onclick="
+                                                    const menu = this.nextElementSibling;
+                                                    const isVisible = menu.style.display === 'block';
+                                                    document.querySelectorAll('.upload-dropdown-menu, .machine-details-dropdown-menu, .view-file-dropdown-menu').forEach(m => m.style.display = 'none');
+                                                    menu.style.display = isVisible ? 'none' : 'block';
+                                                    event.stopPropagation();
+                                                " style="cursor: pointer; background: #ffffff; border: 1px solid #dfe6e9; color: #6c5ce7; padding: 6px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='#f1f2f6'; this.style.borderColor='#b2bec3'" onmouseout="this.style.background='#ffffff'; this.style.borderColor='#dfe6e9'">
+                                                    <span style="display: flex; align-items: center; justify-content: center;">
+                                                        <!-- Clean minimal sewing machine representation -->
+                                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                            <path d="M4 19v2h16v-2"/>
+                                                            <path d="M8 15V13c0-3.3 2.7-6 6-6h1V5c0-1.1-.9-2-2-2H9c-1.1 0-2 .9-2 2v2H6v2h1v2H6v2h2v2h7"/>
+                                                            <path d="M19 19v-4.5c0-.8-.7-1.5-1.5-1.5H16"/>
+                                                            <path d="M16 13v6"/>
+                                                            <circle cx="8" cy="15" r="1"/>
+                                                        </svg>
+                                                    </span>
+                                                </button>
+                                                <div class="machine-details-dropdown-menu" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 5px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border: 1px solid #eaeaea; z-index: 1001; min-width: 250px; overflow: hidden; text-align: left;">
+                                                    <div onclick="downloadMachineList(${lineData.lineNumber}, 'idle'); this.parentElement.style.display='none'; event.stopPropagation();" style="display: flex; align-items: center; gap: 8px; padding: 12px 15px; cursor: pointer; color: #2d3436; font-size: 13px; font-weight: 600; border-bottom: 1px solid #f1f2f6; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
+                                                        <span style="font-size: 16px;">📄</span> Idle Machine List (Excel)
+                                                    </div>
+                                                    <div onclick="downloadMachineList(${lineData.lineNumber}, 'running'); this.parentElement.style.display='none'; event.stopPropagation();" style="display: flex; align-items: center; gap: 8px; padding: 12px 15px; cursor: pointer; color: #2d3436; font-size: 13px; font-weight: 600; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
+                                                        <span style="font-size: 16px;">⚙️</span> Running Machine List (Excel)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="upload-dropdown-container" style="position: relative; display: inline-block;">
+                                                <button type="button" onclick="
+                                                    const menu = this.nextElementSibling;
+                                                    const isVisible = menu.style.display === 'block';
+                                                    document.querySelectorAll('.upload-dropdown-menu, .machine-details-dropdown-menu, .view-file-dropdown-menu').forEach(m => m.style.display = 'none');
+                                                    menu.style.display = isVisible ? 'none' : 'block';
+                                                    event.stopPropagation();
+                                                " style="cursor: pointer; background: #6c5ce7; border: none; color: white; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                                                    <span>📤 Upload Data</span>
+                                                    <span style="font-size: 10px;">▼</span>
+                                                </button>
+                                                <div class="upload-dropdown-menu" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 5px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border: 1px solid #eaeaea; z-index: 1000; min-width: 155px; overflow: hidden; text-align: left;">
+                                                    <label style="display: flex; align-items: center; gap: 8px; padding: 10px 15px; cursor: pointer; color: #2d3436; font-size: 13px; font-weight: 600; border-bottom: 1px solid #f1f2f6; transition: background 0.2s; margin: 0;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
+                                                        <span style="font-size: 16px;">📄</span> Upload PDF
+                                                        <input type="file" multiple accept=".pdf" style="display: none;" onchange="handleLineUpload(this, ${lineData.lineNumber}, 'PDF')">
+                                                    </label>
+                                                    <label style="display: flex; align-items: center; gap: 8px; padding: 10px 15px; cursor: pointer; color: #2d3436; font-size: 13px; font-weight: 600; transition: background 0.2s; margin: 0;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
+                                                        <span style="font-size: 16px;">📊</span> Upload Excel
+                                                        <input type="file" multiple accept=".xlsx, .xls" style="display: none;" onchange="handleLineUpload(this, ${lineData.lineNumber}, 'Excel')">
+                                                    </label>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -391,7 +569,9 @@
 
                                             <div class="detail-label">Upcoming Style Requirements</div>
                                             <div class="detail-colon">:</div>
-                                            <div class="detail-value">${lineData.upcoming.nextStep || 'Standard setup'}</div>
+                                            <div class="detail-value" id="dynamic-req-line-${lineData.lineNumber}">
+                                                <span style="color: #b2bec3;">Analyzing data...</span>
+                                            </div>
 
                                             <div class="detail-label">Changeover Time</div>
                                             <div class="detail-colon">:</div>
@@ -419,6 +599,10 @@
                             `;
                         });
                         modalBody.innerHTML = html;
+
+                        // Trigger dynamic machine calculation for all rendered lines in the factory
+                        lineNumbers.forEach(num => calculateUpcomingRequirements(num));
+                        
                     } catch (err) {
                         console.error('Failed to load factory detail:', err);
                         modalBody.innerHTML = "<h2>Error loading data.</h2>";
