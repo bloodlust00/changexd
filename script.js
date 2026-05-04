@@ -395,6 +395,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Machine Required Chart (Main)
     const defectsCanvas = document.getElementById('defectsChart');
     if (defectsCanvas) {
+        let machineRequiredData = {};
+        fetch('/api/machine-required')
+            .then(r => r.json())
+            .then(data => {
+                machineRequiredData = data;
+            })
+            .catch(console.error);
+
         const defectsCtx = defectsCanvas.getContext('2d');
         new Chart(defectsCtx, {
             type: 'bar',
@@ -411,7 +419,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false }
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: function(context) {
+                                return 'Line ' + context[0].label;
+                            },
+                            label: function(context) {
+                                const lineNum = context.label;
+                                if (machineRequiredData[lineNum] && machineRequiredData[lineNum].length > 0) {
+                                    return machineRequiredData[lineNum];
+                                }
+                                return 'Availability: ' + context.raw + '%';
+                            }
+                        }
+                    }
                 },
                 scales: {
                     y: {

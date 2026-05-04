@@ -381,11 +381,30 @@
                             ];
 
                             function getPrepProgressHtml(prep) {
-                                if (prep < 20) return `<div style="background: white; padding: 5px;"><strong style="color:#636e72;">0–20% → Initial Planning</strong><ul style="margin: 6px 0 0 15px; padding: 0;"><li>Tech pack & BOM reviewed</li><li>Line balancing plan created</li><li>Setup requirements identified</li></ul></div>`;
-                                if (prep < 40) return `<div style="background: white; padding: 5px;"><strong style="color:#e67e22;">🟠 20–40% → Material Synchronization</strong><ul style="margin: 6px 0 0 15px; padding: 0;"><li>Fabrics requested from warehouse</li><li>Trims/accessories sorted</li><li>Cut panels verified for completeness</li></ul></div>`;
-                                if (prep < 60) return `<div style="background: white; padding: 5px;"><strong style="color:#f1c40f;">🟡 40–60% → Machine & Tools Alignment</strong><ul style="margin: 6px 0 0 15px; padding: 0;"><li>Specialized folders/attachments sourced</li><li>Needles & threads pre-positioned</li><li>Mechanic schedule confirmed</li></ul></div>`;
-                                if (prep < 80) return `<div style="background: white; padding: 5px;"><strong style="color:#2ecc71;">🟢 60–80% → Manpower Allocation</strong><ul style="margin: 6px 0 0 15px; padding: 0;"><li>Operators briefed on operations</li><li>Critical path skills verified</li><li>Quality checkpoints established</li></ul></div>`;
-                                return `<div style="background: white; padding: 5px;"><strong style="color:#0984e3;">🔵 80–100% → Final Readiness</strong><ul style="margin: 6px 0 0 15px; padding: 0;"><li>All resources available at line</li><li>Mock-up samples prepared</li><li>Ready for switch-on</li></ul></div>`;
+                                let stageName, delay;
+                                if (prep < 20) {
+                                    stageName = "Initial Planning & Documentation";
+                                    delay = "Missing tech pack or BOM approval pending";
+                                } else if (prep < 40) {
+                                    stageName = "Material & Trim Verification";
+                                    delay = "Trim shortage or Cut panel mismatch";
+                                } else if (prep < 60) {
+                                    stageName = "Machine Tooling & Setup Strategy";
+                                    delay = "Special attachment missing or Mechanic unavailability";
+                                } else if (prep < 80) {
+                                    stageName = "Manpower Allocation & Briefing";
+                                    delay = "Operator absenteeism or Skill gap identification";
+                                } else {
+                                    stageName = "Final Layout & Pilot Run Readiness";
+                                    delay = "Layout approval pending or Sample issues";
+                                }
+
+                                return `<div style="background: white; padding: 5px;">
+                                    <strong style="color:#3498db;">🔵 Current Phase → ${stageName}</strong>
+                                    <ul style="margin: 6px 0 0 15px; padding: 0;">
+                                        <li><strong>Potential Blockers:</strong> <span style="color:#e74c3c;">${delay}</span></li>
+                                    </ul>
+                                </div>`;
                             }
 
                             window.pushLineStyle = async function(lineNumber) {

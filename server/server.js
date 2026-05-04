@@ -37,6 +37,7 @@ const lineSchema = new mongoose.Schema({
     current: { 
         style: { type: String, default: 'No Data' }, 
         progress: { type: Number, default: 0 }, 
+        stageName: { type: String, default: 'Setup' },
         time: { type: String, default: '00:00' }, 
         machineAvail: { type: String, default: '0%' }, 
         workaidsAvail: { type: String, default: '0%' }, 
@@ -79,12 +80,13 @@ const User = mongoose.models.User || mongoose.model('User', userSchema);
 
 // Parse OB files and calculate total SMV
 function parseOBFiles() {
-    const obDir = path.join(__dirname, '..', 'excels and pdfs');
+    const obDir = path.join(__dirname, '..', 'data', 'OB');
+    const pdfDir = path.join(__dirname, '..', 'data', 'TECHPACKS');
     const obDataList = [];
     if (!fs.existsSync(obDir)) return obDataList;
 
     try {
-        const pdffiles = fs.readdirSync(obDir).filter(f => f.toLowerCase().endsWith('.pdf'));
+        const pdffiles = fs.existsSync(pdfDir) ? fs.readdirSync(pdfDir).filter(f => f.toLowerCase().endsWith('.pdf')) : [];
         const files = fs.readdirSync(obDir).filter(f => f.toLowerCase().endsWith('.xlsx') && !f.startsWith('~$'));
         files.forEach(file => {
             try {
@@ -131,6 +133,12 @@ function parseOBFiles() {
                         }
                     }
 
+                    const smvRow = rows.find(r => r && r.some && r.some(c => typeof c === 'string' && c.toUpperCase().includes('TOTAL SMV WITH ALLOWANCES')));
+                    if (smvRow) {
+                        const smvVal = smvRow.find(c => typeof c === 'number');
+                        if (smvVal) totalSMV = smvVal;
+                    }
+
                     // Enhanced matcher to find associated PDF
                     let matchedPdf = null;
                     const baseName = file.replace(/\.xlsx$/i, '').replace(/[^a-zA-Z0-9]/g, '');
@@ -138,11 +146,11 @@ function parseOBFiles() {
                     for (let p of pdffiles) {
                         const pClean = p.replace(/[^a-zA-Z0-9]/g, '');
                         if (pClean.includes(fallbackNamePrefix)) {
-                            matchedPdf = path.join(obDir, p);
+                            matchedPdf = path.join(pdfDir, p);
                             break;
                         }
                     }
-                    if (!matchedPdf && pdffiles.length > 0) matchedPdf = path.join(obDir, pdffiles[0]);
+                    if (!matchedPdf && pdffiles.length > 0) matchedPdf = path.join(pdfDir, pdffiles[0]);
 
                     if (totalSMV === 0) totalSMV = 10; // Fallback SMV if parsing fails
 
@@ -168,6 +176,21 @@ async function syncDataFromLocalFile() {
     if (obDataList.length === 0) return console.log('⚠️ No OB files found to sync.');
 
     try {
+        const stages = [
+            { name: 'Fabric Inspection', pct: 5, delays: ['Fabric defects', 'Inspection backlog'] },
+            { name: 'Cutting', pct: 10, delays: ['Marker delay', 'Fabric shortage', 'Machine downtime'] },
+            { name: 'Bundling', pct: 5, delays: ['Miscount', 'Labeling errors'] },
+            { name: 'Front Panel Operations', pct: 10, delays: ['Operator inefficiency', 'Rework'] },
+            { name: 'Back Panel Operations', pct: 8, delays: ['Quality issues', 'Machine breakdown'] },
+            { name: 'Sleeve Assembly', pct: 10, delays: ['Skill gap', 'Balancing issue'] },
+            { name: 'Collar & Cuff Making', pct: 12, delays: ['High precision work', 'Rejection'] },
+            { name: 'Main Assembly (Joining)', pct: 15, delays: ['Line imbalance', 'Waiting time'] },
+            { name: 'Button Attach', pct: 5, delays: ['Machine stoppage', 'Thread issues'] },
+            { name: 'Finishing (Trimming, Ironing)', pct: 10, delays: ['Iron delay', 'Thread trimming backlog'] },
+            { name: 'Inspection (QC)', pct: 5, delays: ['High rejection rate'] },
+            { name: 'Packing', pct: 5, delays: ['Packing material shortage'] }
+        ];
+
         for (let i = 1; i <= 11; i++) {
             // Pick two different random indices from our OB list
             const idx1 = Math.floor(Math.random() * obDataList.length);
@@ -188,30 +211,40 @@ async function syncDataFromLocalFile() {
                 queue.push({
                     style: qOB.styleName,
                     prep: Math.floor(Math.random() * 80) + 10,
-                    time: '45 min',
+                    time: (10 + Math.floor(Math.random() * 2)) + ' min',
                     nextStep: qOB.tools.length > 0 ? qOB.tools.slice(0, 2).join(', ') : 'Standard Setup',
-                    manpower: qOB.manpower + ' Operators',
+                    manpower: (Math.floor(Math.random() * 11) + 85) + ' Operators',
                     smv: qOB.smv,
                     excelFilePath: qOB.excelFilePath,
                     pdfFilePath: qOB.pdfFilePath
                 });
             }
 
+            const randomStageIdx = Math.floor(Math.random() * stages.length);
+            let totalProgress = 0;
+            for (let j = 0; j <= randomStageIdx; j++) {
+                totalProgress += stages[j].pct;
+            }
+            const currentStage = stages[randomStageIdx];
+            const randomDelay = currentStage.delays[Math.floor(Math.random() * currentStage.delays.length)];
+
             await Line.findOneAndUpdate({ lineNumber: i }, {
                 $set: {
                     'current.style': rOB.styleName,
-                    'current.progress': Math.floor(Math.random() * 40) + 40,
+                    'current.progress': totalProgress,
+                    'current.stageName': currentStage.name,
                     'current.time': '12:45',
                     'current.machineAvail': '95%',
                     'current.workaidsAvail': '98%',
+                    'current.delay': randomDelay,
                     'current.smv': rOB.smv,
                     'current.excelFilePath': rOB.excelFilePath,
                     'current.pdfFilePath': rOB.pdfFilePath,
                     'upcoming.style': uOB.styleName,
                     'upcoming.prep': Math.floor(Math.random() * 80) + 10,
-                    'upcoming.time': '45 min',
+                    'upcoming.time': (10 + Math.floor(Math.random() * 2)) + ' min',
                     'upcoming.nextStep': uOB.tools.length > 0 ? uOB.tools.slice(0, 2).join(', ') : 'Standard Setup',
-                    'upcoming.manpower': uOB.manpower + ' Operators',
+                    'upcoming.manpower': (Math.floor(Math.random() * 11) + 85) + ' Operators',
                     'upcoming.smv': uOB.smv,
                     'upcoming.excelFilePath': uOB.excelFilePath,
                     'upcoming.pdfFilePath': uOB.pdfFilePath,
@@ -225,29 +258,41 @@ async function syncDataFromLocalFile() {
 }
 
 // Routes
-// Parse machine details from Application wireframe.xlsx
+// Parse machine details from MACHINES LIST (2).xlsx
 function parseMachineDetails() {
-    const filePath = path.join(__dirname, '..', 'Application wireframe.xlsx');
+    const filePath = path.join(__dirname, '..', 'MACHINES LIST (2).xlsx');
     const result = {};
     if (!fs.existsSync(filePath)) return result;
 
     try {
         const wb = xlsx.readFile(filePath);
-        const lineSheets = ['L1','L2','L3','L4','L5'];
-
-        lineSheets.forEach(sheetName => {
+        
+        for (let i = 1; i <= 11; i++) {
+            const sheetName = 'L' + i;
             const sheet = wb.Sheets[sheetName];
-            if (!sheet) return;
+            if (!sheet) continue;
+            
             const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 });
 
             // Detect column positions from header row
-            let sectionCol = 2, totalCol = 6;
-            for (let i = 0; i < 10; i++) {
-                const r = rows[i];
+            let sectionCol = -1, totalCol = -1;
+            for (let rIdx = 0; rIdx < Math.min(15, rows.length); rIdx++) {
+                const r = rows[rIdx];
                 if (!r) continue;
                 const idx = r.findIndex(c => String(c || '').toUpperCase().includes('SECTION'));
-                if (idx !== -1) { sectionCol = idx; totalCol = idx + 4; break; }
+                if (idx !== -1) { 
+                    sectionCol = idx; 
+                    const tIdx = r.findIndex(c => String(c || '').toUpperCase().includes('TOTAL'));
+                    if (tIdx !== -1) {
+                        totalCol = tIdx;
+                    } else {
+                        totalCol = idx + 4; 
+                    }
+                    break; 
+                }
             }
+
+            if (sectionCol === -1 || totalCol === -1) continue;
 
             let currentSection = null;
             const sections = [];
@@ -264,11 +309,104 @@ function parseMachineDetails() {
                 }
             });
 
-            const lineNum = parseInt(sheetName.replace('L', ''));
-            result[lineNum] = sections;
-        });
+            result[i] = sections;
+        }
     } catch (e) {
         console.error('Error parsing machine details:', e);
+    }
+    return result;
+}
+
+// Parse Machine required for next changeover from MACHINES LIST (2).xlsx
+function parseMachineRequired() {
+    const filePath = path.join(__dirname, '..', 'MACHINES LIST (2).xlsx');
+    const result = {};
+    if (!fs.existsSync(filePath)) return result;
+
+    function getShortForm(typeStr) {
+        if (!typeStr) return '';
+        const upper = typeStr.toUpperCase().trim();
+        // Clean trailing (2), (4) etc.
+        const cleanStr = upper.replace(/\s*\(\d+\)\s*/g, '').trim();
+        const map = {
+            'SINGLE NEEDLE LOCKSTITCH': 'SNLS',
+            'BUTTON HOLE': 'BH',
+            'COLLAR BLOCKING MACHINE': 'CBM',
+            'COLLAR NOTCH': 'CN',
+            'IRON TABLE': 'IT',
+            'PATTERN SEWER MACHINE': 'PSM',
+            'SINGLE NEEDLE EDGE CUTTING': 'SNEC',
+            'BUTTON STITCH': 'BS',
+            'CUFF BLOCKING MACHINE': 'CUBM',
+            'BACK YOKE STACKER': 'BYS',
+            'RIGHT HEM STACKER': 'RHS',
+            'OVERLOCK': 'OL',
+            'ROTARY FUSING MACHINE': 'RFM',
+            'DOUBLE NEEDLE CHAIN STITCH': 'DNCS',
+            'GUSSET PRESSING MACHINE': 'GPM',
+            'BARCODE SCANNER': 'BCS',
+            'FUSING MACHINE': 'FM',
+            'END CUTTER MACHINE': 'ECM',
+            'FEED OFF ARM': 'FOA'
+        };
+        if (map[cleanStr]) return map[cleanStr];
+        
+        // Fallback: take first letter of each word
+        return cleanStr.replace(/[^A-Z\s]/g, '').split(/\s+/).map(w => w[0]).join('');
+    }
+
+    try {
+        const wb = xlsx.readFile(filePath);
+        for (let i = 1; i <= 11; i++) {
+            const sheetName = 'L' + i;
+            const sheet = wb.Sheets[sheetName];
+            if (!sheet) continue;
+            
+            const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 });
+            let tCol = -1, cCol = -1, startRow = -1;
+            
+            // Find columns
+            for (let rIdx = 0; rIdx < Math.min(10, rows.length); rIdx++) {
+                const row = rows[rIdx];
+                if (!row) continue;
+                for (let cIdx = 0; cIdx < row.length; cIdx++) {
+                    const v = String(row[cIdx] || '').toUpperCase();
+                    if (v.includes('MACHINE TYPE')) tCol = cIdx;
+                    if (v.includes('MACHINE COUNT')) cCol = cIdx;
+                }
+                if (tCol !== -1 && cCol !== -1) {
+                    startRow = rIdx + 1;
+                    break;
+                }
+            }
+            
+            if (tCol === -1 || cCol === -1) continue;
+            
+            const machineCounts = {};
+            for (let rIdx = startRow; rIdx < rows.length; rIdx++) {
+                const row = rows[rIdx];
+                if (!row) continue;
+                
+                const typeVal = row[tCol];
+                const countVal = parseInt(row[cCol]);
+                
+                if (typeVal && !isNaN(countVal) && countVal > 0) {
+                    const typeStr = String(typeVal).trim();
+                    const shortForm = getShortForm(typeStr);
+                    if (shortForm) {
+                        if (!machineCounts[shortForm]) {
+                            machineCounts[shortForm] = { full: typeStr, count: 0 };
+                        }
+                        machineCounts[shortForm].count += countVal;
+                    }
+                }
+            }
+            
+            // Format for tooltip
+            result[i] = Object.keys(machineCounts).map(k => `${k}: ${machineCounts[k].count}`);
+        }
+    } catch (e) {
+        console.error('Error parsing machine required:', e);
     }
     return result;
 }
@@ -276,6 +414,15 @@ function parseMachineDetails() {
 app.get('/api/machine-details', (req, res) => {
     try {
         const data = parseMachineDetails();
+        res.json(data);
+    } catch (e) {
+        res.status(500).json({});
+    }
+});
+
+app.get('/api/machine-required', (req, res) => {
+    try {
+        const data = parseMachineRequired();
         res.json(data);
     } catch (e) {
         res.status(500).json({});
@@ -300,6 +447,7 @@ app.post('/api/lines/push/:lineNumber', async (req, res) => {
         line.current = {
             style: line.upcoming.style,
             progress: 0,
+            stageName: 'Setup',
             time: '00:00',
             machineAvail: '100%',
             workaidsAvail: '100%',
@@ -324,7 +472,7 @@ app.post('/api/lines/push/:lineNumber', async (req, res) => {
                 line.upcomingQueue.push({
                     style: qOB.styleName,
                     prep: 0,
-                    time: '45 min',
+                    time: (10 + Math.floor(Math.random() * 2)) + ' min',
                     nextStep: qOB.tools.length > 0 ? qOB.tools.slice(0, 2).join(', ') : 'Standard Setup',
                     manpower: qOB.manpower + ' Operators',
                     smv: qOB.smv,
@@ -355,14 +503,86 @@ app.get('/api/open-doc', async (req, res) => {
             (format === 'pdf' ? lineData.upcoming.pdfFilePath : lineData.upcoming.excelFilePath);
         
         if (filePath && fs.existsSync(filePath)) {
-            if (format === 'pdf') {
-                res.contentType('application/pdf');
-                return res.sendFile(filePath);
-            }
             return res.download(filePath);
         }
         res.status(404).send(`File not found for style: ${style}`);
     } catch (e) { res.status(500).send('Error'); }
+});
+
+app.get('/api/download-machine-list/:line/:type', (req, res) => {
+    try {
+        let line = parseInt(req.params.line);
+        const type = req.params.type.toLowerCase();
+        
+        let folderName = type === 'idle' ? 'IDLE MACHINE LIST' : 'RUNNING MACHINE LIST';
+        let dirPath = path.join(__dirname, '..', 'data', 'line wise MACHINE Details', folderName);
+        
+        if (!fs.existsSync(dirPath)) {
+            return res.status(404).send('Directory not found');
+        }
+
+        const files = fs.readdirSync(dirPath).filter(f => f.toLowerCase().endsWith('.xlsx'));
+        
+        if (files.length === 0) {
+            return res.status(404).send('No files found');
+        }
+
+        let targetFile = null;
+        
+        if (line === 10 || line === 11) {
+            targetFile = files[Math.floor(Math.random() * files.length)];
+        } else {
+            const regex = new RegExp(`line\\s*${line}\\b`, 'i');
+            targetFile = files.find(f => regex.test(f));
+            
+            if (!targetFile) {
+                targetFile = files[Math.floor(Math.random() * files.length)];
+            }
+        }
+        
+        if (targetFile) {
+            return res.download(path.join(dirPath, targetFile));
+        } else {
+            return res.status(404).send('File not found');
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+
+app.get('/api/internal-external', (req, res) => {
+    try {
+        const filePath = path.join(__dirname, '..', 'SMED STUDY.xlsx');
+        if (!fs.existsSync(filePath)) return res.json({ internal: [], external: [] });
+        
+        const wb = xlsx.readFile(filePath);
+        const sheet = wb.Sheets['Internal & External'];
+        if (!sheet) return res.json({ internal: [], external: [] });
+        
+        const rows = xlsx.utils.sheet_to_json(sheet, {header: 1});
+        const internal = [];
+        const external = [];
+        
+        rows.forEach(r => {
+            if (r.length >= 2 && r[0] && r[1]) {
+                const op = String(r[0]).trim();
+                const type = String(r[1]).trim().toLowerCase();
+                const desc = r.length > 4 && r[4] ? String(r[4]).trim() : '';
+                
+                if (type.includes('internal')) {
+                    internal.push({ op, desc });
+                } else if (type.includes('external')) {
+                    external.push({ op, desc });
+                }
+            }
+        });
+        
+        res.json({ internal, external });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ internal: [], external: [] });
+    }
 });
 
 app.post('/api/login', async (req, res) => {
