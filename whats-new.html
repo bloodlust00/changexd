@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <script>
         if (sessionStorage.getItem('sidebar_persistent_hover') === 'true') {
@@ -9,139 +10,139 @@
             document.documentElement.setAttribute('data-theme', 'dark');
         }
     </script>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SMED Digital Factory - What's New</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMED Digital Factory - What's New</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-<style>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
+            color: white;
+            margin: 0;
+        }
 
-body{
-    font-family: 'Inter', sans-serif;
-    background:#0f172a;
-    color:white;
-    margin:0;
-}
+        /* HEADER */
 
-/* HEADER */
+        .whats-new-header {
+            text-align: center;
+            padding: 60px 20px;
+        }
 
-.whats-new-header{
-    text-align:center;
-    padding:60px 20px;
-}
+        .whats-new-header h1 {
+            font-size: 42px;
+            background: linear-gradient(90deg, #00d9ff, #4ade80);
+            -webkit-background-clip: text;
+            color: transparent;
+        }
 
-.whats-new-header h1{
-    font-size:42px;
-    background:linear-gradient(90deg,#00d9ff,#4ade80);
-    -webkit-background-clip:text;
-    color:transparent;
-}
+        .whats-new-header p {
+            color: #cbd5f5;
+            max-width: 700px;
+            margin: auto;
+        }
 
-.whats-new-header p{
-    color:#cbd5f5;
-    max-width:700px;
-    margin:auto;
-}
+        /* KPI DASHBOARD */
 
-/* KPI DASHBOARD */
+        .kpi-section {
+            padding: 50px;
+        }
 
-.kpi-section{
-    padding:50px;
-}
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+        }
 
-.kpi-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-    gap:25px;
-}
+        .kpi-card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.15);
+            transition: 0.3s;
+        }
 
-.kpi-card{
-    background:#1e293b;
-    border-radius:12px;
-    padding:25px;
-    text-align:center;
-    box-shadow:0 0 15px rgba(0,255,255,0.15);
-    transition:0.3s;
-}
+        .kpi-card:hover {
+            transform: translateY(-5px);
+        }
 
-.kpi-card:hover{
-    transform:translateY(-5px);
-}
+        .kpi-number {
+            font-size: 40px;
+            font-weight: 700;
+            color: #22d3ee;
+        }
 
-.kpi-number{
-    font-size:40px;
-    font-weight:700;
-    color:#22d3ee;
-}
+        .kpi-title {
+            color: #94a3b8;
+        }
 
-.kpi-title{
-    color:#94a3b8;
-}
+        /* FEATURES */
 
-/* FEATURES */
+        .features {
+            padding: 60px 50px;
+        }
 
-.features{
-    padding:60px 50px;
-}
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
 
-.feature-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-    gap:40px;
-}
+        .feature-card {
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 12px;
+        }
 
-.feature-card{
-    background:#1e293b;
-    padding:30px;
-    border-radius:12px;
-}
+        .feature-card h3 {
+            color: #4ade80;
+        }
 
-.feature-card h3{
-    color:#4ade80;
-}
+        .feature-card p {
+            color: #cbd5f5;
+        }
 
-.feature-card p{
-    color:#cbd5f5;
-}
+        /* ROADMAP */
 
-/* ROADMAP */
+        .roadmap {
+            padding: 60px;
+        }
 
-.roadmap{
-    padding:60px;
-}
+        .roadmap h2 {
+            text-align: center;
+            margin-bottom: 40px;
+        }
 
-.roadmap h2{
-    text-align:center;
-    margin-bottom:40px;
-}
+        .timeline {
+            max-width: 800px;
+            margin: auto;
+        }
 
-.timeline{
-    max-width:800px;
-    margin:auto;
-}
+        .step {
+            background: #1e293b;
+            padding: 20px;
+            border-left: 4px solid #22d3ee;
+            margin-bottom: 20px;
+        }
 
-.step{
-    background:#1e293b;
-    padding:20px;
-    border-left:4px solid #22d3ee;
-    margin-bottom:20px;
-}
+        /* FOOTER */
 
-/* FOOTER */
-
-.footer{
-    text-align:center;
-    padding:30px;
-    color:#94a3b8;
-}
-
-</style>
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #94a3b8;
+        }
+    </style>
 </head>
 
 <body class="dashboard-page">
     <header class="header">
         <div class="header-left">
-            <a href="index.html" class="btn btn-back" style="background: #1e293b; color: white; border: 1px solid #334155; display: flex; align-items: center; gap: 8px; border-radius: 8px; padding: 10px 20px; text-decoration: none;">
+            <a href="index.html" class="btn btn-back"
+                style="background: #1e293b; color: white; border: 1px solid #334155; display: flex; align-items: center; gap: 8px; border-radius: 8px; padding: 10px 20px; text-decoration: none;">
                 <span>←</span> Back to Dashboard
             </a>
         </div>
@@ -151,159 +152,165 @@ body{
         <main class="main-content" style="background:#0f172a; color:white; padding: 0;">
             <!-- HEADER -->
             <section class="whats-new-header">
-                <h1>Future of SMED Line Changeover</h1>
+                <h1>Future of SMED</h1>
                 <p>
-                    Transforming garment factories into fully digital Industry 4.0 smart manufacturing systems through AI, automation and real-time production intelligence.
+                    Transforming garment factories into fully digital Industry 4.0 smart manufacturing systems through
+                    AI, automation and real-time production intelligence.
                 </p>
             </section>
 
 
-<!-- KPI DASHBOARD -->
+            <!-- KPI DASHBOARD -->
 
-<section class="kpi-section">
+            <section class="kpi-section">
 
-<h2>Digital Factory </h2>
+                <h2>Digital Factory </h2>
 
-<div class="kpi-grid">
+                <div class="kpi-grid">
 
-<div class="kpi-card">
-<div class="kpi-number" data-target="90">0</div>
-<div class="kpi-title">Target Line Efficiency %</div>
-</div>
+                    <div class="kpi-card">
+                        <div class="kpi-number" data-target="90">0</div>
+                        <div class="kpi-title">Target Line Efficiency %</div>
+                    </div>
 
-<div class="kpi-card">
-<div class="kpi-number" data-target="9">0</div>
-<div class="kpi-title">Changeover Time (Minutes)</div>
-</div>
+                    <div class="kpi-card">
+                        <div class="kpi-number" data-target="9">0</div>
+                        <div class="kpi-title">Changeover Time (Minutes)</div>
+                    </div>
 
-<div class="kpi-card">
-<div class="kpi-number" data-target="40">0</div>
-<div class="kpi-title">Downtime Reduction %</div>
-</div>
+                    <div class="kpi-card">
+                        <div class="kpi-number" data-target="40">0</div>
+                        <div class="kpi-title">Downtime Reduction %</div>
+                    </div>
 
-<div class="kpi-card">
-<div class="kpi-number" data-target="95">0</div>
-<div class="kpi-title">Data Accuracy %</div>
-</div>
+                    <div class="kpi-card">
+                        <div class="kpi-number" data-target="95">0</div>
+                        <div class="kpi-title">Data Accuracy %</div>
+                    </div>
 
-</div>
+                </div>
 
-</section>
+            </section>
 
-<!-- FEATURES -->
+            <!-- FEATURES -->
 
-<section class="features">
+            <section class="features">
 
-<h2>Next Generation Capabilities</h2>
+                <h2>Next Generation Capabilities</h2>
 
-<div class="feature-grid">
+                <div class="feature-grid">
 
-<div class="feature-card">
-<h3>AI Changeover Prediction</h3>
-<p>
-Machine learning algorithms will analyze historical production data to predict changeover time, detect bottlenecks, and suggest optimal machine setup before production starts.
-</p>
-</div>
+                    <div class="feature-card">
+                        <h3>AI Changeover Prediction</h3>
+                        <p>
+                            Machine learning algorithms will analyze historical production data to predict changeover
+                            time, detect bottlenecks, and suggest optimal machine setup before production starts.
+                        </p>
+                    </div>
 
-<div class="feature-card">
-<h3>Real-Time Factory Command Center</h3>
-<p>
-Managers will monitor all factories through a centralized digital dashboard displaying line efficiency, machine details, and changeover progress in real time.
-</p>
-</div>
+                    <div class="feature-card">
+                        <h3>Real-Time Factory Command Center</h3>
+                        <p>
+                            Managers will monitor all factories through a centralized digital dashboard displaying line
+                            efficiency, machine details, and changeover progress in real time.
+                        </p>
+                    </div>
 
-<div class="feature-card">
-<h3>IoT Connected Sewing Machines</h3>
-<p>
-Industrial machines will automatically send production data, idle time, and machine status directly to the platform, eliminating manual tracking.
-</p>
-</div>
+                    <div class="feature-card">
+                        <h3>IoT Connected Sewing Machines</h3>
+                        <p>
+                            Industrial machines will automatically send production data, idle time, and machine status
+                            directly to the platform, eliminating manual tracking.
+                        </p>
+                    </div>
 
-<div class="feature-card">
-<h3>Digital Twin Simulation</h3>
-<p>
-Factories will simulate production lines virtually to test line balancing and production schedules before executing them on the shop floor.
-</p>
-</div>
+                    <div class="feature-card">
+                        <h3>Digital Twin Simulation</h3>
+                        <p>
+                            Factories will simulate production lines virtually to test line balancing and production
+                            schedules before executing them on the shop floor.
+                        </p>
+                    </div>
 
-</div>
+                </div>
 
-</section>
+            </section>
 
-<!-- ROADMAP -->
+            <!-- ROADMAP -->
 
-<section class="roadmap">
+            <section class="roadmap">
 
-<h2>Digital Transformation Roadmap</h2>
+                <h2>Digital Transformation Roadmap</h2>
 
-<div class="timeline">
+                <div class="timeline">
 
-<div class="step">
-<h4>Phase 1 – Digital SMED Monitoring</h4>
-<p>Track changeover activities, line status and SAM comparison digitally.</p>
-</div>
+                    <div class="step">
+                        <h4>Phase 1 – Digital SMED Monitoring</h4>
+                        <p>Track changeover activities, line status and SAM comparison digitally.</p>
+                    </div>
 
-<div class="step">
-<h4>Phase 2 – Smart Factory Dashboard</h4>
-<p>Real-time monitoring of machine details, operator efficiency and line productivity.</p>
-</div>
+                    <div class="step">
+                        <h4>Phase 2 – Smart Factory Dashboard</h4>
+                        <p>Real-time monitoring of machine details, operator efficiency and line productivity.</p>
+                    </div>
 
-<div class="step">
-<h4>Phase 3 – AI Production Intelligence</h4>
-<p>Predict delays, recommend line balancing strategies and optimize production flow.</p>
-</div>
+                    <div class="step">
+                        <h4>Phase 3 – AI Production Intelligence</h4>
+                        <p>Predict delays, recommend line balancing strategies and optimize production flow.</p>
+                    </div>
 
-<div class="step">
-<h4>Phase 4 – Fully Autonomous Factory</h4>
-<p>Machines, operators and managers connected through a digital ecosystem.</p>
-</div>
+                    <div class="step">
+                        <h4>Phase 4 – Fully Autonomous Factory</h4>
+                        <p>Machines, operators and managers connected through a digital ecosystem.</p>
+                    </div>
 
-</div>
+                </div>
 
-</section>
+            </section>
 
-<!-- FOOTER -->
+            <!-- FOOTER -->
 
-<div class="footer">
+            <div class="footer">
 
-SMED Line Changeover System • Digital Manufacturing Platform
+                SMED Line Changeover System • Digital Manufacturing Platform
 
-</div>
-</main>
-</div>
+            </div>
+        </main>
+    </div>
 
-<script src="script.js"></script>
-<script>
+    <script src="script.js"></script>
+    <script>
 
-/* Animated KPI numbers */
+        /* Animated KPI numbers */
 
-const counters = document.querySelectorAll(".kpi-number");
+        const counters = document.querySelectorAll(".kpi-number");
 
-counters.forEach(counter => {
+        counters.forEach(counter => {
 
-const update = () => {
+            const update = () => {
 
-const target = +counter.getAttribute("data-target");
+                const target = +counter.getAttribute("data-target");
 
-const count = +counter.innerText;
+                const count = +counter.innerText;
 
-const speed = target / 100;
+                const speed = target / 100;
 
-if(count < target){
-counter.innerText = Math.ceil(count + speed);
-setTimeout(update,20);
-}
-else{
-counter.innerText = target;
-}
+                if (count < target) {
+                    counter.innerText = Math.ceil(count + speed);
+                    setTimeout(update, 20);
+                }
+                else {
+                    counter.innerText = target;
+                }
 
-};
+            };
 
-update();
+            update();
 
-});
+        });
 
-</script>
+    </script>
 
 </body>
+
 </html>

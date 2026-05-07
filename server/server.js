@@ -210,7 +210,7 @@ async function syncDataFromLocalFile() {
                 const qOB = obDataList[qIdx];
                 queue.push({
                     style: qOB.styleName,
-                    prep: Math.floor(Math.random() * 80) + 10,
+                    prep: Math.floor(Math.random() * 10),
                     time: (10 + Math.floor(Math.random() * 2)) + ' min',
                     nextStep: qOB.tools.length > 0 ? qOB.tools.slice(0, 2).join(', ') : 'Standard Setup',
                     manpower: (Math.floor(Math.random() * 11) + 85) + ' Operators',
@@ -241,7 +241,7 @@ async function syncDataFromLocalFile() {
                     'current.excelFilePath': rOB.excelFilePath,
                     'current.pdfFilePath': rOB.pdfFilePath,
                     'upcoming.style': uOB.styleName,
-                    'upcoming.prep': Math.floor(Math.random() * 80) + 10,
+                    'upcoming.prep': Math.floor(Math.random() * 10),
                     'upcoming.time': (10 + Math.floor(Math.random() * 2)) + ' min',
                     'upcoming.nextStep': uOB.tools.length > 0 ? uOB.tools.slice(0, 2).join(', ') : 'Standard Setup',
                     'upcoming.manpower': (Math.floor(Math.random() * 11) + 85) + ' Operators',
@@ -551,34 +551,197 @@ app.get('/api/download-machine-list/:line/:type', (req, res) => {
     }
 });
 
-app.get('/api/internal-external', (req, res) => {
+app.get('/api/internal-external', async (req, res) => {
     try {
-        const filePath = path.join(__dirname, '..', 'SMED STUDY.xlsx');
-        if (!fs.existsSync(filePath)) return res.json({ internal: [], external: [] });
+        const lineNum = parseInt(req.query.line);
+        let filePath = null;
         
+        if (lineNum) {
+            const lineData = await Line.findOne({ lineNumber: lineNum });
+            if (lineData) {
+                filePath = lineData.upcoming.excelFilePath || lineData.current.excelFilePath;
+            }
+        }
+        
+        // Fallback to SMED STUDY.xlsx if no line file
+        if (!filePath || !fs.existsSync(filePath)) {
+            filePath = path.join(__dirname, '..', 'SMED STUDY.xlsx');
+            if (!fs.existsSync(filePath)) return res.json({ internal: [], external: [] });
+            
+            const wb = xlsx.readFile(filePath);
+            const sheet = wb.Sheets['Internal & External'];
+            if (!sheet) return res.json({ internal: [], external: [] });
+            
+            const rows = xlsx.utils.sheet_to_json(sheet, {header: 1});
+            const internal = [];
+            const external = [];
+            
+            rows.forEach(r => {
+                if (r.length >= 2 && r[0] && r[1]) {
+                    const op = String(r[0]).trim();
+                    const type = String(r[1]).trim().toLowerCase();
+                    const desc = r.length > 4 && r[4] ? String(r[4]).trim() : '';
+                    
+                    if (type.includes('internal')) {
+                        internal.push({ op, desc });
+                    } else if (type.includes('external')) {
+                        external.push({ op, desc });
+                    }
+                }
+            });
+            return res.json({ internal, external });
+        }
+        
+        // Dynamic OB excel parsing for the line
         const wb = xlsx.readFile(filePath);
-        const sheet = wb.Sheets['Internal & External'];
-        if (!sheet) return res.json({ internal: [], external: [] });
-        
+        const sheet = wb.Sheets[wb.SheetNames[0]];
         const rows = xlsx.utils.sheet_to_json(sheet, {header: 1});
+        
+        const externalKeywords = [
+            'blocking', 'iron', 'notch', 'mark', 'trim', 'pairing', 'label', 'tape', 
+            'button preparation', 'fusible', 'helper', 'prep', 'inspection', 'handling',
+            'collar block', 'cuff block', 'sort', 'bundle', 'crease', 'fuse'
+        ];
+        
+        const internalKeywords = [
+            'stitch', 'sew', 'attach', 'hole', 'edge', 'kansai', 'join', 'run', 
+            'topstitch', 'insert', 'bind', 'hem', 'tack', 'set', 'make'
+        ];
+        
         const internal = [];
         const external = [];
         
-        rows.forEach(r => {
-            if (r.length >= 2 && r[0] && r[1]) {
-                const op = String(r[0]).trim();
-                const type = String(r[1]).trim().toLowerCase();
-                const desc = r.length > 4 && r[4] ? String(r[4]).trim() : '';
+        let opIndex = -1;
+        let machineIndex = -1;
+        let startRow = -1;
+        
+        for (let r = 0; r < Math.min(20, rows.length); r++) {
+            const row = rows[r];
+            if (!row) continue;
+            
+            const oIdx = row.findIndex(c => String(c||'').toLowerCase().includes('operation'));
+            const mIdx = row.findIndex(c => String(c||'').toLowerCase().includes('machine'));
+            const sIdx = row.findIndex(c => String(c||'').toLowerCase() === 'smv');
+            
+            if (oIdx !== -1 && (mIdx !== -1 || sIdx !== -1)) {
+                opIndex = oIdx;
+                machineIndex = mIdx;
+                startRow = r + 1;
+                break;
+            }
+        }
+        
+        if (opIndex !== -1) {
+            for (let r = startRow; r < rows.length; r++) {
+                const row = rows[r];
+                if (!row) continue;
                 
-                if (type.includes('internal')) {
-                    internal.push({ op, desc });
-                } else if (type.includes('external')) {
-                    external.push({ op, desc });
+                const opDesc = String(row[opIndex] || '').trim();
+                const machine = machineIndex !== -1 ? String(row[machineIndex] || '').trim() : '';
+                
+                // Skip empty, headers, or totals
+                if (!opDesc || opDesc.length < 3 || opDesc.toLowerCase().includes('operation') || opDesc.toLowerCase().includes('total smv')) continue;
+                
+                // If it's just a section header (no SMV or machine), skip it
+                if (row.length > 0 && !row.some(c => typeof c === 'number')) {
+                     // sometimes section headers don't have numbers
+                     if (!machine && !row.some(c => typeof c === 'number' && c > 0)) continue;
+                }
+                
+                const opLower = opDesc.toLowerCase();
+                const machLower = machine.toLowerCase();
+                
+                const isExt = externalKeywords.some(k => opLower.includes(k));
+                const isInt = internalKeywords.some(k => opLower.includes(k));
+                
+                // If machine is "Iron table" or "N/A" or "Helper", it's usually external
+                const isMachExt = machLower.includes('iron') || machLower.includes('table') || machLower === 'n/a' || machLower.includes('helper') || machLower.includes('blocking');
+                
+                if (isExt || (isMachExt && !isInt)) {
+                    let technique = "Perform setup or handling tasks while the machine is running the previous batch.";
+                    let reason = "Converts internal setup time to external time, increasing overall machine utilization.";
+                    let precaution = "Ensure all offline preparation meets the exact specifications of the upcoming style.";
+
+                    if (opLower.includes('block')) {
+                        technique = "Pre-shape and block components offline at a dedicated workstation.";
+                        reason = "Eliminates machine idle time previously spent by the operator manually shaping the piece.";
+                        precaution = "Stacked pieces must be stored carefully to avoid deformation before feeding to the main line.";
+                    } else if (opLower.includes('iron') || opLower.includes('fuse') || opLower.includes('fusible')) {
+                        technique = "Conduct ironing and fusing in offline batches using a helper.";
+                        reason = "Heating and setting time no longer stops the sewing machine.";
+                        precaution = "Maintain precise temperature/pressure settings to prevent fabric bubbling or shrinkage.";
+                    } else if (opLower.includes('mark') || opLower.includes('notch')) {
+                        technique = "Pre-mark components in bulk on a preparation table.";
+                        reason = "Prevents the sewing operator from stopping the machine to measure and mark.";
+                        precaution = "Use correct, erasable markers and ensure templates are perfectly aligned to avoid permanent defects.";
+                    } else if (opLower.includes('trim') || opLower.includes('base')) {
+                        technique = "Pre-trimming and base preparation handled by off-line support staff.";
+                        reason = "Operator can focus purely on continuous joining rather than intermediate trimming.";
+                        precaution = "Trimming must be consistent to maintain seam allowances for the subsequent sewing steps.";
+                    } else if (opLower.includes('pair') || opLower.includes('sort') || opLower.includes('bundle')) {
+                        technique = "Sort and pair components (e.g. left/right sleeves, fronts) into organized bundles beforehand.";
+                        reason = "Removes sorting time from the sewing operator's cycle time.";
+                        precaution = "Strict bundle control required to prevent shading or size mixing.";
+                    } else if (opLower.includes('label') || opLower.includes('tape') || opLower.includes('button preparation')) {
+                        technique = "Pre-cut tapes and arrange labels/buttons in sequence.";
+                        reason = "Reduces handling time during the actual sewing/attaching process.";
+                        precaution = "Keep components free of dust and correctly oriented for immediate pickup.";
+                    }
+
+                    external.push({ 
+                        op: opDesc, 
+                        desc: machine || 'External prep/handling',
+                        technique,
+                        reason,
+                        precaution
+                    });
+                } else if (isInt || machLower.includes('snls') || machLower.includes('machine') || machLower.includes('stitch')) {
+                    internal.push({ op: opDesc, desc: machine || 'Internal machine operation' });
+                } else {
+                    // Default categorization for anything that looks like an operation
+                    if (row.some(c => typeof c === 'number' && c > 0)) {
+                        internal.push({ op: opDesc, desc: machine || 'Machine operation' });
+                    }
                 }
             }
-        });
+        }
         
-        res.json({ internal, external });
+        // Remove duplicates
+        const uniqueInternal = Array.from(new Map(internal.map(item => [item.op, item])).values());
+        const uniqueExternal = Array.from(new Map(external.map(item => [item.op, item])).values());
+        
+        // We want internal and external to be EXACTLY the same list of operations
+        // This demonstrates how specific internal activities are converted into external ones.
+        let chosenActivities = uniqueExternal;
+        
+        // If no specific external candidates were found, pick some generic internal ones and give them standard SMED text
+        if (chosenActivities.length === 0 && uniqueInternal.length > 0) {
+            chosenActivities = uniqueInternal.map(item => ({
+                op: item.op,
+                desc: item.desc,
+                technique: "Perform setup or handling tasks while the machine is running the previous batch.",
+                reason: "Converts internal setup time to external time, increasing overall machine utilization.",
+                precaution: "Ensure all offline preparation meets the exact specifications of the upcoming style."
+            }));
+        }
+
+        // Limit to 2-6 random ones to keep the UI clean
+        if (chosenActivities.length > 2) {
+            const count = Math.min(chosenActivities.length, Math.floor(Math.random() * 5) + 2); // 2 to 6
+            const shuffled = [...chosenActivities].sort(() => 0.5 - Math.random());
+            chosenActivities = shuffled.slice(0, count);
+        }
+
+        // Internal array just needs op and desc showing it as currently internal
+        const finalInternal = chosenActivities.map(item => ({ 
+            op: item.op, 
+            desc: "Currently an Internal operation (machine stops)" 
+        }));
+        
+        // External array contains the same ops but with SMED technique/reason/precaution
+        const finalExternal = chosenActivities;
+
+        res.json({ internal: finalInternal, external: finalExternal });
     } catch (e) {
         console.error(e);
         res.status(500).json({ internal: [], external: [] });

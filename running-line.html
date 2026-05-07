@@ -167,7 +167,7 @@
 
                 <div style="background: rgba(232, 67, 147, 0.05); padding: 25px; border-radius: 12px; border-left: 4px solid #ad1457;">
                     <h3 style="color: #ad1457; font-size: 20px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 10px;">
-                        <span>🧵</span> External Activities (Operator / Outside Actions)
+                        <span>🧵</span> External Activities (Converted from Internal via SMED)
                     </h3>
 
                     <ul id="external-activities-list" style="font-size: 15px; color: var(--text-dark); margin-bottom: 0; padding-left: 20px; line-height: 1.7;">
@@ -183,35 +183,47 @@
     </div>
     
     <script>
-        let ieData = null;
-        async function openIEModal() {
+        let ieDataCache = {};
+        async function openIEModal(lineNum) {
             document.getElementById('ieModal').style.display = 'flex';
             document.body.style.overflow = 'hidden';
 
-            if (!ieData) {
+            const intList = document.getElementById('internal-activities-list');
+            const extList = document.getElementById('external-activities-list');
+            intList.innerHTML = '<li>Loading...</li>';
+            extList.innerHTML = '<li>Loading...</li>';
+
+            if (!ieDataCache[lineNum]) {
                 try {
-                    const response = await fetch('/api/internal-external');
-                    ieData = await response.json();
+                    const response = await fetch(`/api/internal-external?line=${lineNum}`);
+                    ieDataCache[lineNum] = await response.json();
                 } catch(e) {
-                    ieData = { internal: [], external: [] };
+                    ieDataCache[lineNum] = { internal: [], external: [] };
                 }
             }
 
-            const intList = document.getElementById('internal-activities-list');
-            const extList = document.getElementById('external-activities-list');
+            const ieData = ieDataCache[lineNum];
             
-            if (ieData && ieData.internal.length > 0 && ieData.external.length > 0) {
-                const getItems = (arr) => {
-                    const count = Math.floor(Math.random() * 4) + 2; // 2 to 5 items
-                    const shuffled = [...arr].sort(() => 0.5 - Math.random());
-                    return shuffled.slice(0, count);
-                };
-
-                const selectedInt = getItems(ieData.internal);
-                const selectedExt = getItems(ieData.external);
-
-                intList.innerHTML = selectedInt.map(item => `<li><strong>${item.op}:</strong> ${item.desc || 'Standard internal operation procedure'}</li>`).join('');
-                extList.innerHTML = selectedExt.map(item => `<li><strong>${item.op}:</strong> ${item.desc || 'Standard external operation procedure'}</li>`).join('');
+            if (ieData && (ieData.internal.length > 0 || ieData.external.length > 0)) {
+                intList.innerHTML = ieData.internal.length > 0 
+                    ? ieData.internal.map(item => `<li style="margin-bottom: 8px;"><strong>${item.op}:</strong> ${item.desc || 'Internal machine operation'}</li>`).join('') 
+                    : '<li>No specific internal activities found.</li>';
+                
+                extList.innerHTML = ieData.external.length > 0 
+                    ? ieData.external.map(item => `
+                        <li style="margin-bottom: 15px; list-style-type: none; margin-left: -20px;">
+                            <strong style="color:#d63031; font-size: 15px;">▶ ${item.op}</strong>
+                            <div style="font-size: 13px; margin-top: 6px; background: white; padding: 10px; border-radius: 6px; border-left: 3px solid #ad1457; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                <div style="margin-bottom: 4px;"><strong style="color: #2d3436;">Technique:</strong> ${item.technique || 'Prepare offline before machine setup.'}</div>
+                                <div style="margin-bottom: 4px;"><strong style="color: #2d3436;">Reason:</strong> ${item.reason || 'Removes dependency on machine runtime.'}</div>
+                                <div><strong style="color: #2d3436;">Precaution:</strong> ${item.precaution || 'Ensure quality standards are met before feeding to line.'}</div>
+                            </div>
+                        </li>
+                    `).join('')
+                    : '<li>No specific external activities found.</li>';
+            } else {
+                intList.innerHTML = '<li>Standard internal operation procedure</li>';
+                extList.innerHTML = '<li>Standard external operation procedure</li>';
             }
         }
         function closeIEModal() {
@@ -689,10 +701,6 @@
                                                 <p style="color: #888; font-size: 13px; margin: 0;">Machine availability %</p>
                                                 <span style="background-color: #f1f2f6; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: #555; font-weight: 700;">${curr.machineAvail || '0%'}</span>
                                             </div>
-                                            <p style="color: #888; font-size: 13px; margin: 0;">
-                                                Unavailable machine count - 
-                                                <span style="color: #555; font-weight: 600;">${curr.delay || 'None'}</span>
-                                            </p>
                                         </div>
                                         <div style="display: flex; flex-direction: column; gap: 10px; align-items: flex-end;">
                                             <div style="display: flex; gap: 10px; align-items: center;">
@@ -701,7 +709,7 @@
                                             </div>
                                             <div style="display: flex; gap: 10px; align-items: center;">
                                                 <p style="color: #888; font-size: 13px; margin: 0;">Internal-External</p>
-                                                <span style="background-color: #e84393; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: white; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'" onclick="openIEModal()">
+                                                <span style="background-color: #e84393; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: white; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'" onclick="openIEModal(${lNum})">
                                                     <span>ℹ️</span> View Details
                                                 </span>
                                             </div>
